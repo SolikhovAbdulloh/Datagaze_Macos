@@ -4,38 +4,38 @@ import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 import io from "socket.io-client";
 
-const TerminalApp = () => {
+const TerminalComponent = () => {
   const terminalRef = useRef<any>(null);
   const socketRef = useRef<any>(null);
   const termRef = useRef<any>(null);
 
   useEffect(() => {
-    // Terminalni boshlash
+    // Terminalni sozlash
     termRef.current = new Terminal({
       cursorBlink: true,
-      
-      theme: { background: "#000765", foreground: "#fff" },
-      disableStdin: false // Inputni faollashtirish
+      fontFamily: "monospace",
+      fontSize: 14,
+      theme: { background: "#1a1a1a", foreground: "#00ff00" },
+      disableStdin: false,
+      scrollback: 1000
     });
 
     const fitAddon = new FitAddon();
     termRef.current.loadAddon(fitAddon);
     termRef.current.open(terminalRef.current);
     fitAddon.fit();
-
-    // Terminalga fokus qo'yish
+    const token = localStorage.getItem("token");
     termRef.current.focus();
 
-    termRef.current.write("Terminal ochildi! Serverga ulanmoqda...\r\n");
+    termRef.current.write("Serverga ulanmoqda ...\r\n");
 
-    // Socket.IO ulanishini boshlash
+    // Socket ulanishini sozlash
     socketRef.current = io(
       "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal",
       {
         transports: ["websocket"],
         auth: {
-          token:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZTFkYWJmNmEtZmM1My00OWY3LTgwYjUtY2NlNTg4MWI4NDQwIiwicm9sZSI6InN1cGVyYWRtaW4iLCJyb2xlX2lkIjoxLCJpYXQiOjE3NDI4NzY5MTQsImV4cCI6MTc0Mjk2MzMxNH0.iDYcjE1N7E6k1Ku2cYlY39no6g5eomY6fCGTKwzJkfw"
+          token: `Bearer ${token}`
         }
       }
     );
@@ -43,60 +43,57 @@ const TerminalApp = () => {
     let rawInputMode = false;
     let inputBuffer = "";
 
-    // Socket eventlari
-    socketRef.current.on("connect", () => {
-      termRef.current.write("\r\nHolat: Serverga ulandi!");
-      socketRef.current.emit("command", { command: "init" });
-      termRef.current.focus(); // Ulangandan keyin fokusni qaytarish
-    });
+    const scrollToBottom = () => {
+      termRef.current.scrollToBottom();
+    };
 
     socketRef.current.on("disconnect", () => {
-      termRef.current.write("\r\nHolat: Serverdan uzildi! Qayta ulanmoqda...");
+      termRef.current.write("\r\nHolat: Serverdan uzildi! Qayta ulanmoqda...\r\n");
+      scrollToBottom();
       setTimeout(() => {
         if (!socketRef.current.connected) socketRef.current.connect();
       }, 1000);
     });
 
-    socketRef.current.on("data", ({ sessionId, output }: any) => {
-      termRef.current.write(output);
-      termRef.current.focus(); // Ma'lumot kelganda fokusni saqlash
+    socketRef.current.on("data", ({ output }: any) => {
+      termRef.current.write("\r\n" + output + "");
+      scrollToBottom();
     });
 
     socketRef.current.on("command_response", ({ data }: any) => {
       if (data.result.startsWith("CLIENT_ID:")) {
-        const clientId = data.result.split(":")[1];
         rawInputMode = true;
-        termRef.current.write("\r\nRaw input rejimi yoqildi");
+        termRef.current.write("\r\nRaw input rejimi yoqildi\r\n");
       } else {
-        termRef.current.write(data.result);
+        termRef.current.write(data.result + "");
       }
-      termRef.current.focus(); // Javob kelganda fokusni saqlash
+      scrollToBottom();
     });
-
+    socketRef.current.on("connect", () => {
+      termRef.current.write("Serverga uladi!\n\r");
+    });
+    // \r-bu qator boshiga otkazadi \n-bu esa ENTER \b-backspace ASCII dagi kodi
     socketRef.current.on("error", (err: any) => {
-      termRef.current.write("\r\nServer xatosi: " + err);
+      termRef.current.write("\r\nServer xatosi: " + err + "\r\n");
+      scrollToBottom();
     });
 
     socketRef.current.on("connect_error", (err: any) => {
-      termRef.current.write("\r\nUlanish xatosi: " + err.message);
+      termRef.current.write("\r\nUlanish xatosi: " + err.message + "\r\n");
+      scrollToBottom();
     });
 
-    // Terminal input handler
     termRef.current.onData((data: any) => {
       if (rawInputMode) {
         socketRef.current.emit("command", { command: data });
-        termRef.current.write(data);
       } else {
         if (data === "\r") {
-          if (socketRef.current && socketRef.current.connected) {
-            if (inputBuffer.trim()) {
-              socketRef.current.emit("command", { command: inputBuffer });
-              inputBuffer = "";
-            }
+          if (socketRef.current.connected && inputBuffer.trim()) {
+            socketRef.current.emit("command", { command: inputBuffer });
             termRef.current.write("\r\n");
-          } else {
-            termRef.current.write("\r\nXato: Serverga ulanib bo‘lmadi!");
             inputBuffer = "";
+          } else {
+            termRef.current.write("\r\nXato: Serverga ulanib bo‘lmadi!\r\n");
           }
         } else if (data === "\u007F" || data === "\b") {
           if (inputBuffer.length > 0) {
@@ -108,30 +105,32 @@ const TerminalApp = () => {
           termRef.current.write(data);
         }
       }
+      scrollToBottom();
     });
 
     terminalRef.current.addEventListener("click", () => {
       termRef.current.focus();
     });
 
+    const handleResize = () => {
+      fitAddon.fit();
+      scrollToBottom();
+    };
+    window.addEventListener("resize", handleResize);
+
     return () => {
       if (socketRef.current) socketRef.current.disconnect();
       if (termRef.current) termRef.current.dispose();
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <div
-        ref={terminalRef}
-        style={{
-          width: "100%",
-          height: "100vh",
-          background: "#000"
-        }}
-      />
-    </div>
+    <div
+      ref={terminalRef}
+      style={{ width: "100%", height: "100%", background: "#1a1a1a" }}
+    />
   );
 };
 
-export default TerminalApp;
+export default TerminalComponent;

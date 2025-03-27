@@ -16,18 +16,19 @@ export interface ComputerType {
   Disk_C?: number;
 }
 export interface ComputersType {
-  computer_name: string;
+  computerName: string;
   hostname: string;
   id: string;
   os: string;
   status: string;
-  ip_address: string;
+  ipAddress: string;
 }
+
 export interface computersbyIdType {
   os_details?: {
     os?: string;
     platform?: string;
-    build_number?: string;
+    buildNumber?: string;
     version?: string;
   };
   processor_details?: {
@@ -42,21 +43,57 @@ export interface computersbyIdType {
     drives: RamType[];
   };
 }
+// "id": "73198df4-acff-4ec8-8a62-c8e923e630f9",
+//   "os_details": {
+//     "os": "Windows",
+//     "platform": "Windows 11 Pro",
+//     "buildNumber": "22621.1702",
+//     "version": "11.0.22621"
+//   },
+//   "processor_details": {
+//     "cpu": "Intel Core i7-12700K",
+//     "core": "12",
+//     "generation": "12th Gen"
+//   },
+//   "network_details": [
+//     {
+//       "nicName": "Ethernet",
+//       "ipAddress": "192.168.1.2",
+//       "macAddress": "00:1A:2B:3C:4D:5E",
+//       "available": "Offline",
+//       "type": "ethernet"
+//     },
+//     {
+//       "nicName": "Wi-Fi",
+//       "ipAddress": "192.168.1.3",
+//       "macAddress": "00:1A:2B:3C:4D:5F",
+//       "available": "Online",
+//       "type": "wifi"
+//     }
+//   ],
+//   "memory_storage_details": {
+//     "ram": "32GB",
+//     "drives": [
+//       {
+//         "driveName": "C",
+//         "totalSize": "512GB",
+//         "freeSize": "289GB"
+//       },
 export interface NetworkDetail {
-  nic_name?: string;
-  ip_address?: string;
+  nicName?: string;
+  ipAddress?: string;
   available?: string;
   type?: string;
   wifi_name?: string;
   either_net_name?: string;
-  mac_address?: string;
+  macAddress?: string;
   status?: string;
 }
 
 export interface RamType {
-  drive_name: string;
-  total_size: string;
-  free_size: string;
+  driveName: string;
+  totalSize: string;
+  freeSize: string;
 }
 
 export interface ComputersAppType {

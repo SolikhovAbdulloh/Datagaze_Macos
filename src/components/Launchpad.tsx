@@ -25,6 +25,7 @@ export default function Launchpad({ show, toggleLaunchpad }: LaunchpadProps) {
   });
 
   const applications: ApplicationType[] = data || [];
+console.log(applications);
 
   const OpenModal = (app: ApplicationType) => setSelectedApp(app);
   const OpenModalinstall = (app: ApplicationType) => setSelectedApp1(app);
@@ -36,8 +37,8 @@ export default function Launchpad({ show, toggleLaunchpad }: LaunchpadProps) {
     const text = searchText.toLowerCase();
     return applications.filter((item) => {
       return (
-        item.application_name?.toLowerCase().includes(text) ||
-        item.id?.toLowerCase().includes(text)
+        item.applicationName.toLowerCase().includes(text) ||
+        item.id.toLowerCase().includes(text)
       );
     });
   };
@@ -90,21 +91,22 @@ export default function Launchpad({ show, toggleLaunchpad }: LaunchpadProps) {
                   <a
                     className="w-12 xs:w-14 sm:w-16 mx-auto cursor-pointer"
                     onClick={
-                      app?.is_installed
+                      app?.isInstalled
                         ? () => OpenModal(app)
                         : () => OpenModalinstall(app)
                     }
                   >
                     <img
-                      src={`/icons/${app?.pathToIcon}`}
-                      alt={app?.application_name}
+                      src={`/icons/${app.pathToIcon}`}
+                      alt={app?.applicationName}
                       className="w-full h-full object-contain"
                     />
                   </a>
                   <span className="mt-2 flex items-center gap-1 text-white text-center">
-                    {!app?.is_installed && <AiOutlineCloudUpload size={16} />}
-                    <p className="text-xs xs:text-sm sm:text-[16px] font-medium truncate max-w-full">
-                      {app?.application_name}
+                    {!app?.isInstalled && <AiOutlineCloudUpload size={16} />}
+
+                    <p className="text-xs xs:text-sm sm:text-[16px]  font-medium  max-w-full">
+                      {app.applicationName}
                     </p>
                   </span>
                 </div>

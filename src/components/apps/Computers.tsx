@@ -56,7 +56,7 @@ const Computers = () => {
 
     if (search) {
       filtered = filtered.filter((comp) =>
-        comp?.computer_name?.toLowerCase().includes(search.toLowerCase())
+        comp?.computerName?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -203,10 +203,10 @@ const Computers = () => {
                     </td>
                     <td className="p-3">{index + 1}</td>
                     <td className="p-3 cursor-pointer" onClick={() => apptable(item.id)}>
-                      {item.computer_name}
+                      {item.computerName}
                     </td>
                     <td className="p-3">{item.os}</td>
-                    <td className="p-3">{item.ip_address}</td>
+                    <td className="p-3">{item.ipAddress}</td>
                     <td>
                       <p
                         className={`${

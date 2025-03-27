@@ -1,7 +1,7 @@
 export interface ApplicationType {
   id: string;
-  application_name: string;
-  version: string;
+  applicationName: string;
+  webVersion: string;
   pathToIcon: string;
-  is_installed: boolean;
+  isInstalled: boolean;
 }

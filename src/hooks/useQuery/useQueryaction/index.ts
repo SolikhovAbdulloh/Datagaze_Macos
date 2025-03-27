@@ -44,6 +44,7 @@ const useInstallApplication = () => {
     },
     onSuccess: (response, variables) => {
       console.log("Success application:", response);
+      // window.location.href = '/desktop'
       queryClient.invalidateQueries({
         queryKey: ["information_app", variables.id]
       });
@@ -66,6 +67,8 @@ const useDeleteApplication = () => {
     },
     onSuccess: () => {
       console.log("Delete application", 1);
+      // window.location.href = "/desktop";
+
     },
     onError: (error) => {
       console.log(error.message);

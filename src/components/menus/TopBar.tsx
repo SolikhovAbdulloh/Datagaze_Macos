@@ -21,7 +21,7 @@ const TopBar = () => {
 
   const open = Boolean(anchorEl);
   return (
-    <div className="relative w-full h-[44px] flex items-center justify-between bg-gray-700/10 text-sm text-white px-4 shadow">
+    <div className="relative w-full h-[44px] flex  items-center justify-between bg-gray-700/10 text-sm text-white px-4 shadow">
       <div className="flex items-center ">
         <div className="relative">
           <div

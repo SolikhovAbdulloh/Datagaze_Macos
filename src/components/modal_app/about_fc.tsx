@@ -113,7 +113,7 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
               </span>
               <span className="flex flex-col gap-1">
                 <p className="text-gray-500 text-sm">Build number</p>
-                <p className="text-lg font-medium">{data?.os_details?.build_number}</p>
+                <p className="text-lg font-medium">{data?.os_details?.buildNumber}</p>
               </span>
               <span className="flex flex-col gap-1">
                 <p className="text-gray-500 text-sm">Version</p>
@@ -148,15 +148,15 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
                 >
                   <span className="flex flex-col gap-1">
                     <p className="text-gray-500 text-sm">NIC Name</p>
-                    <p className="text-lg font-medium">{info.nic_name}</p>
+                    <p className="text-lg font-medium">{info.nicName}</p>
                   </span>
                   <span className="flex flex-col gap-1">
                     <p className="text-gray-500 text-sm">Mac Address</p>
-                    <p className="text-lg font-medium">{info.mac_address}</p>
+                    <p className="text-lg font-medium">{info.macAddress}</p>
                   </span>
                   <span className="flex flex-col gap-1">
                     <p className="text-gray-500 text-sm">IP Address</p>
-                    <p className="text-lg font-medium">{info.ip_address}</p>
+                    <p className="text-lg font-medium">{info.ipAddress}</p>
                   </span>
                   <span className="flex flex-col gap-1">
                     <p className="text-gray-500 text-sm">Available</p>
@@ -199,8 +199,8 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
           </Box>
 
           {data?.memory_storage_details?.drives.map((val, idx) => {
-            const totalSize = getSizeInGB(val.total_size || "0GB");
-            const freeSize = getSizeInGB(val.free_size || "0GB");
+            const totalSize = getSizeInGB(val?.totalSize || "0GB");
+            const freeSize = getSizeInGB(val?.freeSize || "0GB");
             const usagePercentage = totalSize
               ? ((totalSize - freeSize) / totalSize) * 100
               : 0;
@@ -209,9 +209,9 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
               <Box key={idx} display="flex" alignItems="center" marginTop={1}>
                 <Box width="100%" mr={1}>
                   <label className="block font-medium text-[17px]">
-                    Disk {val.drive_name}
+                    Disk {val.driveName}
                     <span className="text-gray-500 text-[14px] font-normal">
-                      ({val?.total_size})
+                      ({val?.totalSize})
                     </span>
                   </label>
                   <LinearProgress

@@ -41,7 +41,7 @@ export default function Desktop(props: any) {
 
   const { data, isLoading, isError } = useQueryApi({
     pathname: "application",
-    url: "/api/1/desktop/web-applications"
+    url: "/api/1/desktop/web-application"
   });
 
   const applications: ApplicationType[] = data || [];
@@ -185,7 +185,7 @@ export default function Desktop(props: any) {
     const text = searchText.toLowerCase();
     return applications.filter(
       (item) =>
-        item.application_name?.toLowerCase().includes(text) ||
+        item.applicationName?.toLowerCase().includes(text) ||
         item.id?.toLowerCase().includes(text)
     );
   };
@@ -200,10 +200,6 @@ export default function Desktop(props: any) {
       style={{ background: "linear-gradient(to bottom, rgb(6, 70, 246), #ffffff)" }}
     >
       <TopBar
-        title={state.currentTitle}
-        toggleSpotlight={toggleSpotlight}
-        hide={state.hideDockAndTopbar}
-        setSpotlightBtnRef={setSpotlightBtnRef}
       />
       <div className="window-bound z-10 absolute" style={{ top: minMarginY }}>
         {renderAppWindows()}
@@ -264,27 +260,27 @@ export default function Desktop(props: any) {
                     <a
                       className="w-12 xs:w-14 sm:w-16 mx-auto cursor-pointer"
                       onClick={
-                        app?.is_installed
+                        app?.isInstalled
                           ? () => OpenModal(app)
                           : () => OpenModalinstall(app)
                       }
                     >
                       <img
                         src={`/icons/${app.pathToIcon}`}
-                        alt={app?.application_name}
+                        alt={app?.applicationName}
                         className="w-full h-full object-contain"
                       />
                     </a>
                     <span className="mt-2 flex items-center gap-1 text-white text-center">
-                      {!app?.is_installed && <AiOutlineCloudUpload size={16} />}
+                      {!app?.isInstalled && <AiOutlineCloudUpload size={16} />}
                       <p className="text-xs xs:text-sm sm:text-[16px] font-medium truncate max-w-full">
-                        {app?.application_name}
+                        {app?.applicationName}
                       </p>
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-white text-center col-span-full">No data</p>
+                <p className="text-white text-center col-span-full">No application</p>
               )}
             </div>
           </div>

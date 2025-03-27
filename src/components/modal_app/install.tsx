@@ -1,4 +1,5 @@
-import { Modal, Box, Typography } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Modal, Box, Typography, IconButton, LinearProgress } from "@mui/material";
 import { ApplicationType, InstallAppInfoType } from "~/types";
 import { BiMemoryCard } from "react-icons/bi";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -8,9 +9,9 @@ import { RiComputerLine } from "react-icons/ri";
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { FiGlobe } from "react-icons/fi";
 import { Stepper, Step, StepLabel, Button } from "@mui/material";
-import { useState } from "react";
 import { useQueryApi } from "~/hooks/useQuery";
 import { useInstallApplication } from "~/hooks/useQuery/useQueryaction";
+import TerminalApp from "../apps/Terminal"; // Terminal komponentini import qilish
 
 const steps = ["System requirements", "Server configs", "Completed"];
 
@@ -22,7 +23,6 @@ const LicenseModalinstall = ({
   onClose: () => void;
 }) => {
   console.log(app);
-
   const [formData, setFormData] = useState({
     host: "209.38.250.43",
     port: "22",
@@ -39,7 +39,10 @@ const LicenseModalinstall = ({
 
   const { mutate } = useInstallApplication();
   const [activeStep, setActiveStep] = useState(0);
-  const [OpenModal, SetOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressOpen, setProgressOpen] = useState(false);
+  const [terminalOpen, setTerminalOpen] = useState(false); // Terminal holati uchun yangi state
 
   const { data } = useQueryApi({
     pathname: "information_app",
@@ -48,11 +51,31 @@ const LicenseModalinstall = ({
 
   const configs: InstallAppInfoType = data;
 
+  // Progressni boshqarish va 100% da modalni yopish, terminalni ochish
+  useEffect(() => {
+    if (progressOpen) {
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            setProgressOpen(false); // Progress modalni yopish
+            setTerminalOpen(true); // Terminalni ochish
+            clearInterval(interval); // Intervalni to'xtatish
+            return 100;
+          }
+          return prev + 10; // Progressni oshirish
+        });
+      }, 500);
+      return () => clearInterval(interval); // Komponent unmount bo'lganda intervalni tozalash
+    }
+  }, [progressOpen]);
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
     mutate({ id: app.id, data: data2 });
     setActiveStep((prev) => prev + 1);
+    setProgressOpen(true); // Progress modalini ochish
   };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -64,15 +87,16 @@ const LicenseModalinstall = ({
     if (activeStep > 0) {
       setActiveStep((prev) => prev - 1);
     } else {
-      SetOpenModal(false);
+      setOpenModal(false);
     }
   };
 
   const OpenInstallModal = () => {
-    SetOpenModal(true);
+    setOpenModal(true);
   };
+
   const CloseModal = () => {
-    SetOpenModal(false);
+    setOpenModal(false);
   };
 
   const handleNext = () => {
@@ -107,7 +131,7 @@ const LicenseModalinstall = ({
             className="cursor-pointer text-gray-500 hover:text-gray-700"
             onClick={onClose}
           />
-          <p className="text-[13px] font-600 text-[grey]">{configs?.application_name}</p>
+          <p className="text-[13px] font-600 text-[grey]">{configs?.applicationName}</p>
         </div>
         <Typography
           variant="h4"
@@ -117,9 +141,9 @@ const LicenseModalinstall = ({
           <img
             className="w-[56px] h-[56px]"
             src={`/icons/${configs?.pathToIcon}`}
-            alt={configs?.application_name}
+            alt={configs?.applicationName}
           />
-          <p className="text-[40px] font-[500]">{configs?.application_name}</p>
+          <p className="text-[40px] font-[500]">{configs?.applicationName}</p>
         </Typography>
         <div className="mt-[30px] mb-[20px]">
           <p className="text-[grey] text-[14px] font-400">Basic requirements</p>
@@ -151,7 +175,7 @@ const LicenseModalinstall = ({
                 <FiGlobe />
                 <p>Network</p>
               </div>
-              <p className="text-[16px] font-500">{configs?.network_bandwidth}</p>
+              <p className="text-[16px] font-500">{configs?.networkBandwidth}</p>
             </div>
           </div>
         </div>
@@ -178,28 +202,30 @@ const LicenseModalinstall = ({
               <FiCheck size={19} />
             </button>
           </div>
-          {OpenModal && (
+          {openModal && (
             <div>
               <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                 <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[650px] h-[620px]">
                   <div className="flex flex-col gap-2 mb-[30px]">
                     <h2 className="text-2xl font-semibold flex justify-between">
-                      Datagaze {configs.application_name}
+                      Datagaze {configs?.applicationName}
                       <img
                         className="w-[70px] h-[70px]"
-                        src={`/icons/${configs.pathToIcon}`}
+                        src={`/icons/${configs?.pathToIcon}`}
                         alt="logo"
                       />
                     </h2>
                     <p className="text-sm text-gray-600">
                       Publisher:
                       <span className="text-blue-500 cursor-pointer">
-                        {configs.publisher}
+                        {configs?.publisher}
                       </span>
                     </p>
-                    <p className="text-sm text-gray-600">Version: {configs?.version}</p>
                     <p className="text-sm text-gray-600">
-                      Release date: {configs?.release_date}
+                      Version: {configs?.webVersion}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Release date: {configs?.releaseDate}
                     </p>
                   </div>
 
@@ -226,7 +252,7 @@ const LicenseModalinstall = ({
                         </p>
                         <p className="text-[16px] text-[grey] font-400">
                           Network:
-                          <span className="text-black">{configs?.network_bandwidth}</span>
+                          <span className="text-black">{configs?.networkBandwidth}</span>
                         </p>
                       </div>
                     )}
@@ -313,19 +339,77 @@ const LicenseModalinstall = ({
                       </form>
                     )}
                     {activeStep === 2 && (
-                      <div className="fixed inset-0 bg-white mt-3 flex flex-col items-center justify-start overflow-hidden">
-                        <div className="flex items-center p-1 gap-2 justify-start w-full bg-gray-200">
-                          <IoMdCloseCircle
-                            onClick={onClose}
-                            size={15}
-                            className="cursor-pointer text-gray-500"
-                          />
-                          <span className="text-sm font-normal">Terminal</span>
+                      <>
+                        {/* Progress Modal */}
+                        <Modal open={progressOpen} onClose={() => setProgressOpen(false)}>
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                              borderRadius: "8px",
+                              padding: 2,
+                              paddingX: 2,
+                              paddingY: 1,
+                              backgroundColor: "#e7ecf8",
+                              height: 150,
+                              width: 406,
+                              alignItems: "center",
+                              boxShadow: 124,
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "center"
+                            }}
+                          >
+                            <Typography
+                              variant="h6"
+                              sx={{ mb: 2, fontWeight: "bold", color: "#1A79D8" }}
+                            >
+                              Installing {configs?.applicationName}
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={progress}
+                              sx={{
+                                width: "100%",
+                                height: 10,
+                                borderRadius: 5,
+                                bgcolor: "#d3d8e6",
+                                "& .MuiLinearProgress-bar": {
+                                  bgcolor: "#1A79D8"
+                                }
+                              }}
+                            />
+                            <Typography sx={{ mt: 2, color: "#333" }}>
+                              Progress: {progress}%
+                            </Typography>
+                          </Box>
+                        </Modal>
+
+                        {/* Terminal Modal */}
+                        <div>
+                          <br />
+                          {terminalOpen && (
+                            <div
+                              className="fixed inset-0 bg-white flex flex-col items-center justify-start"
+                              style={{ zIndex: 1300 }} // Modal ustida ko'rinishi uchun
+                            >
+                              <div className="flex items-center p-1 gap-2 justify-start w-full bg-gray-200">
+                                <IoMdCloseCircle
+                                  onClick={() => setTerminalOpen(false)}
+                                  size={15}
+                                  className="cursor-pointer text-gray-500 hover:text-gray-700"
+                                />
+                                <span className="text-sm font-normal">Terminal</span>
+                              </div>
+                              <div className="w-full">
+                                <TerminalApp />
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <div className="w-full h-full overflow-hidden">
-                          <Terminal />
-                        </div>
-                      </div>
+                      </>
                     )}
                   </div>
 
