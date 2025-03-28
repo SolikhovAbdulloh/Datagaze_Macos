@@ -12,6 +12,7 @@ import { Stepper, Step, StepLabel, Button } from "@mui/material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { useInstallApplication } from "~/hooks/useQuery/useQueryaction";
 import TerminalApp from "../apps/Terminal"; // Terminal komponentini import qilish
+import { useQueryClient } from "@tanstack/react-query";
 
 const steps = ["System requirements", "Server configs", "Completed"];
 
@@ -42,7 +43,7 @@ const LicenseModalinstall = ({
   const [openModal, setOpenModal] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressOpen, setProgressOpen] = useState(false);
-  const [terminalOpen, setTerminalOpen] = useState(false); // Terminal holati uchun yangi state
+  const [terminalOpen, setTerminalOpen] = useState(false);
 
   const { data } = useQueryApi({
     pathname: "information_app",
@@ -50,7 +51,6 @@ const LicenseModalinstall = ({
   });
 
   const configs: InstallAppInfoType = data;
-
   // Progressni boshqarish va 100% da modalni yopish, terminalni ochish
   useEffect(() => {
     if (progressOpen) {
@@ -62,7 +62,7 @@ const LicenseModalinstall = ({
             clearInterval(interval); // Intervalni to'xtatish
             return 100;
           }
-          return prev + 10; // Progressni oshirish
+          return prev + 50; // Progressni oshirish
         });
       }, 500);
       return () => clearInterval(interval); // Komponent unmount bo'lganda intervalni tozalash
@@ -71,7 +71,10 @@ const LicenseModalinstall = ({
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    mutate({ id: app.id, data: data2 });
+    mutate(
+      { id: app.id, data: data2 },
+      // { onSuccess: () => queryClient.invalidateQueries({ queryKey: ["application"] }) }
+    );
     setActiveStep((prev) => prev + 1);
     setProgressOpen(true); // Progress modalini ochish
   };
@@ -389,7 +392,6 @@ const LicenseModalinstall = ({
 
                         {/* Terminal Modal */}
                         <div>
-                          <br />
                           {terminalOpen && (
                             <div
                               className="fixed inset-0 bg-white flex flex-col items-center justify-start"
@@ -397,7 +399,7 @@ const LicenseModalinstall = ({
                             >
                               <div className="flex items-center p-1 gap-2 justify-start w-full bg-gray-200">
                                 <IoMdCloseCircle
-                                  onClick={() => setTerminalOpen(false)}
+                                  onClick={CloseModal}
                                   size={15}
                                   className="cursor-pointer text-gray-500 hover:text-gray-700"
                                 />

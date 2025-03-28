@@ -21,10 +21,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if ((error.response && error.response.status === 401) || 500) {
-      console.log("Token yaroqsiz yoki muddati tugagan. Foydalanuvchini logout qilamiz.");
-      localStorage.removeItem("token");
-      window.location.href = "/";
+    if (error.response) {
+      console.log("Token yaroqsiz yoki muddati tugagan. Foydalanuvchini logout qilamiz.",error);
+      // localStorage.removeItem("token");
+      // window.location.href = "/";
     }
     return Promise.reject(error);
   }

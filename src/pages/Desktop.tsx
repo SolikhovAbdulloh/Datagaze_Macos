@@ -199,8 +199,7 @@ export default function Desktop(props: any) {
       className="size-full overflow-hidden bg-center bg-cover"
       style={{ background: "linear-gradient(to bottom, rgb(6, 70, 246), #ffffff)" }}
     >
-      <TopBar
-      />
+      <TopBar />
       <div className="window-bound z-10 absolute" style={{ top: minMarginY }}>
         {renderAppWindows()}
       </div>

@@ -43,7 +43,7 @@ const useDockHoverAnimation = (
     damping: 90
   });
 
-  const width = useTransform(widthPX, (width) => `${width / 16}rem`);
+  const width = useTransform(widthPX, (width) => `${width / 15}rem`);
 
   useRaf(() => {
     const el = ref.current;

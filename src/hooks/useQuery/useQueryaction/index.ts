@@ -29,9 +29,7 @@ const useRegister = () => {
 };
 
 const useInstallApplication = () => {
-  const queryClient = useQueryClient();
   const axios = useAxios();
-
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data?: any }) => {
       const response = await axios({
@@ -42,12 +40,8 @@ const useInstallApplication = () => {
       });
       return response.data;
     },
-    onSuccess: (response, variables) => {
+    onSuccess: (response) => {
       console.log("Success application:", response);
-      // window.location.href = '/desktop'
-      queryClient.invalidateQueries({
-        queryKey: ["information_app", variables.id]
-      });
     },
     onError: (err) => {
       console.error("Error installing application:", err.message);
@@ -66,9 +60,7 @@ const useDeleteApplication = () => {
       });
     },
     onSuccess: () => {
-      console.log("Delete application", 1);
-      // window.location.href = "/desktop";
-
+      console.log("Ochirildi");
     },
     onError: (error) => {
       console.log(error.message);
