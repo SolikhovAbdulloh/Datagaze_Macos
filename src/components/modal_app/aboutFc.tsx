@@ -18,7 +18,7 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
     url: `/api/1/device/${id}`,
     pathname: "Modal_info_application"
   });
-  console.log(data?.network_details);
+  console.log(data);
 
   const [tabValue, setTabValue] = useState("os");
 

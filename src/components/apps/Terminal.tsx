@@ -10,7 +10,7 @@ const TerminalComponent = () => {
   const termRef = useRef<any>(null);
 
   useEffect(() => {
-    // Terminalni sozlash
+    
     termRef.current = new Terminal({
       cursorBlink: true,
       fontFamily: "monospace",
@@ -29,7 +29,7 @@ const TerminalComponent = () => {
 
     termRef.current.write("Serverga ulanmoqda ...\r\n");
 
-    // Socket ulanishini sozlash
+    
     socketRef.current = io(
       "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal",
       {
@@ -70,7 +70,7 @@ const TerminalComponent = () => {
       scrollToBottom();
     });
     socketRef.current.on("connect", () => {
-      termRef.current.write("Serverga uladi!\n\r");
+      termRef.current.write("Serverga ulandi!\n\r");
     });
     // \r-bu qator boshiga otkazadi \n-bu esa ENTER \b-backspace ASCII dagi kodi
     socketRef.current.on("error", (err: any) => {

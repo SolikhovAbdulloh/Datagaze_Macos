@@ -16,10 +16,9 @@ const useRegister = () => {
       if (data.status === "success") {
         localStorage.setItem("token", data.token);
       }
-      setTimeout(() => {
-        navigate("/desktop", { replace: true });
-        notify("superadmin");
-      }, 500);
+
+      notify("superadmin");
+      navigate("/desktop", { replace: true });
     },
     onError: (err) => {
       console.log(err.message);
@@ -30,6 +29,9 @@ const useRegister = () => {
 
 const useInstallApplication = () => {
   const axios = useAxios();
+  const queryClient = useQueryClient();
+  const notify = notificationApi();
+
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data?: any }) => {
       const response = await axios({
@@ -42,15 +44,22 @@ const useInstallApplication = () => {
     },
     onSuccess: (response) => {
       console.log("Success application:", response);
+      notify("Install");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["application"] });
     },
     onError: (err) => {
-      console.error("Error installing application:", err.message);
+      console.error(err.message);
     }
   });
 };
 
 const useDeleteApplication = () => {
   const axios = useAxios();
+  const queryClient = useQueryClient();
+  const notify = notificationApi();
+
   return useMutation({
     mutationFn: async ({ id }: { id: string }) => {
       await axios({
@@ -59,13 +68,37 @@ const useDeleteApplication = () => {
         headers: { "Content-Type": "application/json" }
       });
     },
-    onSuccess: () => {
-      console.log("Ochirildi");
+    onSuccess: (response) => {
+      console.log(response);
+      notify("Uninstall");
     },
-    onError: (error) => {
-      console.log(error.message);
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["application"] });
+    },
+    onError: (err) => {
+      console.error(err.message);
     }
   });
 };
 
-export { useRegister, useInstallApplication, useDeleteApplication };
+const useCreateApplication = () => {
+  const axios = useAxios();
+  return useMutation({
+    mutationFn: async ({ data }: any) => {
+      const response = await axios({
+        url: "/api/1/desktop/create",
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        body: data
+      });
+      return response.data;
+    },
+    onSuccess: (response) => {
+      console.log("Create malumotlari:", response);
+    },
+    onError: (err) => {
+      console.log(err.message);
+    }
+  });
+};
+export { useRegister, useInstallApplication, useDeleteApplication, useCreateApplication };

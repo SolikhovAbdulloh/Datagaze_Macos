@@ -20,7 +20,7 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
   const [tabValue, setTabValue] = useState("Server Details");
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(true);
-  const { mutate, isPending, isError } = useDeleteApplication();
+  const { mutate, isPending } = useDeleteApplication();
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     event.preventDefault();
@@ -32,7 +32,7 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
   };
 
   const UninstallApplication = (id: any) => {
-    mutate({ id });
+    mutate({ id }, { onSuccess: () => handleModalClose() });
   };
 
   const handleEditClose = () => {
@@ -201,7 +201,7 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
             }}
             color="error"
           >
-            {isPending || isError ? <CircularProgress size="30px" /> : "Uninstall"}
+            {isPending ? <CircularProgress size="30px" /> : "Uninstall"}
           </Button>
           <div className="flex items-center gap-1">
             <Button

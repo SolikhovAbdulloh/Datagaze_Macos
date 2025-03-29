@@ -1,13 +1,15 @@
 import { Popover, Typography } from "@mui/material";
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
   const [showAppleMenu, setShowAppleMenu] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/";
+    navigate("/", { replace: true });
   };
   const [anchorEl, setAnchorEl] = useState(null);
 

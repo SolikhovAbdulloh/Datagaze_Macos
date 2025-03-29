@@ -11,8 +11,7 @@ import { FiGlobe } from "react-icons/fi";
 import { Stepper, Step, StepLabel, Button } from "@mui/material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { useInstallApplication } from "~/hooks/useQuery/useQueryaction";
-import TerminalApp from "../apps/Terminal"; // Terminal komponentini import qilish
-import { useQueryClient } from "@tanstack/react-query";
+import TerminalApp from "../apps/Terminal";
 
 const steps = ["System requirements", "Server configs", "Completed"];
 
@@ -29,14 +28,13 @@ const LicenseModalinstall = ({
     port: "22",
     username: "root",
     password: "Datagaze2134$Platform"
-  });
-
+  }); //formga default qoyilgan obyekt
   const data2 = {
     host: "209.38.250.43",
     port: "22",
     username: "root",
     password: "Datagaze2134$Platform"
-  };
+  }; //backendga jonatilgan obyekt
 
   const { mutate } = useInstallApplication();
   const [activeStep, setActiveStep] = useState(0);
@@ -51,7 +49,6 @@ const LicenseModalinstall = ({
   });
 
   const configs: InstallAppInfoType = data;
-  // Progressni boshqarish va 100% da modalni yopish, terminalni ochish
   useEffect(() => {
     if (progressOpen) {
       const interval = setInterval(() => {
@@ -59,24 +56,21 @@ const LicenseModalinstall = ({
           if (prev >= 100) {
             setProgressOpen(false); // Progress modalni yopish
             setTerminalOpen(true); // Terminalni ochish
-            clearInterval(interval); // Intervalni to'xtatish
+            clearInterval(interval);
             return 100;
           }
-          return prev + 50; // Progressni oshirish
+          return prev + 50;
         });
       }, 500);
-      return () => clearInterval(interval); // Komponent unmount bo'lganda intervalni tozalash
+      return () => clearInterval(interval);
     }
   }, [progressOpen]);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    mutate(
-      { id: app.id, data: data2 },
-      // { onSuccess: () => queryClient.invalidateQueries({ queryKey: ["application"] }) }
-    );
+    mutate({ id: app.id, data: data2 }, { onSuccess: () => onClose() });
     setActiveStep((prev) => prev + 1);
-    setProgressOpen(true); // Progress modalini ochish
+    setProgressOpen(true);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -343,7 +337,6 @@ const LicenseModalinstall = ({
                     )}
                     {activeStep === 2 && (
                       <>
-                        {/* Progress Modal */}
                         <Modal open={progressOpen} onClose={() => setProgressOpen(false)}>
                           <Box
                             sx={{
@@ -390,12 +383,11 @@ const LicenseModalinstall = ({
                           </Box>
                         </Modal>
 
-                        {/* Terminal Modal */}
                         <div>
                           {terminalOpen && (
                             <div
                               className="fixed inset-0 bg-white flex flex-col items-center justify-start"
-                              style={{ zIndex: 1300 }} // Modal ustida ko'rinishi uchun
+                              style={{ zIndex: 1300 }}
                             >
                               <div className="flex items-center p-1 gap-2 justify-start w-full bg-gray-200">
                                 <IoMdCloseCircle

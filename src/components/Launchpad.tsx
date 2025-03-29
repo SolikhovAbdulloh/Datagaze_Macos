@@ -25,7 +25,7 @@ export default function Launchpad({ show, toggleLaunchpad }: LaunchpadProps) {
   });
 
   const applications: ApplicationType[] = data || [];
-console.log(applications);
+  console.log(applications);
 
   const OpenModal = (app: ApplicationType) => setSelectedApp(app);
   const OpenModalinstall = (app: ApplicationType) => setSelectedApp1(app);

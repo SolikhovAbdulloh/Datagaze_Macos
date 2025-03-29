@@ -4,6 +4,7 @@ import { FormControl, Select, MenuItem } from "@mui/material";
 import { FilterList } from "@mui/icons-material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { ComputersAppType } from "~/types/configs/computers";
+import Skeleton from "@mui/material/Skeleton";
 
 const Computers_app = ({ id }: { id: string }) => {
   const { data, isLoading, isError } = useQueryApi({
@@ -108,7 +109,31 @@ const Computers_app = ({ id }: { id: string }) => {
             </thead>
             <tbody>
               {isLoading || isError
-                ? "Loading ..."
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-200 p-4 text-sm bg-gray-50"
+                    >
+                      <td className="p-3">
+                        <Skeleton variant="rectangular" width={20} height={20} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={20} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={100} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={120} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={100} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="rectangular" width={49} height={20} />
+                      </td>
+                    </tr>
+                  ))
                 : paginatedComputers.map((item, index) => (
                     <tr
                       key={index}
@@ -117,9 +142,9 @@ const Computers_app = ({ id }: { id: string }) => {
                       }`}
                     >
                       <td className="p-3">{item.name}</td>
-                      <td className="p-3">{item.file_size}</td>
-                      <td className="p-3">{item.installation_type}</td>
-                      <td className="p-3">{item.installed_date}</td>
+                      <td className="p-3">{item.fileSize}</td>
+                      <td className="p-3">{item.installationType}</td>
+                      <td className="p-3">{item.installedDate}</td>
                       <td className="p-3 text-[#1A79D8] cursor-pointer">Update</td>
                       <td className="p-3 text-red-600 cursor-pointer">Delete</td>
                     </tr>

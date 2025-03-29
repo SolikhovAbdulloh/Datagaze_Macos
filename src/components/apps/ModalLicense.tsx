@@ -28,6 +28,9 @@ const ModalLicense = () => {
 
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
+  const [formData, setFormData] = useState({
+    agentFile: null
+  });
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
@@ -52,10 +55,7 @@ const ModalLicense = () => {
     setTabValue(newValue);
   };
   const step = ["General settings", "Scripts settings", "Product files"];
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    setActiveStep((prev) => prev + 1);
-  };
+
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newRowsPerPage = Number(event.target.value);
     setRowsPerPage(newRowsPerPage);
@@ -72,6 +72,15 @@ const ModalLicense = () => {
     } else {
       setIsOpen(false);
     }
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    const file = e.target.files?.[0] || null;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: file
+    }));
+    console.log(formData);
   };
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
@@ -202,7 +211,12 @@ const ModalLicense = () => {
                       <div className="p-2 bg-[#efefef]">
                         <RiImageAddLine />
                       </div>
-                      <input type="file" className="hidden" />
+                      <input type="file" onChange={handleFileChange} className="hidden" />
+                      {formData.agentFile && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          Tanlangan fayl: {formData.agentFile}
+                        </p>
+                      )}
                       <span className="bg-white border border-gray-300 text-gray-700 px-4 py-1 rounded-lg text-sm hover:bg-gray-100">
                         Choose
                       </span>
@@ -331,17 +345,18 @@ const ModalLicense = () => {
                     </Tabs>
                   </Box>
                   {tabValue === "Install script" && (
-                    <div className="w-[100%] h-[200px] bg-[grey] rounded-[8px]">
-                      Install page
+                    <div className="w-[100%] h-[200px] bg-[black] text-white p-2 rounded-[8px]">
+                      sudo timedatectl set-timezone Asia/Tashkentsudo apt update && sudo
+                      apt upgrade -y
                     </div>
                   )}
                   {tabValue === "Update script" && (
-                    <div className="w-[100%] h-[200px] bg-[grey] rounded-[8px]">
+                    <div className="w-[100%] h-[200px] bg-[black] text-white p-2 rounded-[8px]">
                       Update page
                     </div>
                   )}
                   {tabValue === "Delete scripts" && (
-                    <div className="w-[100%] h-[200px] bg-[grey] rounded-[8px]">
+                    <div className="w-[100%] h-[200px] bg-[black] text-white p-2 rounded-[8px]">
                       Delete page
                     </div>
                   )}

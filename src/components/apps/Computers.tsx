@@ -6,7 +6,8 @@ import { FormControl, Select, MenuItem, CircularProgress } from "@mui/material";
 import Computers_app from "./Computer_app";
 import { useQueryApi } from "~/hooks/useQuery";
 import { useSearchParams } from "react-router-dom";
-import About_fc from "../modal_app/about_fc";
+import About_fc from "../modal_app/aboutFc";
+import Skeleton from "@mui/material/Skeleton";
 
 const Computers = () => {
   const [params, setSearchparams] = useSearchParams();
@@ -188,45 +189,73 @@ const Computers = () => {
               </tr>
             </thead>
             <tbody>
-              {isLoading || isError ? (
-                <CircularProgress />
-              ) : (
-                paginatedComputers.map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className={`border-b border-gray-200 p-4 text-sm ${
-                      index % 2 === 0 ? "bg-[grey-50]" : "bg-[#ccdaf8]"
-                    }`}
-                  >
-                    <td className="p-3">
-                      <input type="checkbox" />
-                    </td>
-                    <td className="p-3">{index + 1}</td>
-                    <td className="p-3 cursor-pointer" onClick={() => apptable(item.id)}>
-                      {item.computerName}
-                    </td>
-                    <td className="p-3">{item.os}</td>
-                    <td className="p-3">{item.ipAddress}</td>
-                    <td>
-                      <p
-                        className={`${
-                          item.status === "active"
-                            ? "bg-[#DCFCE7] flex text-green-600 w-[49px] h-[20px] items-center justify-center p-2 rounded-[8px] text-[12px]"
-                            : "text-[grey] bg-[#dfe8fb] flex w-[49px] h-[20px] text-[12px] items-center justify-center px-2 py-2 rounded-[8px]"
-                        }`}
-                      >
-                        {item.status}
-                      </p>
-                    </td>
-                    <td
-                      className="p-3 text-blue-500 cursor-pointer"
-                      onClick={() => showModal(item.id)}
+              {isLoading || isError
+                ? Array.from({ length: 5 }).map((_, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-200 p-4 text-sm bg-gray-50"
                     >
-                      About PC
-                    </td>
-                  </tr>
-                ))
-              )}
+                      <td className="p-3">
+                        <Skeleton variant="rectangular" width={20} height={20} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={20} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={100} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={120} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={100} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="rectangular" width={49} height={20} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={60} />
+                      </td>
+                    </tr>
+                  ))
+                : paginatedComputers.map((item, index) => (
+                    <tr
+                      key={item.id}
+                      className={`border-b border-gray-200 p-4 text-sm ${
+                        index % 2 === 0 ? "bg-[grey-50]" : "bg-[#ccdaf8]"
+                      }`}
+                    >
+                      <td className="p-3">
+                        <input type="checkbox" />
+                      </td>
+                      <td className="p-3">{index + 1}</td>
+                      <td
+                        className="p-3 cursor-pointer"
+                        onClick={() => apptable(item.id)}
+                      >
+                        {item.computerName}
+                      </td>
+                      <td className="p-3">{item.os}</td>
+                      <td className="p-3">{item.ipAddress}</td>
+                      <td>
+                        <p
+                          className={`${
+                            item.status === "active"
+                              ? "bg-[#DCFCE7] flex text-green-600 w-[49px] h-[20px] items-center justify-center p-2 rounded-[8px] text-[12px]"
+                              : "text-[grey] bg-[#dfe8fb] flex w-[49px] h-[20px] text-[12px] items-center justify-center px-2 py-2 rounded-[8px]"
+                          }`}
+                        >
+                          {item.status}
+                        </p>
+                      </td>
+                      <td
+                        className="p-3 text-blue-500 cursor-pointer"
+                        onClick={() => showModal(item.id)}
+                      >
+                        About PC
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>

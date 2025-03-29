@@ -99,7 +99,8 @@ export interface RamType {
 export interface ComputersAppType {
   id: string;
   name: string;
-  file_size: string;
-  installation_type: string;
-  installed_date: string;
+  fileSize: string;
+  installationType: string;
+  installedDate: string;
 }
+ 

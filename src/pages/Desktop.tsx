@@ -41,7 +41,7 @@ export default function Desktop(props: any) {
 
   const { data, isLoading, isError } = useQueryApi({
     pathname: "application",
-    url: "/api/1/desktop/web-application"
+    url: "/api/1/desktop/web-applications"
   });
 
   const applications: ApplicationType[] = data || [];
@@ -220,9 +220,8 @@ export default function Desktop(props: any) {
         hide={state.hideDockAndTopbar}
       />
 
-      {/* Integrated Launchpad-like Overlay */}
       <div
-        className={`${close} z-30 size-full fixed overflow-hidden bg-gray-900/20 backdrop-blur-2xl`}
+        className={`${close} z-30 size-full fixed overflow-hidden  backdrop-blur-2xl`}
         id="launchpad"
         onClick={() => toggleLaunchpad(true)}
       >

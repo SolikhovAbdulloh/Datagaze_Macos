@@ -43,7 +43,7 @@ const useDockHoverAnimation = (
     damping: 90
   });
 
-  const width = useTransform(widthPX, (width) => `${width / 15}rem`);
+  const width = useTransform(widthPX, (width) => `${width / 16}rem`);
 
   useRaf(() => {
     const el = ref.current;
@@ -97,10 +97,10 @@ export default function DockItem({
     <li
       id={`dock-${id}`}
       onClick={desktop || id === "launchpad" ? () => openApp(id) : () => {}}
-      className="relative flex flex-col justify-end mb-1"
+      className="relative flex flex-col justify-end  mb-1"
     >
       <p
-        className="tooltip absolute inset-x-0 mx-auto w-max rounded-md bg-c-300/80"
+        className="tooltip absolute inset-x-0 mx-auto  w-max rounded-md bg-c-300/80"
         p="x-3 y-1"
         text="sm c-black"
       >
