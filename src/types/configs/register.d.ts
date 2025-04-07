@@ -1,4 +1,4 @@
-export interface RegisterType {
+export interface LoginType {
   username: string;
   email?: string;
   password: string;

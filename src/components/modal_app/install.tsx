@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Box, Typography, IconButton, LinearProgress } from "@mui/material";
+import { Modal, Box, Typography, LinearProgress } from "@mui/material";
 import { ApplicationType, InstallAppInfoType } from "~/types";
 import { BiMemoryCard } from "react-icons/bi";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -24,16 +24,16 @@ const LicenseModalinstall = ({
 }) => {
   console.log(app);
   const [formData, setFormData] = useState({
-    host: "209.38.250.43",
+    host: "170.64.141.16",
     port: "22",
-    username: "root",
-    password: "Datagaze2134$Platform"
+    username: "ubuntu",
+    password: "ubuntuNew123"
   }); //formga default qoyilgan obyekt
   const data2 = {
-    host: "209.38.250.43",
+    host: "170.64.141.16",
     port: "22",
-    username: "root",
-    password: "Datagaze2134$Platform"
+    username: "ubuntu",
+    password: "ubuntuNew123"
   }; //backendga jonatilgan obyekt
 
   const { mutate } = useInstallApplication();
@@ -128,7 +128,11 @@ const LicenseModalinstall = ({
             className="cursor-pointer text-gray-500 hover:text-gray-700"
             onClick={onClose}
           />
-          <p className="text-[13px] font-600 text-[grey]">{configs?.applicationName}</p>
+          <p className="text-[13px] font-600 text-[grey]">
+            {configs?.applicationName === "index.html"
+              ? "SOC"
+              : `${app?.applicationName}`}
+          </p>
         </div>
         <Typography
           variant="h4"
@@ -137,10 +141,14 @@ const LicenseModalinstall = ({
         >
           <img
             className="w-[56px] h-[56px]"
-            src={`/icons/${configs?.pathToIcon}`}
+            src={`/icons/${configs?.pathToIcon !== "/any.png" ? configs?.pathToIcon : "soc.png"}`}
             alt={configs?.applicationName}
           />
-          <p className="text-[40px] font-[500]">{configs?.applicationName}</p>
+          <p className="text-[40px] font-[500]">
+            {configs?.applicationName === "index.html"
+              ? "SOC"
+              : `${app?.applicationName}`}
+          </p>
         </Typography>
         <div className="mt-[30px] mb-[20px]">
           <p className="text-[grey] text-[14px] font-400">Basic requirements</p>

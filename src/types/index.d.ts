@@ -9,7 +9,6 @@ export {
   WebsitesData,
   SiteSectionData,
   SiteData,
-  RegisterType,
   Apptable,
   ApplicationType,
   InstallAppInfoType,

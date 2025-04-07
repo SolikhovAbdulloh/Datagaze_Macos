@@ -1,28 +1,90 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
-import { useNavigate } from "react-router-dom";
-import { RegisterType } from "~/types";
+import { useSignIn } from "react-auth-kit";
+import { LoginType } from "~/types/configs";
 
-const useRegister = () => {
+const useLogin = () => {
   const axios = useAxios();
-  const navigate = useNavigate();
   const notify = notificationApi();
+  const signIn = useSignIn();
+
   return useMutation({
-    mutationFn: async ({ data }: { data: RegisterType }) =>
+    mutationFn: async ({ data }: { data: LoginType }) =>
       await axios({ url: "/api/1/auth/login", body: data, method: "POST" }),
 
-    onSuccess: (data) => {
-      if (data.status === "success") {
-        localStorage.setItem("token", data.token);
+    onSuccess: (response, variables) => {
+      if (response.status === "success") {
+        localStorage.setItem("token", response.token);
       }
+      const { username, password } = variables.data;
+      const { token } = response;
+      signIn({
+        token,
+        tokenType: "Bearer",
+        expiresIn: 3600,
+        authState: { username, password }
+      });
 
-      notify("superadmin");
-      navigate("/desktop", { replace: true });
+      notify("superadmin", username);
     },
     onError: (err) => {
       console.log(err.message);
       notify("Not register");
+    }
+  });
+};
+
+const useRegister = () => {
+  const notify = notificationApi();
+  const queryClient = useQueryClient();
+  const axios = useAxios();
+  return useMutation({
+    mutationFn: async ({ data }: { data: object }) => {
+      let { username, email, password, fullName }: any = data;
+      await axios({
+        url: "/api/1/auth/register",
+        method: "POST",
+        body: { username, email, password, fullName }
+      });
+      return data;
+    },
+    onSuccess: (response) => {
+      console.log(response);
+      notify("Add new user");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["superadmin_Users"] });
+    },
+    onError: (err) => {
+      console.log(err);
+      notify("Xatolik");
+    }
+  });
+};
+
+const useDeleteRegister = () => {
+  const axios = useAxios();
+  const notify = notificationApi();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: any) => {
+      await axios({
+        url: `/api/1/auth/delete-user/{id}?id=${id}`,
+        method: "DELETE"
+      });
+    },
+    onSuccess: () => {
+      console.log("success DELETE");
+      notify("o'chirildi");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["superadmin_Users"] });
+    },
+    onError: (err) => {
+      console.log(err);
+      notify("Xatolik");
     }
   });
 };
@@ -80,7 +142,25 @@ const useDeleteApplication = () => {
     }
   });
 };
-
+const useUpdateRegister = (data: any) => {
+  const axios = useAxios();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await axios({
+        url: "/api/1/auth/update-profile",
+        method: "PUT",
+        body: { data },
+        headers: { "Content-Type": "application/json" }
+      });
+    },
+    onSuccess: (res) => {
+      console.log(res);
+    },
+    onError: (err) => {
+      console.log(err);
+    }
+  });
+};
 const useCreateApplication = () => {
   const axios = useAxios();
   return useMutation({
@@ -101,4 +181,12 @@ const useCreateApplication = () => {
     }
   });
 };
-export { useRegister, useInstallApplication, useDeleteApplication, useCreateApplication };
+export {
+  useLogin,
+  useInstallApplication,
+  useDeleteApplication,
+  useCreateApplication,
+  useRegister,
+  useDeleteRegister,
+  useUpdateRegister
+};

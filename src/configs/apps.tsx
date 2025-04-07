@@ -19,9 +19,11 @@ const apps: AppsData[] = [
     img: "/icons/support.png"
   },
   {
-    id: "users",
+    id: "Superadmin",
     title: "Superadmin",
     desktop: true,
+    width: 1100,
+    height: 500,
     content: <SuperAdmin_users />,
     img: "/icons/users.png"
   },
@@ -44,6 +46,8 @@ const apps: AppsData[] = [
     id: "terminal",
     title: "Terminal",
     desktop: true,
+    width: 1100,
+    height: 500,
     img: "/icons/terminal.png",
     content: <Terminal />
   },
@@ -51,6 +55,8 @@ const apps: AppsData[] = [
     id: "Add product",
     title: "Add product",
     desktop: true,
+    width: 1100,
+    height: 500,
     img: "/icons/Liceses.png",
     content: <ModalLicense />
   },
@@ -58,6 +64,8 @@ const apps: AppsData[] = [
     id: "computers",
     title: "Computers",
     desktop: true,
+    width: 1100,
+    height: 500,
     img: "/icons/camputers.png",
     content: <Computers />
   }

@@ -145,8 +145,12 @@ const Computers_app = ({ id }: { id: string }) => {
                       <td className="p-3">{item.fileSize}</td>
                       <td className="p-3">{item.installationType}</td>
                       <td className="p-3">{item.installedDate}</td>
-                      <td className="p-3 text-[#1A79D8] cursor-pointer">Update</td>
-                      <td className="p-3 text-red-600 cursor-pointer">Delete</td>
+                      <td className="p-3 text-[#1A79D8] ">
+                        <button>Update</button>
+                      </td>
+                      <td className="p-3 text-red-600">
+                        <button>Delete</button>
+                      </td>
                     </tr>
                   ))}
             </tbody>

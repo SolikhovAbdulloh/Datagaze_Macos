@@ -1,4 +1,5 @@
 import { useMotionValue } from "framer-motion";
+import { useAuthUser } from "react-auth-kit";
 import { apps } from "~/configs";
 
 interface DockProps {
@@ -32,10 +33,11 @@ export default function Dock({
   };
 
   const mouseX = useMotionValue<number | null>(null);
+  const auth = useAuthUser()() ?? {};
 
   return (
     <div
-      className={`dock fixed inset-x-0 mx-auto bottom-1 ${hide ? "z-0" : "z-50"}`}
+      className={`dock fixed inset-x-0 mx-auto bottom-1 ${hide ? "z-0" : "z-40"}`}
       w="full sm:max"
       overflow="x-scroll sm:x-visible"
     >
@@ -48,21 +50,29 @@ export default function Dock({
           height: `${(dockSize + 15) / 16}rem`
         }}
       >
-        {apps.map((app) => (
-          <DockItem
-            key={`dock-${app.id}`}
-            id={app.id}
-            title={app.title}
-            img={app.img}
-            mouseX={mouseX}
-            desktop={app.desktop}
-            openApp={openApp}
-            isOpen={app.desktop && showApps[app.id]}
-            link={app.link}
-            dockSize={dockSize}
-            dockMag={dockMag}
-          />
-        ))}
+        {apps
+          .filter((app) => {
+            if (app.id === "Superadmin") {
+              return auth.username === "superadmin";
+            }
+            return true;
+          })
+
+          .map((app) => (
+            <DockItem
+              key={`dock-${app.id}`}
+              id={app.id}
+              title={app.title}
+              img={app.img}
+              mouseX={mouseX}
+              desktop={app.desktop}
+              openApp={openApp}
+              isOpen={app.desktop && showApps[app.id]}
+              link={app.link}
+              dockSize={dockSize}
+              dockMag={dockMag}
+            />
+          ))}
       </ul>
     </div>
   );

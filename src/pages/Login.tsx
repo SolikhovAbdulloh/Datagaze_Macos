@@ -1,14 +1,15 @@
-import { useRegister } from "~/hooks/useQuery/useQueryaction";
+import { useLogin } from "~/hooks/useQuery/useQueryaction";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import CircularProgress from "@mui/material/CircularProgress";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const { mutate, isPending } = useRegister();
-
+  const { mutate, isPending } = useLogin();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const togglePassword = () => setShowPassword(!showPassword);
 
@@ -28,7 +29,10 @@ export default function Login() {
   });
 
   const onSubmit = async (e: RegisterForm) => {
-    await mutate({ data: e });
+    await mutate(
+      { data: e },
+      { onSuccess: () => navigate("/desktop", { replace: true }) }
+    );
   };
 
   return (

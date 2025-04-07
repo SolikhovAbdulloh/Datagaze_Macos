@@ -1,6 +1,6 @@
 export interface superadmin_users {
-  fullname: string;
+  id: string;
+  fullName: string;
   email: string;
-  computer_name: string;
-  degistered_date: string;
+  created_at: string;
 }

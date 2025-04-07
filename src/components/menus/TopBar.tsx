@@ -1,13 +1,15 @@
 import { Popover, Typography } from "@mui/material";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useAuthUser, useSignOut } from "react-auth-kit";
 import { useNavigate } from "react-router-dom";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
   const [showAppleMenu, setShowAppleMenu] = useState(false);
   const navigate = useNavigate();
-
+  const SignOut = useSignOut();
   const handleLogout = () => {
+    SignOut();
     localStorage.removeItem("token");
     navigate("/", { replace: true });
   };
@@ -20,37 +22,22 @@ const TopBar = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const auth = useAuthUser()() ?? {};
 
   const open = Boolean(anchorEl);
   return (
     <div className="relative w-full h-[44px] flex  items-center justify-between bg-gray-700/10 text-sm text-white px-4 shadow">
       <div className="flex items-center ">
         <div className="relative">
-          <div
-            ref={appleBtnRef}
-            className="cursor-pointer"
-            onClick={() => setShowAppleMenu(!showAppleMenu)}
-          >
+          <div ref={appleBtnRef} className="cursor-pointer">
             <img src="/logo/logo_data.svg" alt="Datagaze" className="w-[15px] h-[23px]" />
           </div>
-
-          {showAppleMenu && (
-            <div className="absolute top-full mt-3 w-[150px] bg-[#4474f8] text-white rounded-lg shadow-lg z-30">
-              <button
-                onClick={handleLogout}
-                className="w-full py-2 text-left p-3  bg-grey text-white hover:text-black flex items-center cursor-pointer 
-                          hover:bg-white/20 transition-colors duration-200 rounded-md text-sm font-medium"
-              >
-                Log Out
-              </button>
-            </div>
-          )}
         </div>
 
         <p className="font-normal cursor-pointer ml-3">DataGaze LTD 2025</p>
       </div>
 
-      <div className="flex items-center space-x-5">
+      <div className="flex items-center justify-end gap-4 ">
         <button
           className="cursor-pointer flex items-center space-x-1"
           onClick={() => window.open("https://www.datagaze.uz/", "_blank")}
@@ -90,11 +77,27 @@ const TopBar = () => {
             </div>
           </Popover>
         </div>
-        <div className="flex items-center gap-1 cursor-pointer">
+        <div
+          onClick={() => setShowAppleMenu(!showAppleMenu)}
+          className="flex items-center gap-1 cursor-pointer"
+        >
           <span className="i-bx:bxs-smile text-[17px]" />
-          <span>Jam</span>
-          <span className="i-bx:bx-chevron-down text-[17px]" />
+          <span>{auth.username}</span>
+          <span
+            className={`${showAppleMenu ? "i-bx:bx-chevron-down" : "i-bx:bx-chevron-up"} text-[20px]`}
+          />
         </div>
+        {showAppleMenu && (
+          <div className="absolute top-full mt-3 w-[150px] bg-[#4474f8] text-white rounded-lg shadow-lg z-30">
+            <button
+              onClick={handleLogout}
+              className="w-full  p-3   bg-grey text-white flex items-center cursor-pointer 
+                          hover:bg-white/20 transition-colors duration-200 rounded-md text-sm font-medium"
+            >
+              Log Out
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

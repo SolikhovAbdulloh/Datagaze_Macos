@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider, Route, Outlet } from "react-router-dom";
+import { createBrowserRouter, RouterProvider,  Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 import Desktop from "~/pages/Desktop";
 import Login from "~/pages/Login";
@@ -9,7 +9,8 @@ import "@unocss/reset/tailwind.css";
 import "uno.css";
 import "katex/dist/katex.min.css";
 import "~/styles/index.css";
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "react-auth-kit";
 
 function Layout() {
   const [login, setLogin] = useState<boolean>(false);
@@ -41,9 +42,16 @@ const rootElement = document.getElementById("root") as HTMLElement;
 const root = createRoot(rootElement);
 const queryClinet = new QueryClient();
 root.render(
-  <QueryClientProvider client={queryClinet}>
-    <Toaster position="top-right" richColors />
-    <ReactQueryDevtools initialIsOpen={false} />
-    <RouterProvider router={router} />
-  </QueryClientProvider>
+  <AuthProvider
+    authType="cookie"
+    authName="register_auth_cookie"
+    cookieDomain={window.location.hostname}
+    cookieSecure={true}
+  >
+    <QueryClientProvider client={queryClinet}>
+      <Toaster position="top-right" richColors />
+      <ReactQueryDevtools initialIsOpen={false} />
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  </AuthProvider>
 );

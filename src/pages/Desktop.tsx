@@ -13,24 +13,24 @@ interface DesktopState {
   maxApps: { [key: string]: boolean };
   minApps: { [key: string]: boolean };
   maxZ: number;
-  showLaunchpad: boolean;
   currentTitle: string;
   hideDockAndTopbar: boolean;
   spotlight: boolean;
 }
 
-export default function Desktop(props: any) {
+export default function Desktop(props: DesktopState | any) {
   const [state, setState] = useState({
     showApps: {},
     appsZ: {},
     maxApps: {},
     minApps: {},
     maxZ: 2,
-    showLaunchpad: false,
     currentTitle: "Finder",
     hideDockAndTopbar: false,
     spotlight: false
   } as DesktopState);
+
+  const [showLaunchpad, setShowLaunchpad] = useState(true);
 
   const [spotlightBtnRef, setSpotlightBtnRef] =
     useState<React.RefObject<HTMLDivElement> | null>(null);
@@ -70,7 +70,7 @@ export default function Desktop(props: any) {
       r.style.transform = target ? "scale(1)" : "scale(1.1)";
       r.style.transition = target ? "ease-in 0.2s" : "ease-out 0.2s";
     }
-    setState({ ...state, showLaunchpad: target });
+    setShowLaunchpad(target);
   };
 
   const toggleSpotlight = (): void => {
@@ -190,7 +190,7 @@ export default function Desktop(props: any) {
     );
   };
 
-  const close = state.showLaunchpad
+  const close = showLaunchpad
     ? ""
     : "opacity-0 invisible transition-opacity duration-200";
 
@@ -211,19 +211,17 @@ export default function Desktop(props: any) {
           btnRef={spotlightBtnRef as React.RefObject<HTMLDivElement>}
         />
       )}
-      <Launchpad show={state.showLaunchpad} toggleLaunchpad={toggleLaunchpad} />
+      {/* <Launchpad show={showLaunchpad} toggleLaunchpad={toggleLaunchpad} /> */}
       <Dock
         open={openApp}
         showApps={state.showApps}
-        showLaunchpad={state.showLaunchpad}
+        showLaunchpad={showLaunchpad}
         toggleLaunchpad={toggleLaunchpad}
         hide={state.hideDockAndTopbar}
       />
-
       <div
         className={`${close} z-30 size-full fixed overflow-hidden  backdrop-blur-2xl`}
         id="launchpad"
-        onClick={() => toggleLaunchpad(true)}
       >
         <div className="w-full h-full px-4">
           <div
@@ -264,7 +262,7 @@ export default function Desktop(props: any) {
                       }
                     >
                       <img
-                        src={`/icons/${app.pathToIcon}`}
+                        src={`/icons/${app?.pathToIcon !== "/any.png" ? app?.pathToIcon : "soc.png"}`}
                         alt={app?.applicationName}
                         className="w-full h-full object-contain"
                       />
@@ -272,7 +270,9 @@ export default function Desktop(props: any) {
                     <span className="mt-2 flex items-center gap-1 text-white text-center">
                       {!app?.isInstalled && <AiOutlineCloudUpload size={16} />}
                       <p className="text-xs xs:text-sm sm:text-[16px] font-medium truncate max-w-full">
-                        {app?.applicationName}
+                        {app?.applicationName === "index.html"
+                          ? "SOC"
+                          : `${app?.applicationName}`}
                       </p>
                     </span>
                   </div>

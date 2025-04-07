@@ -14,7 +14,6 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { EditDetailsModal } from "./edit";
 import { useDeleteApplication } from "~/hooks/useQuery/useQueryaction";
 import { useState } from "react"; // useState import qilish
-import { useQueryClient } from "@tanstack/react-query";
 
 const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => void }) => {
   const [tabValue, setTabValue] = useState("Server Details");
