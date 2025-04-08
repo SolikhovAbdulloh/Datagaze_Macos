@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getToken, remove } from "~/utils";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
@@ -9,7 +10,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token: string | undefined = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,7 +27,7 @@ api.interceptors.response.use(
         "Token yaroqsiz yoki muddati tugagan. Foydalanuvchini logout qilamiz.",
         error
       );
-      localStorage.removeItem("token");
+      remove();
       window.location.href = "/";
     }
     return Promise.reject(error);

@@ -1,32 +1,35 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
-import { useSignIn } from "react-auth-kit";
 import { LoginType } from "~/types/configs";
+import { RegisterUser } from "~/types/configs/register";
+import { setToken } from "~/utils";
 
 const useLogin = () => {
   const axios = useAxios();
   const notify = notificationApi();
-  const signIn = useSignIn();
-
+  const navigate = useNavigate();
   return useMutation({
     mutationFn: async ({ data }: { data: LoginType }) =>
       await axios({ url: "/api/1/auth/login", body: data, method: "POST" }),
 
-    onSuccess: (response, variables) => {
+    onSuccess: (response) => {
       if (response.status === "success") {
-        localStorage.setItem("token", response.token);
+        setToken(response.token);
+        navigate("/desktop");
       }
-      const { username, password } = variables.data;
+
       const { token } = response;
-      signIn({
-        token,
-        tokenType: "Bearer",
-        expiresIn: 3600,
-        authState: { username, password }
+      Cookies.set("token", token, {
+        expires: 1,
+        path: "/",
+        secure: true,
+        sameSite: "strict"
       });
 
-      notify("superadmin", username);
+      notify("superadmin");
     },
     onError: (err) => {
       console.log(err.message);
@@ -41,7 +44,7 @@ const useRegister = () => {
   const axios = useAxios();
   return useMutation({
     mutationFn: async ({ data }: { data: object }) => {
-      let { username, email, password, fullName }: any = data;
+      let { username, email, password, fullName } = data as RegisterUser;
       await axios({
         url: "/api/1/auth/register",
         method: "POST",
@@ -69,7 +72,7 @@ const useDeleteRegister = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: any) => {
+    mutationFn: async (id: string) => {
       await axios({
         url: `/api/1/auth/delete-user/{id}?id=${id}`,
         method: "DELETE"
@@ -142,25 +145,34 @@ const useDeleteApplication = () => {
     }
   });
 };
-const useUpdateRegister = (data: any) => {
+
+const useUpdateRegister = () => {
+  const notify = notificationApi();
+  const queryClient = useQueryClient();
   const axios = useAxios();
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ data }: { data: object }) => {
+      const { username, fullName, password, userId, email } = data as RegisterUser;
       await axios({
         url: "/api/1/auth/update-profile",
         method: "PUT",
-        body: { data },
+        body: { username, fullName, password, userId, email },
         headers: { "Content-Type": "application/json" }
       });
     },
     onSuccess: (res) => {
       console.log(res);
+      notify("Update");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["superadmin_Users"] });
     },
     onError: (err) => {
       console.log(err);
     }
   });
 };
+
 const useCreateApplication = () => {
   const axios = useAxios();
   return useMutation({
@@ -181,6 +193,7 @@ const useCreateApplication = () => {
     }
   });
 };
+
 export {
   useLogin,
   useInstallApplication,

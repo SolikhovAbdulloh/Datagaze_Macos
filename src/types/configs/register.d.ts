@@ -9,3 +9,10 @@ export interface InistallApplicationType {
   username: string;
   password: string;
 }
+export interface RegisterUser {
+  userId?: string;
+  username?: string;
+  fullName?: string;
+  email?: string;
+  password?: string;
+}

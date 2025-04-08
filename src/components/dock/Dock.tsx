@@ -1,5 +1,4 @@
 import { useMotionValue } from "framer-motion";
-import { useAuthUser } from "react-auth-kit";
 import { apps } from "~/configs";
 
 interface DockProps {
@@ -33,7 +32,6 @@ export default function Dock({
   };
 
   const mouseX = useMotionValue<number | null>(null);
-  const auth = useAuthUser()() ?? {};
 
   return (
     <div
@@ -50,29 +48,21 @@ export default function Dock({
           height: `${(dockSize + 15) / 16}rem`
         }}
       >
-        {apps
-          .filter((app) => {
-            if (app.id === "Superadmin") {
-              return auth.username === "superadmin";
-            }
-            return true;
-          })
-
-          .map((app) => (
-            <DockItem
-              key={`dock-${app.id}`}
-              id={app.id}
-              title={app.title}
-              img={app.img}
-              mouseX={mouseX}
-              desktop={app.desktop}
-              openApp={openApp}
-              isOpen={app.desktop && showApps[app.id]}
-              link={app.link}
-              dockSize={dockSize}
-              dockMag={dockMag}
-            />
-          ))}
+        {apps.map((app) => (
+          <DockItem
+            key={`dock-${app.id}`}
+            id={app.id}
+            title={app.title}
+            img={app.img}
+            mouseX={mouseX}
+            desktop={app.desktop}
+            openApp={openApp}
+            isOpen={app.desktop && showApps[app.id]}
+            link={app.link}
+            dockSize={dockSize}
+            dockMag={dockMag}
+          />
+        ))}
       </ul>
     </div>
   );

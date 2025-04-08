@@ -35,7 +35,7 @@ export const SuperAdmin_users = () => {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const { mutate } = useRegister();
   const { mutate: deleteRegisterMutate } = useDeleteRegister();
-  // const { mutate: UpdateRegisterUser } = useUpdateRegister();  
+  const { mutate: UpdateRegisterUser } = useUpdateRegister();
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
@@ -95,11 +95,6 @@ export const SuperAdmin_users = () => {
       email: email,
       password: password
     };
-    // if (selectedUserId) {
-    //   UpdateRegisterUser(FormData, {
-    //     onSuccess: () => CloseModal()
-    //   });
-
     mutate({ data: FormData }, { onSuccess: () => CloseModal() });
   };
   const hundleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
@@ -111,6 +106,8 @@ export const SuperAdmin_users = () => {
       email: email,
       password: password
     };
+    
+    UpdateRegisterUser({ data: FormData }, { onSuccess: () => CloseModal() });
   };
   return (
     <div className="p-4  bg-gray-100 min-h-screen">
@@ -160,7 +157,7 @@ export const SuperAdmin_users = () => {
                         <label className="block text-sm text-gray-700">Username</label>
                         <input
                           type="text"
-                          placeholder="Username"
+                          placeholder="username"
                           value={username}
                           className="w-full border rounded-lg p-2 mt-1"
                           onChange={(e) => setUsername(e.target.value)}

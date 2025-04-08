@@ -4,3 +4,4 @@ export interface superadmin_users {
   email: string;
   created_at: string;
 }
+

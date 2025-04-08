@@ -6,12 +6,13 @@ type NotificationType =
   | "Uninstall"
   | "Add new user"
   | "o'chirildi"
-  | "Xatolik";
+  | "Xatolik"
+  | "Update";
 export const notificationApi = () => {
-  const notify = (type: NotificationType, username?: string) => {
+  const notify = (type: NotificationType) => {
     switch (type) {
       case "superadmin":
-        toast.success(`Welcome  ${username && username} ✅`, { closeButton: true });
+        toast.success(`Welcome ✅`, { closeButton: true });
         break;
       case "Not register":
         toast.error("Ro'yxatdan o'tishda xatolik ❌", { closeButton: true });
@@ -30,6 +31,9 @@ export const notificationApi = () => {
         break;
       case "Xatolik":
         toast.error(`Xatolik !!!`, { closeButton: true });
+        break;
+      case 'Update':
+        toast.info(`Muvaffaqiyatli O'zgartirildi!`, { closeButton: true });
         break;
     }
   };

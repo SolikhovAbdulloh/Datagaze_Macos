@@ -1,16 +1,14 @@
 import { Popover, Typography } from "@mui/material";
 import { useRef, useState } from "react";
-import { useAuthUser, useSignOut } from "react-auth-kit";
 import { useNavigate } from "react-router-dom";
+import { remove } from "~/utils";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
   const [showAppleMenu, setShowAppleMenu] = useState(false);
   const navigate = useNavigate();
-  const SignOut = useSignOut();
   const handleLogout = () => {
-    SignOut();
-    localStorage.removeItem("token");
+    remove();
     navigate("/", { replace: true });
   };
   const [anchorEl, setAnchorEl] = useState(null);
@@ -22,7 +20,6 @@ const TopBar = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const auth = useAuthUser()() ?? {};
 
   const open = Boolean(anchorEl);
   return (
@@ -82,7 +79,7 @@ const TopBar = () => {
           className="flex items-center gap-1 cursor-pointer"
         >
           <span className="i-bx:bxs-smile text-[17px]" />
-          <span>{auth.username}</span>
+          <span>superadmin</span>
           <span
             className={`${showAppleMenu ? "i-bx:bx-chevron-down" : "i-bx:bx-chevron-up"} text-[20px]`}
           />
