@@ -36,6 +36,7 @@ export const SuperAdmin_users = () => {
   const { mutate } = useRegister();
   const { mutate: deleteRegisterMutate } = useDeleteRegister();
   const { mutate: UpdateRegisterUser } = useUpdateRegister();
+
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
@@ -69,17 +70,21 @@ export const SuperAdmin_users = () => {
     setSelectedUserId(id);
     setOpenModal(true);
   };
+
   const AddModalOpen = () => {
     setOpenModalAdd(true);
   };
+
   const CloseModal = () => {
     setOpenModal(false);
     setOpenModalAdd(false);
     setOpenModalDelete(false);
   };
+
   const DeleteModal = () => {
     setOpenModalDelete(true);
   };
+
   const DeleteShure = () => {
     if (selectedUserId) {
       deleteRegisterMutate(selectedUserId, {
@@ -87,6 +92,7 @@ export const SuperAdmin_users = () => {
       });
     }
   };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const FormData = {
@@ -97,6 +103,7 @@ export const SuperAdmin_users = () => {
     };
     mutate({ data: FormData }, { onSuccess: () => CloseModal() });
   };
+
   const hundleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const FormData = {
@@ -106,9 +113,10 @@ export const SuperAdmin_users = () => {
       email: email,
       password: password
     };
-    
+
     UpdateRegisterUser({ data: FormData }, { onSuccess: () => CloseModal() });
   };
+
   return (
     <div className="p-4  bg-gray-100 min-h-screen">
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">

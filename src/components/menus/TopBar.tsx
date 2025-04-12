@@ -1,7 +1,8 @@
 import { Popover, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { remove } from "~/utils";
+import { useQueryApi } from "~/hooks/useQuery";
+import { remove, setUser } from "~/utils";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
@@ -22,6 +23,11 @@ const TopBar = () => {
   };
 
   const open = Boolean(anchorEl);
+
+  const { data } = useQueryApi({
+    url: "/api/1/auth/user",
+    pathname: "user"
+  });
   return (
     <div className="relative w-full h-[44px] flex  items-center justify-between bg-gray-700/10 text-sm text-white px-4 shadow">
       <div className="flex items-center ">
@@ -79,7 +85,7 @@ const TopBar = () => {
           className="flex items-center gap-1 cursor-pointer"
         >
           <span className="i-bx:bxs-smile text-[17px]" />
-          <span>superadmin</span>
+          <span>{data?.username}</span>
           <span
             className={`${showAppleMenu ? "i-bx:bx-chevron-down" : "i-bx:bx-chevron-up"} text-[20px]`}
           />

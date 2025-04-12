@@ -5,14 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import CircularProgress from "@mui/material/CircularProgress";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import { getToken } from "~/utils";
 
 export default function Login() {
   const { mutate, isPending } = useLogin();
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const togglePassword = () => setShowPassword(!showPassword);
-
   const registerSchema = z.object({
     username: z.string().min(3, "Username must be at least 3 characters long").max(12),
     password: z.string().min(4, "Password must contain at least 4 characters").max(22)
@@ -29,11 +28,14 @@ export default function Login() {
   });
 
   const onSubmit = async (e: RegisterForm) => {
-    await mutate(
-      { data: e },
-      { onSuccess: () => navigate("/desktop", { replace: true }) }
-    );
+    await mutate({ data: e });
   };
+
+  const token = getToken();
+
+  if (token) {
+    return <Navigate to={"/desktop"} />;
+  }
 
   return (
     <div style={{ background: "linear-gradient(to bottom, rgb(6, 70, 246), #ffffff)" }}>
