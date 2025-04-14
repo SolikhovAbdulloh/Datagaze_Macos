@@ -2,7 +2,7 @@ import { Popover, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryApi } from "~/hooks/useQuery";
-import { remove, setUser } from "~/utils";
+import { remove } from "~/utils";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
@@ -28,6 +28,7 @@ const TopBar = () => {
     url: "/api/1/auth/user",
     pathname: "user"
   });
+
   return (
     <div className="relative w-full h-[44px] flex  items-center justify-between bg-gray-700/10 text-sm text-white px-4 shadow">
       <div className="flex items-center ">

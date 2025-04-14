@@ -27,7 +27,6 @@ const apps: AppsData[] = [
     content: <SuperAdmin_users />,
     img: "/icons/users.png"
   },
-
   {
     id: "facetime",
     title: "FaceTime",
@@ -70,5 +69,4 @@ const apps: AppsData[] = [
     content: <Computers />
   }
 ];
-
 export default apps;

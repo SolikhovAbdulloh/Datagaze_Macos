@@ -3,6 +3,7 @@ import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 import io from "socket.io-client";
+import { getToken } from "~/utils";
 
 const TerminalComponent = () => {
   const terminalRef = useRef<any>(null);
@@ -24,7 +25,7 @@ const TerminalComponent = () => {
     termRef.current.loadAddon(fitAddon);
     termRef.current.open(terminalRef.current);
     fitAddon.fit();
-    const token = localStorage.getItem("token");
+    const token = getToken()
     termRef.current.focus();
 
     termRef.current.write("Serverga ulanmoqda ...\r\n");
@@ -48,7 +49,7 @@ const TerminalComponent = () => {
     };
 
     socketRef.current.on("disconnect", () => {
-      termRef.current.write("\r\nHolat: Serverdan uzildi! Qayta ulanmoqda...\r\n");
+      termRef.current.write("\r\nHolat: Serverdan uzildi!\r\n");
       scrollToBottom();
       setTimeout(() => {
         if (!socketRef.current.connected) socketRef.current.connect();

@@ -8,7 +8,6 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!token) {
       navigate("/", { replace: true });
-      console.log('ishladi')
     }
   }, [token, navigate]);
 

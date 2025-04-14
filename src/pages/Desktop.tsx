@@ -145,7 +145,7 @@ export default function Desktop(props: DesktopState | any) {
   };
 
   const renderAppWindows = () => {
-    return apps.map((app) => {
+    return apps.map((app:any) => {
       if (app.desktop && state.showApps[app.id]) {
         const props = {
           id: app.id,

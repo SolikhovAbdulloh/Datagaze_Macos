@@ -5,23 +5,25 @@ import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
 import { LoginType } from "~/types/configs";
 import { RegisterUser } from "~/types/configs/register";
-import { setToken } from "~/utils";
+import { getUserInfo, setToken } from "~/utils";
 
 const useLogin = () => {
   const axios = useAxios();
   const notify = notificationApi();
   const navigate = useNavigate();
+
   return useMutation({
     mutationFn: async ({ data }: { data: LoginType }) =>
       await axios({ url: "/api/1/auth/login", body: data, method: "POST" }),
 
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       if (response.status === "success") {
         setToken(response.token);
         navigate("/desktop");
       }
 
       const { token } = response;
+
       Cookies.set("token", token, {
         expires: 1,
         path: "/",
@@ -29,8 +31,23 @@ const useLogin = () => {
         sameSite: "strict"
       });
 
-      notify("superadmin");
+      const userData = await getUserInfo();
+      const user = userData?.username;
+
+      notify("superadmin", user);
+      
+
+      Cookies.set(
+        "user",
+        JSON.stringify({
+          username: userData?.username,
+          fullName: userData?.fullName,
+          email: userData?.email
+        }),
+        { expires: 1, path: "/", secure: true, sameSite: "Strict" }
+      );
     },
+
     onError: (err) => {
       console.log(err.message);
       notify("Not register");

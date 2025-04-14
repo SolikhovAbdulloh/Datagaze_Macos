@@ -1,5 +1,6 @@
 import { useMotionValue } from "framer-motion";
 import { apps } from "~/configs";
+import { useQueryApi } from "~/hooks/useQuery";
 
 interface DockProps {
   open: (id: string) => void;
@@ -30,7 +31,10 @@ export default function Dock({
       open(id);
     }
   };
-
+  const { data } = useQueryApi({
+    url: "/api/1/auth/user",
+    pathname: "user"
+  });
   const mouseX = useMotionValue<number | null>(null);
 
   return (
@@ -48,21 +52,26 @@ export default function Dock({
           height: `${(dockSize + 15) / 16}rem`
         }}
       >
-        {apps.map((app) => (
-          <DockItem
-            key={`dock-${app.id}`}
-            id={app.id}
-            title={app.title}
-            img={app.img}
-            mouseX={mouseX}
-            desktop={app.desktop}
-            openApp={openApp}
-            isOpen={app.desktop && showApps[app.id]}
-            link={app.link}
-            dockSize={dockSize}
-            dockMag={dockMag}
-          />
-        ))}
+        {apps
+          .filter((app) => {
+            if (data?.roleId === 1) return true;
+            return app.title !== "Superadmin";
+          })
+          .map((app) => (
+            <DockItem
+              key={`dock-${app.id}`}
+              id={app.id}
+              title={app.title}
+              img={app.img}
+              mouseX={mouseX}
+              desktop={app.desktop}
+              openApp={openApp}
+              isOpen={app.desktop && showApps[app.id]}
+              link={app.link}
+              dockSize={dockSize}
+              dockMag={dockMag}
+            />
+          ))}
       </ul>
     </div>
   );
