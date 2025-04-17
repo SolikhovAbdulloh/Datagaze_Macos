@@ -22,7 +22,7 @@ interface FormDataType {
 const ModalLicense = () => {
   const { data, isLoading, isError } = useQueryApi({
     pathname: "application",
-    url: "/api/1/desktop/web-applications",
+    url: "/api/1/desktop/web-applications"
   });
 
   const [value, setValue] = useState("");
@@ -44,7 +44,7 @@ const ModalLicense = () => {
     installScript:
       "sudo timedatectl set-timezone Asia/Tashkent && sudo apt update && sudo apt upgrade -y",
     serverFile: "",
-    agentFile: "",
+    agentFile: ""
   });
 
   const { mutate, isPending: isMutating } = useCreateApplication();
@@ -56,7 +56,7 @@ const ModalLicense = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
@@ -67,7 +67,7 @@ const ModalLicense = () => {
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        [name]: file, // Store the File object
+        [name]: file // Store the File object
       }));
     }
   };
@@ -76,9 +76,7 @@ const ModalLicense = () => {
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
-    const filtered = data.filter((comp: any) =>
-      comp.name?.toLowerCase().includes(query)
-    );
+    const filtered = data.filter((comp: any) => comp.name?.toLowerCase().includes(query));
     setFilteredComputers(filtered);
     setPage(0);
   };
@@ -115,7 +113,7 @@ const ModalLicense = () => {
       installScript:
         "sudo timedatectl set-timezone Asia/Tashkent && sudo apt update && sudo apt upgrade -y",
       serverFile: "",
-      agentFile: "",
+      agentFile: ""
     });
     setActiveStep(0);
   };
@@ -127,7 +125,8 @@ const ModalLicense = () => {
         formData.applicationName &&
         formData.publisher &&
         formData.webVersion &&
-        formData.agentVersion
+        formData.agentVersion &&
+        formData.icon
       );
     }
     if (step === 1) {
@@ -137,9 +136,12 @@ const ModalLicense = () => {
       const isValidFile = (file: any) =>
         file instanceof File &&
         file.size <= 100 * 1024 * 1024 && // 100MB limit
-        ["application/zip", "application/x-msdownload", "image/png", "image/jpeg"].includes(
-          file.type
-        ); // Adjust allowed types as needed
+        [
+          "application/zip",
+          "application/x-msdownload",
+          "image/png",
+          "image/jpeg"
+        ].includes(file.type); // Adjust allowed types as needed
 
       return (
         formData.serverFile &&
@@ -166,10 +168,8 @@ const ModalLicense = () => {
       formDataToSend.append("webVersion", formData.webVersion);
       formDataToSend.append("agentVersion", formData.agentVersion);
       formDataToSend.append("installScript", formData.installScript);
+      formDataToSend.append("icon", formData.icon);
 
-      if (formData.icon) {
-        formDataToSend.append("icon", formData.icon);
-      }
       if (formData.serverFile) {
         formDataToSend.append("serverFile", formData.serverFile);
       }
@@ -181,7 +181,7 @@ const ModalLicense = () => {
         onSuccess: () => {
           setIsOpen(false);
           resetForm(); // Reset form after successful submission
-        },
+        }
       });
     }
   };
@@ -206,8 +206,8 @@ const ModalLicense = () => {
               slotProps={{
                 input: {
                   type: "search",
-                  className: "w-[200px] h-[30px] bg-white",
-                },
+                  className: "w-[200px] h-[30px] bg-white"
+                }
               }}
             />
           </div>
@@ -350,7 +350,7 @@ const ModalLicense = () => {
                           type="file"
                           accept="image/*"
                           name="icon"
-                          onChange={handleFileChange}
+                          onChange={handleTextChange}
                           className="text-sm"
                         />
                       )}
