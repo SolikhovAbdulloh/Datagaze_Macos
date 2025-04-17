@@ -2,17 +2,17 @@ import Cookies from "js-cookie";
 import { useAxios } from "~/hooks/useAxios";
 
 export interface Usertype {
-  username: string | undefined;
-  fullName: string | undefined;
-  email: string | undefined;
+  username?: string | undefined;
+  fullName?: string | undefined;
+  email?: string | undefined;
 }
 
 export const setToken = (token: string) => {
   Cookies.set("token", token, { expires: 1 });
 };
 
-export const setUser = (user: Usertype | any) => {
-  Cookies.set("user", user, { expires: 1 });
+export const setUser = ({ user }: { user: Usertype | any }) => {
+  return Cookies.set("user", user, { expires: 1 });
 };
 export const getUser = () => {
   const user = Cookies.get("user");

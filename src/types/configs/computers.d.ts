@@ -19,9 +19,9 @@ export interface ComputersType {
   computerName: string;
   hostname: string;
   id: string;
-  os: string;
+  operation_system: string;
   status: string;
-  ipAddress: string;
+  ip_address: string;
 }
 
 export interface computersbyIdType {
@@ -31,76 +31,43 @@ export interface computersbyIdType {
     buildNumber?: string;
     version?: string;
   };
+
   processor_details?: {
     cpu?: string;
     core?: string;
     generation?: string;
+    model?: string;
   };
-  network_details: NetworkDetail[];
+  network_adapters: NetworkDetail[];
 
   memory_storage_details?: {
     ram?: string;
     drives: RamType[];
   };
 }
-// "id": "73198df4-acff-4ec8-8a62-c8e923e630f9",
-//   "os_details": {
-//     "os": "Windows",
-//     "platform": "Windows 11 Pro",
-//     "buildNumber": "22621.1702",
-//     "version": "11.0.22621"
-//   },
-//   "processor_details": {
-//     "cpu": "Intel Core i7-12700K",
-//     "core": "12",
-//     "generation": "12th Gen"
-//   },
-//   "network_details": [
-//     {
-//       "nicName": "Ethernet",
-//       "ipAddress": "192.168.1.2",
-//       "macAddress": "00:1A:2B:3C:4D:5E",
-//       "available": "Offline",
-//       "type": "ethernet"
-//     },
-//     {
-//       "nicName": "Wi-Fi",
-//       "ipAddress": "192.168.1.3",
-//       "macAddress": "00:1A:2B:3C:4D:5F",
-//       "available": "Online",
-//       "type": "wifi"
-//     }
-//   ],
-//   "memory_storage_details": {
-//     "ram": "32GB",
-//     "drives": [
-//       {
-//         "driveName": "C",
-//         "totalSize": "512GB",
-//         "freeSize": "289GB"
-//       },
 export interface NetworkDetail {
-  nicName?: string;
-  ipAddress?: string;
+  nic_name?: string;
   available?: string;
   type?: string;
   wifi_name?: string;
   either_net_name?: string;
-  macAddress?: string;
+  mac_address?: string;
   status?: string;
+  Ethernet: string;
+  ip_address: number;
 }
 
 export interface RamType {
-  driveName: string;
-  totalSize: string;
-  freeSize: string;
+  drive_name: string;
+  total_size: string;
+  free_size: string;
 }
 
 export interface ComputersAppType {
   id: string;
   name: string;
-  fileSize: string;
-  installationType: string;
-  installedDate: string;
+  size: string;
+  type: string;
+  installed_date: string;
+  version: string;
 }
- 

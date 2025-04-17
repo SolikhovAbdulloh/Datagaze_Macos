@@ -2,7 +2,7 @@ import { Popover, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryApi } from "~/hooks/useQuery";
-import { remove } from "~/utils";
+import { remove, setUser, Usertype } from "~/utils";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
@@ -28,6 +28,16 @@ const TopBar = () => {
     url: "/api/1/auth/user",
     pathname: "user"
   });
+  useEffect(() => {
+    if (data) {
+      let userinfo = {
+        email: data?.email,
+        user: data?.username,
+        fullName: data?.fullName
+      };
+      setUser(userinfo);
+    }
+  }, [data]);
 
   return (
     <div className="relative w-full h-[44px] flex  items-center justify-between bg-gray-700/10 text-sm text-white px-4 shadow">

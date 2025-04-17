@@ -233,10 +233,10 @@ const Computers = () => {
                         className="p-3 cursor-pointer"
                         onClick={() => apptable(item.id)}
                       >
-                        {item.computerName}
+                        {item.hostname}
                       </td>
-                      <td className="p-3">{item.os}</td>
-                      <td className="p-3">{item.ipAddress}</td>
+                      <td className="p-3">{item.operation_system}</td>
+                      <td className="p-3">{item.ip_address}</td>
                       <td>
                         <p
                           className={`${

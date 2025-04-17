@@ -7,7 +7,6 @@ import { LinearProgress, Typography } from "@mui/material";
 import { computersbyIdType } from "~/types/configs";
 import { useQueryApi } from "~/hooks/useQuery";
 
-// Hajmlarni son sifatida olish uchun yordamchi funksiya
 const getSizeInGB = (size: string): number => {
   const num = parseFloat(size.replace(/[^0-9.]/g, ""));
   return size.includes("TB") ? num * 1024 : num;
@@ -129,9 +128,7 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
               </span>
               <span className="flex flex-col gap-1">
                 <p className="text-gray-500 text-sm">Model</p>
-                <p className="text-lg font-medium">
-                  {data?.processor_details?.generation}
-                </p>
+                <p className="text-lg font-medium">{data?.processor_details?.model}</p>
               </span>
               <span className="flex flex-col gap-1">
                 <p className="text-gray-500 text-sm">Cores</p>
@@ -141,28 +138,28 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
           )}
           {tabValue === "network" && (
             <div>
-              {data?.network_details?.map((info, index) => (
+              {data?.network_adapters?.map((info, index) => (
                 <div
                   className="grid grid-cols-2 gap-4 border-b-[1px] py-3 border-solid"
                   key={index}
                 >
                   <span className="flex flex-col gap-1">
                     <p className="text-gray-500 text-sm">NIC Name</p>
-                    <p className="text-lg font-medium">{info.nicName}</p>
+                    <p className="text-lg font-medium">{info.nic_name}</p>
                   </span>
                   <span className="flex flex-col gap-1">
                     <p className="text-gray-500 text-sm">Mac Address</p>
-                    <p className="text-lg font-medium">{info.macAddress}</p>
+                    <p className="text-lg font-medium">{info.mac_address}</p>
                   </span>
                   <span className="flex flex-col gap-1">
                     <p className="text-gray-500 text-sm">IP Address</p>
-                    <p className="text-lg font-medium">{info.ipAddress}</p>
+                    <p className="text-lg font-medium">{info.ip_address}</p>
                   </span>
                   <span className="flex flex-col gap-1">
                     <p className="text-gray-500 text-sm">Available</p>
                     <p
                       className={`text-[12px] font-medium p-2 w-[51px] rounded-[6px] flex items-center ${
-                        info.available === "Online"
+                        info.available === "Up"
                           ? "text-[#1A8F44] bg-[#e5fbef]"
                           : "text-red-600 bg-[#fee7e6]"
                       }`}
@@ -194,13 +191,15 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
               />
             </Box>
             <Typography variant="body2" color="textSecondary">
-              {`${Math.round(12)}%`}
+              {`${Math.round(50)}%`}
             </Typography>
           </Box>
 
           {data?.memory_storage_details?.drives.map((val, idx) => {
-            const totalSize = getSizeInGB(val?.totalSize || "0GB");
-            const freeSize = getSizeInGB(val?.freeSize || "0GB");
+            console.log(data?.memory_storage_details);
+
+            const totalSize = getSizeInGB(val.total_size || "0GB");
+            const freeSize = getSizeInGB(val.free_size || "0GB");
             const usagePercentage = totalSize
               ? ((totalSize - freeSize) / totalSize) * 100
               : 0;
@@ -209,9 +208,9 @@ const About_fc = ({ id, close }: { id: string; close: () => void }) => {
               <Box key={idx} display="flex" alignItems="center" marginTop={1}>
                 <Box width="100%" mr={1}>
                   <label className="block font-medium text-[17px]">
-                    Disk {val.driveName}
+                    Disk {val?.drive_name}
                     <span className="text-gray-500 text-[14px] font-normal">
-                      ({val?.totalSize})
+                      ({val?.total_size})
                     </span>
                   </label>
                   <LinearProgress

@@ -1,17 +1,21 @@
-import React, { useEffect, useRef } from "react";
+import  { useEffect, useRef } from "react";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 import io from "socket.io-client";
 import { getToken } from "~/utils";
+import { useProgressStore } from "~/stores/slices/progress";
 
 const TerminalComponent = () => {
+  const setProgressMessage = useProgressStore((state) => state.setProgressMessage);
+  const setSocketId = useProgressStore((state) => state.setSocketId);
+  const progressId = useProgressStore((state) => state.setProgressId);
   const terminalRef = useRef<any>(null);
   const socketRef = useRef<any>(null);
+  const progressSocketRef = useRef<any>(null);
   const termRef = useRef<any>(null);
 
   useEffect(() => {
-    
     termRef.current = new Terminal({
       cursorBlink: true,
       fontFamily: "monospace",
@@ -25,12 +29,11 @@ const TerminalComponent = () => {
     termRef.current.loadAddon(fitAddon);
     termRef.current.open(terminalRef.current);
     fitAddon.fit();
-    const token = getToken()
+    const token = getToken();
     termRef.current.focus();
 
     termRef.current.write("Serverga ulanmoqda ...\r\n");
 
-    
     socketRef.current = io(
       "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal",
       {
@@ -72,6 +75,7 @@ const TerminalComponent = () => {
     });
     socketRef.current.on("connect", () => {
       termRef.current.write("Serverga ulandi!\n\r");
+      setSocketId(socketRef.current.id);
     });
     // \r-bu qator boshiga otkazadi \n-bu esa ENTER \b-backspace ASCII dagi kodi
     socketRef.current.on("error", (err: any) => {
@@ -111,6 +115,30 @@ const TerminalComponent = () => {
 
     terminalRef.current.addEventListener("click", () => {
       termRef.current.focus();
+    });
+
+    progressSocketRef.current = io(
+      "https://datagaze-platform-9cab2c02bc91.herokuapp.com/progress",
+      {
+        transports: ["websocket"],
+        auth: { token: `Bearer ${token}` }
+      }
+    );
+
+    progressSocketRef.current.on("connect", () => {
+      progressId(progressSocketRef.current.id);
+    });
+
+    progressSocketRef.current.on("progressUpdate", (data: any) => {
+      setProgressMessage(data.progress);
+    });
+
+    progressSocketRef.current.on("disconnect", () => {
+      setProgressMessage(0);
+    });
+
+    progressSocketRef.current.on("connect_error", (err: any) => {
+      setProgressMessage(err.message);
     });
 
     const handleResize = () => {

@@ -1,45 +1,89 @@
 import React, { useState } from "react";
-import ModalLicenseTable from "~/configs/license";
-import { ModalLicenseType } from "~/types/configs/Liceses";
+import { ModalLicenseType } from "~/types/configs/Liceses"; // Adjust path as needed
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import AddIcon from "@mui/icons-material/Add";
 import { FiUploadCloud } from "react-icons/fi";
+import { Button, Skeleton, Step, StepLabel, Stepper, TextField } from "@mui/material";
+import { useQueryApi } from "~/hooks/useQuery"; // Adjust path as needed
+import { useCreateApplication } from "~/hooks/useQuery/useQueryaction";
 
-import {
-  Box,
-  Button,
-  Step,
-  StepLabel,
-  Stepper,
-  Tab,
-  Tabs,
-  TextField
-} from "@mui/material";
-import { RiImageAddLine } from "react-icons/ri";
+// Define TypeScript interface for form data
+interface FormDataType {
+  icon: File | string;
+  applicationName: string;
+  publisher: string;
+  webVersion: string;
+  agentVersion: string;
+  installScript: string;
+  serverFile: File | string;
+  agentFile: File | string;
+}
 
 const ModalLicense = () => {
+  const { data, isLoading, isError } = useQueryApi({
+    pathname: "application",
+    url: "/api/1/desktop/web-applications",
+  });
+
   const [value, setValue] = useState("");
   const [activeStep, setActiveStep] = useState(0);
-
-  const [filteredComputers, setFilteredComputers] =
-    useState<ModalLicenseType[]>(ModalLicenseTable);
+  const [filteredComputers, setFilteredComputers] = useState<ModalLicenseType[]>(
+    data || []
+  );
   const [isOpen, setIsOpen] = useState(false);
-  const [tabValue, setTabValue] = useState("Install script");
-
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
-  const [formData, setFormData] = useState({
-    agentFile: null
+
+  // Initialize form data
+  const [formData, setFormData] = useState<FormDataType>({
+    icon: "",
+    applicationName: "Tedy",
+    publisher: "Datagaze123 LLC",
+    webVersion: "1.0.0",
+    agentVersion: "2.0.0",
+    installScript:
+      "sudo timedatectl set-timezone Asia/Tashkent && sudo apt update && sudo apt upgrade -y",
+    serverFile: "",
+    agentFile: "",
   });
+
+  const { mutate, isPending: isMutating } = useCreateApplication();
+
+  // Handle text input changes
+  const handleTextChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle file input changes
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: file, // Store the File object
+      }));
+    }
+  };
+
+  // Search function
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
-    const filtered = ModalLicenseTable.filter((comp) =>
+    const filtered = data.filter((comp: any) =>
       comp.name?.toLowerCase().includes(query)
     );
     setFilteredComputers(filtered);
     setPage(0);
   };
+
+  // Pagination
   const paginatedComputers = filteredComputers.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -51,21 +95,97 @@ const ModalLicense = () => {
       setPage(newPage);
     }
   };
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setTabValue(newValue);
-  };
-  const step = ["General settings", "Scripts settings", "Product files"];
+
+  const steps = ["General settings", "Scripts settings", "Product files"];
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newRowsPerPage = Number(event.target.value);
     setRowsPerPage(newRowsPerPage);
     setPage(0);
   };
+
+  // Reset form data after successful submission
+  const resetForm = () => {
+    setFormData({
+      icon: "",
+      applicationName: "Tedy",
+      publisher: "Datagaze123 LLC",
+      webVersion: "1.0.0",
+      agentVersion: "2.0.0",
+      installScript:
+        "sudo timedatectl set-timezone Asia/Tashkent && sudo apt update && sudo apt upgrade -y",
+      serverFile: "",
+      agentFile: "",
+    });
+    setActiveStep(0);
+  };
+
+  // Validate form fields for each step
+  const validateStep = (step: number) => {
+    if (step === 0) {
+      return (
+        formData.applicationName &&
+        formData.publisher &&
+        formData.webVersion &&
+        formData.agentVersion
+      );
+    }
+    if (step === 1) {
+      return formData.installScript;
+    }
+    if (step === 2) {
+      const isValidFile = (file: any) =>
+        file instanceof File &&
+        file.size <= 100 * 1024 * 1024 && // 100MB limit
+        ["application/zip", "application/x-msdownload", "image/png", "image/jpeg"].includes(
+          file.type
+        ); // Adjust allowed types as needed
+
+      return (
+        formData.serverFile &&
+        isValidFile(formData.serverFile) &&
+        formData.agentFile &&
+        isValidFile(formData.agentFile)
+      );
+    }
+    return true;
+  };
+
+  // Handle Next button and send FormData
   const handleNext = () => {
-    if (activeStep < step.length - 1) {
+    if (!validateStep(activeStep)) {
+      alert("Please fill in all required fields or ensure valid files are selected.");
+      return;
+    }
+    if (activeStep < steps.length - 1) {
       setActiveStep((prev) => prev + 1);
+    } else if (activeStep === 2) {
+      const formDataToSend = new FormData();
+      formDataToSend.append("applicationName", formData.applicationName);
+      formDataToSend.append("publisher", formData.publisher);
+      formDataToSend.append("webVersion", formData.webVersion);
+      formDataToSend.append("agentVersion", formData.agentVersion);
+      formDataToSend.append("installScript", formData.installScript);
+
+      if (formData.icon) {
+        formDataToSend.append("icon", formData.icon);
+      }
+      if (formData.serverFile) {
+        formDataToSend.append("serverFile", formData.serverFile);
+      }
+      if (formData.agentFile) {
+        formDataToSend.append("agentFile", formData.agentFile);
+      }
+
+      mutate(formDataToSend, {
+        onSuccess: () => {
+          setIsOpen(false);
+          resetForm(); // Reset form after successful submission
+        },
+      });
     }
   };
+
   const handleBack = () => {
     if (activeStep > 0) {
       setActiveStep((prev) => prev - 1);
@@ -73,20 +193,12 @@ const ModalLicense = () => {
       setIsOpen(false);
     }
   };
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name } = e.target;
-    const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: file
-    }));
-    console.log(formData);
-  };
+
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
         <div className="bg-[#e1e9fb] w-full flex items-center justify-between h-[64px] px-4">
-          <div className="flex items-center  relative gap-2">
+          <div className="flex items-center relative gap-2">
             <TextField
               value={value}
               onChange={searchFunctions}
@@ -94,8 +206,8 @@ const ModalLicense = () => {
               slotProps={{
                 input: {
                   type: "search",
-                  className: "w-[200px] h-[30px] bg-white"
-                }
+                  className: "w-[200px] h-[30px] bg-white",
+                },
               }}
             />
           </div>
@@ -119,27 +231,50 @@ const ModalLicense = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedComputers.map((item, index) => (
-                <tr
-                  key={item.id}
-                  className={`border-b border-gray-200 text-sm ${
-                    index % 2 === 0 ? "bg-gray-50" : "bg-[#ccdaf8]"
-                  }`}
-                >
-                  <td className="p-3 flex items-center gap-2">
-                    <img
-                      className="w-[24px] rounded-[8px] h-[24px]"
-                      src={item.icons}
-                      alt="icon"
-                    />
-                    {item.name}
-                  </td>
-                  <td className="p-3">{item.publisher}</td>
-                  <td className="p-3">{item.server_version}</td>
-                  <td className="p-3">{item.agent_version}</td>
-                  <td className="p-3">{item.file_size}</td>
-                </tr>
-              ))}
+              {isLoading || isError
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <tr
+                      key={index}
+                      className="border fellows border-gray-200 p-4 text-sm bg-gray-50"
+                    >
+                      <td className="p-3">
+                        <Skeleton variant="rectangular" width={20} height={20} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={20} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={100} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={120} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={100} />
+                      </td>
+                    </tr>
+                  ))
+                : paginatedComputers.map((item, index) => (
+                    <tr
+                      key={item.id}
+                      className={`border-b border-gray-200 text-sm ${
+                        index % 2 === 0 ? "bg-gray-50" : "bg-[#ccdaf8]"
+                      }`}
+                    >
+                      <td className="p-3 flex items-center gap-2">
+                        <img
+                          className="w-[30px] rounded-[8px] h-[30px]"
+                          src={`/icons/${item.pathToIcon}`}
+                          alt="icon"
+                        />
+                        {item.applicationName}
+                      </td>
+                      <td className="p-3">{item.applicationName}</td>
+                      <td className="p-3">{item.webVersion}</td>
+                      <td className="p-3">{item.pathToIcon}</td>
+                      <td className="p-3">{item.id}</td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
@@ -196,8 +331,8 @@ const ModalLicense = () => {
           <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[620px] h-[610px]">
             <div className="flex flex-col gap-[40px] justify-between">
               <h2 className="text-[30px] font-bold">Add New Product</h2>
-              <Stepper activeStep={activeStep} className="mt-4  text-[18px]">
-                {step.map((label, idx) => (
+              <Stepper activeStep={activeStep} className="mt-4 text-[18px]">
+                {steps.map((label, idx) => (
                   <Step key={idx}>
                     <StepLabel className="text-[blue]">{label}</StepLabel>
                   </Step>
@@ -207,22 +342,18 @@ const ModalLicense = () => {
                 <div>
                   <div className="flex flex-col items-start gap-4">
                     <p className="text-gray-700 font-medium">Product icon</p>
-                    <label className="flex items-center gap-2  mb-[30px] ">
-                      <div className="p-2 bg-[#efefef]">
-                        <RiImageAddLine />
-                      </div>
-                      <input type="file" onChange={handleFileChange} className="hidden" />
-                      {formData.agentFile && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          Tanlangan fayl: {formData.agentFile}
-                        </p>
+                    <label className="flex items-center gap-2 mb-[30px]">
+                      {formData.icon ? (
+                        <p className="text-sm text-gray-600 mt-1">File selected</p>
+                      ) : (
+                        <input
+                          type="file"
+                          accept="image/*"
+                          name="icon"
+                          onChange={handleFileChange}
+                          className="text-sm"
+                        />
                       )}
-                      <span className="bg-white border border-gray-300 text-gray-700 px-4 py-1 rounded-lg text-sm hover:bg-gray-100">
-                        Choose
-                      </span>
-                      <span className="text-gray-400 text-sm">
-                        JPG, GIF or PNG, 1MB Max.
-                      </span>
                     </label>
                   </div>
                   <div className="grid grid-cols-2 gap-4 mb-8">
@@ -232,8 +363,11 @@ const ModalLicense = () => {
                       </label>
                       <input
                         type="text"
-                        defaultValue="Solikhov"
+                        name="applicationName"
+                        value={formData.applicationName}
+                        onChange={handleTextChange}
                         className="w-full border rounded-lg p-2 mt-1"
+                        required
                       />
                     </div>
                     <div>
@@ -241,21 +375,27 @@ const ModalLicense = () => {
                         Publisher
                       </label>
                       <input
-                        type="email"
-                        defaultValue="david.wilson@data.com"
+                        type="text"
+                        name="publisher"
+                        value={formData.publisher}
+                        onChange={handleTextChange}
                         className="w-full border rounded-lg p-2 mt-1"
+                        required
                       />
                     </div>
                   </div>
-                  <div grid grid-cols-2 gap-4>
-                    <div className="mb-4 ">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="mb-4">
                       <label className="block text-[13px] font-600 text-black">
                         Server version
                       </label>
                       <input
-                        type="password"
-                        placeholder="password"
+                        type="text"
+                        name="webVersion"
+                        value={formData.webVersion}
+                        onChange={handleTextChange}
                         className="w-full border rounded-lg p-2 mt-1"
+                        required
                       />
                     </div>
                     <div className="mb-4">
@@ -263,9 +403,12 @@ const ModalLicense = () => {
                         Agent version
                       </label>
                       <input
-                        type="password"
-                        placeholder="password"
+                        type="text"
+                        name="agentVersion"
+                        value={formData.agentVersion}
+                        onChange={handleTextChange}
                         className="w-full border rounded-lg p-2 mt-1"
+                        required
                       />
                     </div>
                   </div>
@@ -273,130 +416,72 @@ const ModalLicense = () => {
               )}
               {activeStep === 1 && (
                 <div>
-                  <Box sx={{ width: "100%" }}>
-                    <Tabs
-                      value={tabValue}
-                      onChange={handleChange}
-                      textColor="inherit"
-                      variant="fullWidth"
-                      TabIndicatorProps={{ style: { display: "none" } }}
-                      sx={{
-                        backgroundColor: "#e4ebfd",
-                        borderRadius: "999px",
-                        padding: "2px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        height: "40px",
-                        width: "100%",
-                        marginBottom: "30px"
-                      }}
-                    >
-                      <Tab
-                        value="Install script"
-                        label="Install script"
-                        sx={{
-                          minWidth: "100px",
-                          borderRadius: "999px",
-                          textTransform: "none",
-                          height: "40px",
-                          fontWeight: 500,
-                          backgroundColor:
-                            tabValue === "Install script" ? "#fff" : "transparent",
-                          boxShadow:
-                            tabValue === "Install script"
-                              ? "0px 4px 6px rgba(0, 0, 0, 0.1)"
-                              : "none"
-                        }}
-                      />
-                      <Tab
-                        value="Update script"
-                        label="Update script"
-                        sx={{
-                          minWidth: "100px",
-                          borderRadius: "999px",
-                          textTransform: "none",
-                          height: "40px",
-                          fontWeight: 500,
-                          backgroundColor:
-                            tabValue === "Update script" ? "#fff" : "transparent",
-                          boxShadow:
-                            tabValue === "Update script"
-                              ? "0px 4px 6px rgba(0, 0, 0, 0.1)"
-                              : "none"
-                        }}
-                      />
-                      <Tab
-                        value="Delete scripts"
-                        label="Delete scripts"
-                        sx={{
-                          minWidth: "100px",
-                          borderRadius: "999px",
-                          textTransform: "none",
-                          height: "40px",
-                          fontWeight: 500,
-                          backgroundColor:
-                            tabValue === "Delete scripts" ? "#fff" : "transparent",
-                          boxShadow:
-                            tabValue === "Delete scripts"
-                              ? "0px 4px 6px rgba(0, 0, 0, 0.1)"
-                              : "none"
-                        }}
-                      />
-                    </Tabs>
-                  </Box>
-                  {tabValue === "Install script" && (
-                    <div className="w-[100%] h-[200px] bg-[black] text-white p-2 rounded-[8px]">
-                      sudo timedatectl set-timezone Asia/Tashkentsudo apt update && sudo
-                      apt upgrade -y
-                    </div>
-                  )}
-                  {tabValue === "Update script" && (
-                    <div className="w-[100%] h-[200px] bg-[black] text-white p-2 rounded-[8px]">
-                      Update page
-                    </div>
-                  )}
-                  {tabValue === "Delete scripts" && (
-                    <div className="w-[100%] h-[200px] bg-[black] text-white p-2 rounded-[8px]">
-                      Delete page
-                    </div>
-                  )}
+                  <p className="text-gray-700 font-medium mb-4">Install Script</p>
+                  <textarea
+                    name="installScript"
+                    value={formData.installScript}
+                    onChange={handleTextChange}
+                    className="w-[100%] h-[200px] bg-[black] text-white p-2 rounded-[8px]"
+                    required
+                  />
                 </div>
               )}
-
               {activeStep === 2 && (
-                <div className="flex flex-col ">
+                <div className="flex flex-col">
                   <div>
                     <p className="mb-[10px]">Server Side File</p>
                     <div className="w-[100%] h-[136px] bg-[#FFFFFF] flex rounded-[8px] items-center justify-center px-[10px]">
-                      <p className="text-center text-[13px] font-400 text-[grey]">
-                        <FiUploadCloud
-                          size={25}
-                          color="grey"
-                          className="m-auto mb-[15px]"
-                        />
-                        <span className="text-[black]">Drop your files here, or </span>
-                        <span className="text-[#1A79D8] cursor-pointer">
-                          click to browse
-                        </span>
-                        <br /> Up to 10 files, 100MB total limit
-                      </p>
+                      {!formData.serverFile ? (
+                        <label className="text-center text-[13px] font-400 text-[grey]">
+                          <FiUploadCloud
+                            size={25}
+                            color="grey"
+                            className="m-auto mb-[15px]"
+                          />
+                          <span className="text-[black]">Drop your files here, or </span>
+                          <span className="text-[#1A79D8] cursor-pointer">
+                            click to browse
+                          </span>
+                          <br /> Up to 10 files, 100MB total limit
+                          <input
+                            type="file"
+                            name="serverFile"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            required
+                          />
+                        </label>
+                      ) : (
+                        <p className="text-sm text-gray-600 mt-1">File selected</p>
+                      )}
                     </div>
                   </div>
                   <div>
                     <p className="mb-[10px]">Agent Side File</p>
-                    <div className="w-[100%] h-[136px] bg-[#FFFFFF] flex rounded-[8px] items-center justify-center ">
-                      <p className="text-center text-[13px] font-400 text-[grey]">
-                        <FiUploadCloud
-                          size={25}
-                          color="grey"
-                          className="m-auto mb-[5px]"
-                        />
-                        <span className="text-[black]">Drop your files here, or </span>
-                        <span className="text-[#1A79D8] cursor-pointer">
-                          click to browse
-                        </span>
-                        <br /> Up to 10 files, 100MB total limit
-                      </p>
+                    <div className="w-[100%] h-[136px] bg-[#FFFFFF] flex rounded-[8px] items-center justify-center">
+                      {!formData.agentFile ? (
+                        <label className="text-center text-[13px] font-400 text-[grey]">
+                          <FiUploadCloud
+                            size={25}
+                            color="grey"
+                            className="m-auto mb-[5px]"
+                          />
+                          <span className="text-[black]">Drop your files here, or </span>
+                          <span className="text-[#1A79D8] cursor-pointer">
+                            click to browse
+                          </span>
+                          <br /> Up to 10 files, 100MB total limit
+                          <input
+                            type="file"
+                            name="agentFile"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            required
+                          />
+                        </label>
+                      ) : (
+                        <p className="text-sm text-gray-600 mt-1">File selected</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -404,8 +489,7 @@ const ModalLicense = () => {
             </div>
             <div className="flex gap-2 justify-between items-center mt-[30px]">
               <ReportGmailerrorredIcon className="text-[#1380ED] cursor-pointer" />
-
-              <div className="flex  gap-3">
+              <div className="flex gap-3">
                 <Button
                   onClick={handleBack}
                   className="w-[137px] text-[black]"
@@ -421,8 +505,9 @@ const ModalLicense = () => {
                   variant="contained"
                   sx={{ textTransform: "capitalize" }}
                   color="primary"
+                  disabled={isMutating}
                 >
-                  {activeStep === 2 ? "Save" : "Next >"}
+                  {isMutating ? "Saving..." : activeStep === 2 ? "Save" : "Next >"}
                 </Button>
               </div>
             </div>

@@ -54,8 +54,8 @@ const apps: AppsData[] = [
     id: "Add product",
     title: "Add product",
     desktop: true,
-    width: 1100,
-    height: 500,
+    width: 1400,
+    height: 590,
     img: "/icons/Liceses.png",
     content: <ModalLicense />
   },

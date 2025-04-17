@@ -276,7 +276,7 @@ export const SuperAdmin_users = () => {
           </div>
           <span className="text-gray-700 text-sm">
             {page * rowsPerPage + 1}–
-            {Math.min((page + 1) * rowsPerPage, filteredComputers?.length)} of
+            {Math.min((page + 1) * rowsPerPage, filteredComputers?.length)} of 
             {filteredComputers?.length}
           </span>
           <div className="flex items-center gap-2">

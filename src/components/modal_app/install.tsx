@@ -10,8 +10,12 @@ import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { FiGlobe } from "react-icons/fi";
 import { Stepper, Step, StepLabel, Button } from "@mui/material";
 import { useQueryApi } from "~/hooks/useQuery";
-import { useInstallApplication } from "~/hooks/useQuery/useQueryaction";
 import TerminalApp from "../apps/Terminal";
+import { useProgressStore } from "~/stores/slices/progress";
+import {
+  useInstallApplication,
+  useTransferApplication
+} from "~/hooks/useQuery/useQueryaction";
 
 const steps = ["System requirements", "Server configs", "Completed"];
 
@@ -22,24 +26,15 @@ const LicenseModalinstall = ({
   app: ApplicationType;
   onClose: () => void;
 }) => {
-  console.log(app);
-  const [formData, setFormData] = useState({
-    host: "170.64.141.16",
-    port: "22",
-    username: "ubuntu",
-    password: "ubuntuNew123"
-  }); //formga default qoyilgan obyekt
-  const data2 = {
-    host: "170.64.141.16",
-    port: "22",
-    username: "ubuntu",
-    password: "ubuntuNew123"
-  }; //backendga jonatilgan obyekt
+  const progress = useProgressStore((prog) => prog.progressMessage);
+  const progressId = useProgressStore((id) => id.progressId);
+  const setsocketId = useProgressStore((id) => id.socketId);
 
-  const { mutate } = useInstallApplication();
+  // console.log(setsocketId);
+  const { mutate: install } = useInstallApplication();
+  const { mutate } = useTransferApplication();
   const [activeStep, setActiveStep] = useState(0);
   const [openModal, setOpenModal] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [progressOpen, setProgressOpen] = useState(false);
   const [terminalOpen, setTerminalOpen] = useState(false);
 
@@ -49,29 +44,6 @@ const LicenseModalinstall = ({
   });
 
   const configs: InstallAppInfoType = data;
-  useEffect(() => {
-    if (progressOpen) {
-      const interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            setProgressOpen(false); // Progress modalni yopish
-            setTerminalOpen(true); // Terminalni ochish
-            clearInterval(interval);
-            return 100;
-          }
-          return prev + 50;
-        });
-      }, 500);
-      return () => clearInterval(interval);
-    }
-  }, [progressOpen]);
-
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    mutate({ id: app.id, data: data2 }, { onSuccess: () => onClose() });
-    setActiveStep((prev) => prev + 1);
-    setProgressOpen(true);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -102,6 +74,26 @@ const LicenseModalinstall = ({
     }
   };
 
+  const [formData, setFormData] = useState({
+    host: "170.64.141.16",
+    port: 22,
+    username: "ubuntu",
+    password: "ubuntuNew123",
+    socketId: progressId
+  });
+  console.log(setsocketId);
+  
+  const installApp = {
+    id: app.id,
+    socketId: setsocketId
+  };
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    mutate({ id: app.id, data: formData }, { onSuccess: () => setProgressOpen(false) });
+    setActiveStep((prev) => prev + 1);
+    setProgressOpen(true);
+    install({ id: app.id, data: installApp });
+  };
   return (
     <Modal open={true} onClose={onClose} aria-labelledby="modal-title">
       <Box
@@ -129,7 +121,7 @@ const LicenseModalinstall = ({
             onClick={onClose}
           />
           <p className="text-[13px] font-600 text-[grey]">
-            {configs?.applicationName === "index.html"
+            {configs?.applicationName === "index.html" || "Datagaze"
               ? "SOC"
               : `${app?.applicationName}`}
           </p>
@@ -141,11 +133,11 @@ const LicenseModalinstall = ({
         >
           <img
             className="w-[56px] h-[56px]"
-            src={`/icons/${configs?.pathToIcon !== "/any.png" ? configs?.pathToIcon : "soc.png"}`}
+            src={`/icons/${configs?.pathToIcon !== "/any.png" || "/logo.png" ? configs?.pathToIcon : "soc.png"}`}
             alt={configs?.applicationName}
           />
           <p className="text-[40px] font-[500]">
-            {configs?.applicationName === "index.html"
+            {configs?.applicationName === "index.html" || "Datagaze"
               ? "SOC"
               : `${app?.applicationName}`}
           </p>
@@ -213,10 +205,10 @@ const LicenseModalinstall = ({
                 <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[650px] h-[620px]">
                   <div className="flex flex-col gap-2 mb-[30px]">
                     <h2 className="text-2xl font-semibold flex justify-between">
-                      Datagaze {configs?.applicationName}
+                      Datagaze {configs?.applicationName }
                       <img
                         className="w-[70px] h-[70px]"
-                        src={`/icons/${configs?.pathToIcon}`}
+                        src={`/icons/${configs?.pathToIcon !== "/any.png" ? configs?.pathToIcon : "soc.png"}`}
                         alt="logo"
                       />
                     </h2>
@@ -267,7 +259,7 @@ const LicenseModalinstall = ({
                           <label className="flex flex-col text-[13px] font-600 gap-1">
                             IP address
                             <input
-                              name="ipAddress"
+                              name="host"
                               onChange={handleChange}
                               value={formData.host}
                               type="text"
@@ -278,10 +270,10 @@ const LicenseModalinstall = ({
                           <label className="flex flex-col text-[13px] font-600 gap-1">
                             Port number
                             <input
-                              name="portNumber"
                               value={formData.port}
+                              name="port"
                               onChange={handleChange}
-                              type="text"
+                              type="number"
                               className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
                               placeholder="Port number "
                             />
@@ -303,7 +295,7 @@ const LicenseModalinstall = ({
                               name="password"
                               onChange={handleChange}
                               value={formData.password}
-                              type="text"
+                              type="password"
                               className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
                               placeholder="Password"
                             />
@@ -312,15 +304,16 @@ const LicenseModalinstall = ({
                         <label className="flex flex-col text-[13px] mt-4 mb-5 font-600 gap-1">
                           Remind it checkbox
                           <input
-                            name="remindCheckbox"
+                            name="socketId"
                             onChange={handleChange}
                             type="text"
+                            value={formData.socketId}
                             className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
                             placeholder="Remind it checkbox"
                           />
                         </label>
                         <div className="flex gap-2 justify-between items-center mt-[70px]">
-                          <ReportGmailerrorredIcon className="text-[#1380ED] cursor-pointer" />
+                          <ReportGmailerrorredIcon className="text-[#1380ED] bg-light cursor-pointer" />
                           <div className="flex gap-3">
                             <Button
                               onClick={handleBack}
@@ -345,7 +338,7 @@ const LicenseModalinstall = ({
                     )}
                     {activeStep === 2 && (
                       <>
-                        <Modal open={progressOpen} onClose={() => setProgressOpen(false)}>
+                        <Modal open={progressOpen}>
                           <Box
                             sx={{
                               position: "absolute",
@@ -374,6 +367,7 @@ const LicenseModalinstall = ({
                             </Typography>
                             <LinearProgress
                               variant="determinate"
+                              color="success"
                               value={progress}
                               sx={{
                                 width: "100%",
@@ -390,26 +384,20 @@ const LicenseModalinstall = ({
                             </Typography>
                           </Box>
                         </Modal>
-
                         <div>
-                          {terminalOpen && (
-                            <div
-                              className="fixed inset-0 bg-white flex flex-col items-center justify-start"
-                              style={{ zIndex: 1300 }}
-                            >
-                              <div className="flex items-center p-1 gap-2 justify-start w-full bg-gray-200">
-                                <IoMdCloseCircle
-                                  onClick={CloseModal}
-                                  size={15}
-                                  className="cursor-pointer text-gray-500 hover:text-gray-700"
-                                />
-                                <span className="text-sm font-normal">Terminal</span>
-                              </div>
-                              <div className="w-full">
-                                <TerminalApp />
-                              </div>
+                          <div className="fixed inset-0 bg-white flex flex-col items-center justify-start">
+                            <div className="flex items-center p-1 gap-2 justify-start w-full bg-gray-200">
+                              <IoMdCloseCircle
+                                onClick={CloseModal}
+                                size={15}
+                                className="cursor-pointer text-gray-500 hover:text-gray-700"
+                              />
+                              <span className="text-sm font-normal">Terminal</span>
                             </div>
-                          )}
+                            <div className="w-full">
+                              <TerminalApp />
+                            </div>
+                          </div>
                         </div>
                       </>
                     )}

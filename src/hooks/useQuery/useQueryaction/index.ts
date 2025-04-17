@@ -5,7 +5,7 @@ import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
 import { LoginType } from "~/types/configs";
 import { RegisterUser } from "~/types/configs/register";
-import { getUserInfo, setToken } from "~/utils";
+import { getToken, getUserInfo, setToken } from "~/utils";
 
 const useLogin = () => {
   const axios = useAxios();
@@ -35,7 +35,6 @@ const useLogin = () => {
       const user = userData?.username;
 
       notify("superadmin", user);
-      
 
       Cookies.set(
         "user",
@@ -109,30 +108,27 @@ const useDeleteRegister = () => {
   });
 };
 
-const useInstallApplication = () => {
+const useTransferApplication = () => {
   const axios = useAxios();
   const queryClient = useQueryClient();
-  const notify = notificationApi();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data?: any }) => {
-      const response = await axios({
-        url: `/api/1/desktop/install/${id}`,
+    mutationFn: async ({ id, data }: { id: string; data: object }) => {
+      await axios({
+        url: `/api/1/desktop/transfer/${id}`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: data
       });
-      return response.data;
     },
-    onSuccess: (response) => {
-      console.log("Success application:", response);
-      notify("Install");
+    onSuccess: () => {
+      console.log("Success application");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["application"] });
     },
     onError: (err) => {
-      console.error(err.message);
+      console.error(err);
     }
   });
 };
@@ -162,7 +158,31 @@ const useDeleteApplication = () => {
     }
   });
 };
-
+const useInstallApplication = () => {
+  const notify = notificationApi();
+  const queryClient = useQueryClient();
+  const axios = useAxios();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: object }) => {
+      await axios({
+        url: `/api/1/desktop/install/${id}`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: data
+      });
+    },
+    onSuccess: (res) => {
+      console.log(res);
+      notify("Install");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["application"] });
+    },
+    onError: (err) => {
+      console.log(err.message);
+    }
+  });
+};
 const useUpdateRegister = () => {
   const notify = notificationApi();
   const queryClient = useQueryClient();
@@ -192,31 +212,38 @@ const useUpdateRegister = () => {
 
 const useCreateApplication = () => {
   const axios = useAxios();
+  let token = getToken();
   return useMutation({
-    mutationFn: async ({ data }: any) => {
+    mutationFn: async (data: any) => {
       const response = await axios({
         url: "/api/1/desktop/create",
         method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: data
+        headers: {
+          accept: "application/json",
+          "Content-Type": "multipart/form-data"
+        },
+        body: data // FormData to'g'ridan-to'g'ri yuboriladi
       });
-      return response.data;
+      return response.data; // Backend javobini qaytarish
     },
     onSuccess: (response) => {
-      console.log("Create malumotlari:", response);
+      console.log("Muvaffaqiyatli yuborildi:", response);
+      // Bu yerda foydalanuvchiga muvaffaqiyat xabarini ko'rsatishingiz mumkin
     },
     onError: (err) => {
-      console.log(err.message);
+      console.error("Xato yuz berdi:", err.message);
+      // Bu yerda foydalanuvchiga xato xabarini ko'rsatishingiz mumkin
     }
   });
 };
 
 export {
   useLogin,
-  useInstallApplication,
+  useTransferApplication,
   useDeleteApplication,
   useCreateApplication,
   useRegister,
   useDeleteRegister,
+  useInstallApplication,
   useUpdateRegister
 };

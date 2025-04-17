@@ -13,7 +13,7 @@ import { BiMemoryCard } from "react-icons/bi";
 import { IoMdCloseCircle } from "react-icons/io";
 import { EditDetailsModal } from "./edit";
 import { useDeleteApplication } from "~/hooks/useQuery/useQueryaction";
-import { useState } from "react"; // useState import qilish
+import { useState } from "react"; 
 
 const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => void }) => {
   const [tabValue, setTabValue] = useState("Server Details");
@@ -43,7 +43,6 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     onClose();
   };
 
-  console.log("Rendering LicenseModal, isModalOpen:", isModalOpen);
   return (
     <Modal open={isModalOpen} onClose={handleModalClose} aria-labelledby="modal-title">
       <Box

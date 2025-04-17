@@ -17,14 +17,15 @@ const Computers_app = ({ id }: { id: string }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   useEffect(() => {
-    if (data && Array.isArray(data)) {
-      setFilteredComputers(data);
+    if (data.data && Array.isArray(data.data)) {
+      setFilteredComputers(data.data);
     }
   }, [data]);
+
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
-    const filtered = data.filter((comp: any): string =>
+    const filtered = data.data.filter((comp: any): string =>
       comp.name?.toLowerCase().includes(query)
     );
     setFilteredComputers(filtered);
@@ -142,9 +143,9 @@ const Computers_app = ({ id }: { id: string }) => {
                       }`}
                     >
                       <td className="p-3">{item.name}</td>
-                      <td className="p-3">{item.fileSize}</td>
-                      <td className="p-3">{item.installationType}</td>
-                      <td className="p-3">{item.installedDate}</td>
+                      <td className="p-3">{item.size}</td>
+                      <td className="p-3">{item.type}</td>
+                      <td className="p-3">{item.installed_date}</td>
                       <td className="p-3 text-[#1A79D8] ">
                         <button>Update</button>
                       </td>
