@@ -135,7 +135,7 @@ const ModalLicense = () => {
     if (step === 2) {
       const isValidFile = (file: any) =>
         file instanceof File &&
-        file.size <= 100 * 1024 * 1024 && // 100MB limit
+        file.size <= 10 * 1024 * 1024 && // 10MB limit
         [
           "application/zip",
           "application/x-msdownload",
@@ -269,10 +269,10 @@ const ModalLicense = () => {
                         />
                         {item.applicationName}
                       </td>
-                      <td className="p-3">{item.applicationName}</td>
-                      <td className="p-3">{item.webVersion}</td>
-                      <td className="p-3">{item.pathToIcon}</td>
-                      <td className="p-3">{item.id}</td>
+                      <td className="p-3">{item.publisher}</td>
+                      <td className="p-3">{item.serverVersion}</td>
+                      <td className="p-3">{item.agentVersion}</td>
+                      <td className="p-3">{item.storage}</td>
                     </tr>
                   ))}
             </tbody>

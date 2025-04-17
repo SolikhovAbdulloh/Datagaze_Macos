@@ -5,7 +5,7 @@ import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
 import { LoginType } from "~/types/configs";
 import { RegisterUser } from "~/types/configs/register";
-import { getToken, getUserInfo, setToken } from "~/utils";
+import { getUserInfo, setToken } from "~/utils";
 
 const useLogin = () => {
   const axios = useAxios();
@@ -211,8 +211,8 @@ const useUpdateRegister = () => {
 };
 
 const useCreateApplication = () => {
+  const queryClient = useQueryClient();
   const axios = useAxios();
-  let token = getToken();
   return useMutation({
     mutationFn: async (data: any) => {
       const response = await axios({
@@ -229,6 +229,9 @@ const useCreateApplication = () => {
     onSuccess: (response) => {
       console.log("Muvaffaqiyatli yuborildi:", response);
       // Bu yerda foydalanuvchiga muvaffaqiyat xabarini ko'rsatishingiz mumkin
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["application"] });
     },
     onError: (err) => {
       console.error("Xato yuz berdi:", err.message);
