@@ -17,8 +17,8 @@ const Computers_app = ({ id }: { id: string }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   useEffect(() => {
-    if (data.data && Array.isArray(data.data)) {
-      setFilteredComputers(data.data);
+    if (data?.data && Array.isArray(data?.data)) {
+      setFilteredComputers(data?.data);
     }
   }, [data]);
 

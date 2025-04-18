@@ -77,8 +77,8 @@ const LicenseModalinstall = ({
   const [formData, setFormData] = useState({
     host: "170.64.141.16",
     port: 22,
-    username: "ubuntu",
-    password: "ubuntuNew123",
+    username: "root",
+    password: "ubuntu123New",
     socketId: progressId
   });
   console.log(setsocketId);
