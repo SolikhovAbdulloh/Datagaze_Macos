@@ -271,8 +271,8 @@ const ModalLicense = () => {
                       </td>
                       <td className="p-3">{item.publisher}</td>
                       <td className="p-3">{item.serverVersion}</td>
-                      <td className="p-3">{item.agentVersion}</td>
-                      <td className="p-3">{item.storage}</td>
+                      <td className="p-3">{item.agentVersion ? "" : "0.0.1"}</td>
+                      <td className="p-3">{item.serverFileSize}</td>
                     </tr>
                   ))}
             </tbody>

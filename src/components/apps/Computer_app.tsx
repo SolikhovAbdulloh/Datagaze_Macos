@@ -5,13 +5,16 @@ import { FilterList } from "@mui/icons-material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { ComputersAppType } from "~/types/configs/computers";
 import Skeleton from "@mui/material/Skeleton";
+import { io } from "socket.io-client";
+import { getToken } from "~/utils";
 
 const Computers_app = ({ id }: { id: string }) => {
   const { data, isLoading, isError } = useQueryApi({
     url: `/api/1/device/${id}/apps`,
     pathname: "apps"
   });
-
+  const computersSocketRef = useRef<any>(null);
+  let token = getToken();
   const [value, setValue] = useState("");
   const [filteredComputers, setFilteredComputers] = useState<ComputersAppType[]>([]);
   const [page, setPage] = useState(0);
@@ -22,6 +25,21 @@ const Computers_app = ({ id }: { id: string }) => {
     }
   }, [data]);
 
+  computersSocketRef.current = io(
+    "https://datagaze-platform-9cab2c02bc91.herokuapp.com/computer",
+    {
+      transports: ["websocket"],
+      auth: { token: `Bearer ${token}` }
+    }
+  );
+
+  computersSocketRef.current.on("response", (data: any) => {
+    console.log("response", data);
+  });
+
+  computersSocketRef.current.on("error", (error: string) => {
+    console.log("connect error computer :", error);
+  });
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
@@ -46,7 +64,13 @@ const Computers_app = ({ id }: { id: string }) => {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
-
+  const DeleteAppBySocket = (name: string) => {
+    console.log(name, id);
+    computersSocketRef.current.emit("delete_app", {
+      computerId: id,
+      appName: name
+    });
+  };
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
@@ -150,7 +174,9 @@ const Computers_app = ({ id }: { id: string }) => {
                         <button>Update</button>
                       </td>
                       <td className="p-3 text-red-600">
-                        <button>Delete</button>
+                        <button onClick={() => DeleteAppBySocket(item.name)}>
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}

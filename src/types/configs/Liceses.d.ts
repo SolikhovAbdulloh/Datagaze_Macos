@@ -5,6 +5,6 @@ export interface ModalLicenseType {
   serverVersion?: number;
   publisher?: string;
   isInstalled?: boolean;
-  storage?: string;
-  agentVersion?: null;
+  serverFileSize?: string;
+  agentVersion?: string;
 }

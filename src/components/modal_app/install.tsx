@@ -82,7 +82,7 @@ const LicenseModalinstall = ({
     socketId: progressId
   });
   console.log(setsocketId);
-  
+
   const installApp = {
     id: app.id,
     socketId: setsocketId
@@ -136,11 +136,7 @@ const LicenseModalinstall = ({
             src={`/icons/${configs?.pathToIcon !== "/any.png" || "/logo.png" ? configs?.pathToIcon : "soc.png"}`}
             alt={configs?.applicationName}
           />
-          <p className="text-[40px] font-[500]">
-            {configs?.applicationName === "index.html" || "Datagaze"
-              ? "SOC"
-              : `${app?.applicationName}`}
-          </p>
+          <p className="text-[40px] font-[500]">{configs?.applicationName}</p>
         </Typography>
         <div className="mt-[30px] mb-[20px]">
           <p className="text-[grey] text-[14px] font-400">Basic requirements</p>
@@ -205,7 +201,7 @@ const LicenseModalinstall = ({
                 <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[650px] h-[620px]">
                   <div className="flex flex-col gap-2 mb-[30px]">
                     <h2 className="text-2xl font-semibold flex justify-between">
-                      Datagaze {configs?.applicationName }
+                      Datagaze {configs?.applicationName}
                       <img
                         className="w-[70px] h-[70px]"
                         src={`/icons/${configs?.pathToIcon !== "/any.png" ? configs?.pathToIcon : "soc.png"}`}

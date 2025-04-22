@@ -1,10 +1,11 @@
-import  { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 import io from "socket.io-client";
 import { getToken } from "~/utils";
 import { useProgressStore } from "~/stores/slices/progress";
+import { any } from "zod";
 
 const TerminalComponent = () => {
   const setProgressMessage = useProgressStore((state) => state.setProgressMessage);
@@ -13,6 +14,7 @@ const TerminalComponent = () => {
   const terminalRef = useRef<any>(null);
   const socketRef = useRef<any>(null);
   const progressSocketRef = useRef<any>(null);
+  // const computersSocketRef = useRef<any>(null);
   const termRef = useRef<any>(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const TerminalComponent = () => {
     const token = getToken();
     termRef.current.focus();
 
-    termRef.current.write("Serverga ulanmoqda ...\r\n");
+    termRef.current.write("Connecting ...\r\n");
 
     socketRef.current = io(
       "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal",
@@ -52,7 +54,7 @@ const TerminalComponent = () => {
     };
 
     socketRef.current.on("disconnect", () => {
-      termRef.current.write("\r\nHolat: Serverdan uzildi!\r\n");
+      termRef.current.write("\r\nStatus: Disconnect!\r\n");
       scrollToBottom();
       setTimeout(() => {
         if (!socketRef.current.connected) socketRef.current.connect();
@@ -74,17 +76,17 @@ const TerminalComponent = () => {
       scrollToBottom();
     });
     socketRef.current.on("connect", () => {
-      termRef.current.write("Serverga ulandi!\n\r");
+      termRef.current.write("Connect to server!\n\r");
       setSocketId(socketRef.current.id);
     });
     // \r-bu qator boshiga otkazadi \n-bu esa ENTER \b-backspace ASCII dagi kodi
     socketRef.current.on("error", (err: any) => {
-      termRef.current.write("\r\nServer xatosi: " + err + "\r\n");
+      termRef.current.write("\r\nServer error: " + err + "\r\n");
       scrollToBottom();
     });
 
     socketRef.current.on("connect_error", (err: any) => {
-      termRef.current.write("\r\nUlanish xatosi: " + err.message + "\r\n");
+      termRef.current.write("\r\Connect error: " + err.message + "\r\n");
       scrollToBottom();
     });
 
@@ -98,7 +100,7 @@ const TerminalComponent = () => {
             termRef.current.write("\r\n");
             inputBuffer = "";
           } else {
-            termRef.current.write("\r\nXato: Serverga ulanib bo‘lmadi!\r\n");
+            termRef.current.write("\r\nXato: Server not found!\r\n");
           }
         } else if (data === "\u007F" || data === "\b") {
           if (inputBuffer.length > 0) {
@@ -121,6 +123,7 @@ const TerminalComponent = () => {
       "https://datagaze-platform-9cab2c02bc91.herokuapp.com/progress",
       {
         transports: ["websocket"],
+
         auth: { token: `Bearer ${token}` }
       }
     );

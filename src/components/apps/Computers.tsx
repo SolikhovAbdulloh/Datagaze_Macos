@@ -145,7 +145,7 @@ const Computers = () => {
                 <MenuItem value="inactive">Inactive</MenuItem>
               </Select>
             </FormControl>
-            <FormControl sx={{ minWidth: 180 }}>
+            {/* <FormControl sx={{ minWidth: 180 }}>
               <Select
                 size="small"
                 displayEmpty
@@ -170,7 +170,7 @@ const Computers = () => {
                 <MenuItem value="column1">Column 1</MenuItem>
                 <MenuItem value="column2">Column 2</MenuItem>
               </Select>
-            </FormControl>
+            </FormControl> */}
           </div>
         </div>
         <div className="max-h-[600px] overflow-y-auto">
