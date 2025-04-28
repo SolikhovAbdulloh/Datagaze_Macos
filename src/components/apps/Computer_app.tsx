@@ -7,6 +7,7 @@ import { ComputersAppType } from "~/types/configs/computers";
 import Skeleton from "@mui/material/Skeleton";
 import { io } from "socket.io-client";
 import { getToken } from "~/utils";
+import { toast } from "sonner";
 
 const Computers_app = ({ id }: { id: string }) => {
   const { data, isLoading, isError } = useQueryApi({
@@ -35,10 +36,14 @@ const Computers_app = ({ id }: { id: string }) => {
 
   computersSocketRef.current.on("response", (data: any) => {
     console.log("response", data);
+    data.success === false
+      ? toast.error(`${data.appName}  ${data.message} `)
+      : toast.success(`response ${(data.name, data.status)}`);
   });
 
-  computersSocketRef.current.on("error", (error: string) => {
+  computersSocketRef.current.on("error", (error: any) => {
     console.log("connect error computer :", error);
+    error && toast.error(`Error ${error.message}`);
   });
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -71,6 +76,13 @@ const Computers_app = ({ id }: { id: string }) => {
       appName: name
     });
   };
+  const UpdateAppBySocket = (name: string) => {
+    computersSocketRef.current.emit("update_app", {
+      computerId: id,
+      appName: name
+    });
+  };
+
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
@@ -167,11 +179,13 @@ const Computers_app = ({ id }: { id: string }) => {
                       }`}
                     >
                       <td className="p-3">{item.name}</td>
-                      <td className="p-3">{item.size}</td>
+                      <td className="p-3">{item.size} MB</td>
                       <td className="p-3">{item.type}</td>
                       <td className="p-3">{item.installed_date}</td>
                       <td className="p-3 text-[#1A79D8] ">
-                        <button>Update</button>
+                        <button onClick={() => UpdateAppBySocket(item.name)}>
+                          Update
+                        </button>
                       </td>
                       <td className="p-3 text-red-600">
                         <button onClick={() => DeleteAppBySocket(item.name)}>
@@ -192,7 +206,7 @@ const Computers_app = ({ id }: { id: string }) => {
               className="border rounded px-2 py-1"
             >
               <option value={6}>5</option>
-              <option value={12}>12</option>
+              <option value={10}>10</option>
             </select>
           </div>
           <div>

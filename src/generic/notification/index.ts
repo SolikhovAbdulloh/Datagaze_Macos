@@ -15,25 +15,25 @@ export const notificationApi = () => {
         toast.success(`Welcome ${user} ✅`, { closeButton: true });
         break;
       case "Not register":
-        toast.error("Ro'yxatdan o'tishda xatolik ❌", { closeButton: true });
+        toast.error("Error registering ❌", { closeButton: true });
         break;
       case "Install":
-        toast.info("Muvaffaqiyatli o'rnatildi !", { closeButton: true });
+        toast.info("Succsess install !", { closeButton: true });
         break;
       case "Uninstall":
-        toast.success("Muvaffaqiyatli Ochirildi !", { closeButton: true });
+        toast.success("Delete succsess !", { closeButton: true });
         break;
       case "Add new user":
-        toast.success("Mijoz ro'yxatga qo'shildi !", { closeButton: true });
+        toast.success("Customer added to table !", { closeButton: true });
         break;
       case "o'chirildi":
-        toast.success(`O'chirildi !!!`, { closeButton: true });
+        toast.success(`Deleted !!!`, { closeButton: true });
         break;
       case "Xatolik":
-        toast.error(`Xatolik !!!`, { closeButton: true });
+        toast.error(`Error !!!`, { closeButton: true });
         break;
       case "Update":
-        toast.info(`Muvaffaqiyatli O'zgartirildi!`, { closeButton: true });
+        toast.info(`Succsess update!`, { closeButton: true });
         break;
     }
   };

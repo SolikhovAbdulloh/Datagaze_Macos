@@ -5,7 +5,6 @@ import "xterm/css/xterm.css";
 import io from "socket.io-client";
 import { getToken } from "~/utils";
 import { useProgressStore } from "~/stores/slices/progress";
-import { any } from "zod";
 
 const TerminalComponent = () => {
   const setProgressMessage = useProgressStore((state) => state.setProgressMessage);
@@ -14,7 +13,6 @@ const TerminalComponent = () => {
   const terminalRef = useRef<any>(null);
   const socketRef = useRef<any>(null);
   const progressSocketRef = useRef<any>(null);
-  // const computersSocketRef = useRef<any>(null);
   const termRef = useRef<any>(null);
 
   useEffect(() => {
@@ -34,7 +32,6 @@ const TerminalComponent = () => {
     const token = getToken();
     termRef.current.focus();
 
-    termRef.current.write("Connecting ...\r\n");
 
     socketRef.current = io(
       "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal",
@@ -69,7 +66,7 @@ const TerminalComponent = () => {
     socketRef.current.on("command_response", ({ data }: any) => {
       if (data.result.startsWith("CLIENT_ID:")) {
         rawInputMode = true;
-        termRef.current.write("\r\nRaw input rejimi yoqildi\r\n");
+        termRef.current.write("\r\nSuccses row situton\r\n");
       } else {
         termRef.current.write(data.result + "");
       }

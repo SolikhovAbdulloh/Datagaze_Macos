@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ComputersType } from "~/types/configs/computers";
-import { FiColumns } from "react-icons/fi";
+import { RiDeleteBin5Line } from "react-icons/ri";
 import TextField from "@mui/material/TextField";
 import { FormControl, Select, MenuItem, CircularProgress } from "@mui/material";
 import Computers_app from "./Computer_app";
@@ -8,6 +8,9 @@ import { useQueryApi } from "~/hooks/useQuery";
 import { useSearchParams } from "react-router-dom";
 import About_fc from "../modal_app/aboutFc";
 import Skeleton from "@mui/material/Skeleton";
+import { getToken } from "~/utils";
+import { io } from "socket.io-client";
+import { toast } from "sonner";
 
 const Computers = () => {
   const [params, setSearchparams] = useSearchParams();
@@ -20,6 +23,7 @@ const Computers = () => {
   const [allComputers, setAllComputers] = useState<ComputersType[]>([]);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
+  const computersSocketRef = useRef<any>(null);
 
   const Status = params.get("status") || "all";
 
@@ -99,7 +103,30 @@ const Computers = () => {
     setRowsPerPage(newRowsPerPage);
     setPage(0);
   };
+  const token = getToken();
+  computersSocketRef.current = io(
+    "https://datagaze-platform-9cab2c02bc91.herokuapp.com/computer",
+    {
+      transports: ["websocket"],
+      auth: { token: `Bearer ${token}` }
+    }
+  );
 
+  const DeleteAgent = (id: string) => {
+    computersSocketRef.current.emit("delete_agent", {
+      computerId: id
+    });
+  };
+  computersSocketRef.current.on("response", (data: any) => {
+    console.log("response", data);
+    data.success === false
+      ? toast.error(`${data.message} `)
+      : toast.success(`${data.message}`);
+  });
+
+  computersSocketRef.current.on("error", (error: string) => {
+    console.log("connect error computer :", error);
+  });
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       {openTable && selectedTableId && <Computers_app id={selectedTableId || ""} />}
@@ -177,14 +204,12 @@ const Computers = () => {
           <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg">
             <thead>
               <tr className="border-b border-gray-300 text-gray-600 text-sm bg-[#ccdaf8]">
-                <th className="p-3">
-                  <input type="checkbox" />
-                </th>
                 <th className="p-3">#</th>
                 <th className="p-3">Computer name</th>
                 <th className="p-3">Operation System (OS)</th>
                 <th className="p-3">IP address</th>
                 <th className="p-3">Activity</th>
+                <th className="p-3"></th>
                 <th className="p-3"></th>
               </tr>
             </thead>
@@ -225,9 +250,6 @@ const Computers = () => {
                         index % 2 === 0 ? "bg-[grey-50]" : "bg-[#ccdaf8]"
                       }`}
                     >
-                      <td className="p-3">
-                        <input type="checkbox" />
-                      </td>
                       <td className="p-3">{index + 1}</td>
                       <td
                         className="p-3 cursor-pointer"
@@ -253,6 +275,14 @@ const Computers = () => {
                         onClick={() => showModal(item.id)}
                       >
                         About PC
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => DeleteAgent(item.id)}
+                          className="text-[18px] text-[red]"
+                        >
+                          <RiDeleteBin5Line />
+                        </button>
                       </td>
                     </tr>
                   ))}

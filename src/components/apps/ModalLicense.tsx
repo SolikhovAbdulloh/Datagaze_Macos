@@ -102,7 +102,6 @@ const ModalLicense = () => {
     setPage(0);
   };
 
-  // Reset form data after successful submission
   const resetForm = () => {
     setFormData({
       icon: "",
