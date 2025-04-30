@@ -1,22 +1,21 @@
 import React, { useState } from "react";
-import { ModalLicenseType } from "~/types/configs/Liceses"; // Adjust path as needed
+import { ModalLicenseType } from "~/types/configs/Liceses";
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import AddIcon from "@mui/icons-material/Add";
 import { FiUploadCloud } from "react-icons/fi";
 import { Button, Skeleton, Step, StepLabel, Stepper, TextField } from "@mui/material";
-import { useQueryApi } from "~/hooks/useQuery"; // Adjust path as needed
+import { useQueryApi } from "~/hooks/useQuery";
 import { useCreateApplication } from "~/hooks/useQuery/useQueryaction";
 
-// Define TypeScript interface for form data
 interface FormDataType {
-  icon: File | string;
+  icon: File | string | any;
   applicationName: string;
   publisher: string;
   webVersion: string;
   agentVersion: string;
-  installScript: string;
-  serverFile: File | string;
-  agentFile: File | string;
+  installScript: string; // Matn sifatida saqlanadi, keyin faylga aylanadi
+  serverFile: File | string | any;
+  agentFile: File | string | any;
 }
 
 const ModalLicense = () => {
@@ -34,7 +33,6 @@ const ModalLicense = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
 
-  // Initialize form data
   const [formData, setFormData] = useState<FormDataType>({
     icon: "",
     applicationName: "Tedy",
@@ -49,7 +47,6 @@ const ModalLicense = () => {
 
   const { mutate, isPending: isMutating } = useCreateApplication();
 
-  // Handle text input changes
   const handleTextChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -60,19 +57,17 @@ const ModalLicense = () => {
     }));
   };
 
-  // Handle file input changes
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name } = e.target;
     const file = e.target.files?.[0];
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        [name]: file // Store the File object
+        [name]: file
       }));
     }
   };
 
-  // Search function
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
@@ -81,7 +76,6 @@ const ModalLicense = () => {
     setPage(0);
   };
 
-  // Pagination
   const paginatedComputers = filteredComputers.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -117,7 +111,6 @@ const ModalLicense = () => {
     setActiveStep(0);
   };
 
-  // Validate form fields for each step
   const validateStep = (step: number) => {
     if (step === 0) {
       return (
@@ -125,22 +118,24 @@ const ModalLicense = () => {
         formData.publisher &&
         formData.webVersion &&
         formData.agentVersion &&
-        formData.icon
+        formData.icon &&
+        formData.icon instanceof File
       );
     }
     if (step === 1) {
-      return formData.installScript;
+      return formData.installScript && formData.installScript.length > 0;
     }
     if (step === 2) {
       const isValidFile = (file: any) =>
         file instanceof File &&
-        file.size <= 10 * 1024 * 1024 && // 10MB limit
+        file.size <= 10 * 1024 * 1024 &&
         [
           "application/zip",
           "application/x-msdownload",
           "image/png",
-          "image/jpeg"
-        ].includes(file.type); // Adjust allowed types as needed
+          "image/jpeg",
+          "text/plain"
+        ].includes(file.type);
 
       return (
         formData.serverFile &&
@@ -152,10 +147,9 @@ const ModalLicense = () => {
     return true;
   };
 
-  // Handle Next button and send FormData
   const handleNext = () => {
     if (!validateStep(activeStep)) {
-      alert("Please fill in all required fields or ensure valid files are selected.");
+      alert("Please fill in all required fields.");
       return;
     }
     if (activeStep < steps.length - 1) {
@@ -166,9 +160,17 @@ const ModalLicense = () => {
       formDataToSend.append("publisher", formData.publisher);
       formDataToSend.append("webVersion", formData.webVersion);
       formDataToSend.append("agentVersion", formData.agentVersion);
-      formDataToSend.append("installScript", formData.installScript);
-      formDataToSend.append("icon", formData.icon);
 
+      // installScript’ni fayl sifatida qo‘shish
+      const scriptBlob = new Blob([formData.installScript], { type: "text/plain" });
+      const scriptFile = new File([scriptBlob], "installScript.sh", {
+        type: "text/plain"
+      });
+      formDataToSend.append("scriptFile", scriptFile);
+
+      if (formData.icon) {
+        formDataToSend.append("iconFile ", formData.icon);
+      }
       if (formData.serverFile) {
         formDataToSend.append("serverFile", formData.serverFile);
       }
@@ -179,7 +181,7 @@ const ModalLicense = () => {
       mutate(formDataToSend, {
         onSuccess: () => {
           setIsOpen(false);
-          resetForm(); // Reset form after successful submission
+          resetForm();
         }
       });
     }
@@ -190,6 +192,7 @@ const ModalLicense = () => {
       setActiveStep((prev) => prev - 1);
     } else {
       setIsOpen(false);
+      resetForm();
     }
   };
 
@@ -203,10 +206,7 @@ const ModalLicense = () => {
               onChange={searchFunctions}
               placeholder="Search"
               slotProps={{
-                input: {
-                  type: "search",
-                  className: "w-[200px] h-[30px] bg-white"
-                }
+                input: { type: "search", className: "w-[200px] h-[30px] bg-white" }
               }}
             />
           </div>
@@ -256,9 +256,7 @@ const ModalLicense = () => {
                 : paginatedComputers.map((item, index) => (
                     <tr
                       key={item.id}
-                      className={`border-b border-gray-200 text-sm ${
-                        index % 2 === 0 ? "bg-gray-50" : "bg-[#ccdaf8]"
-                      }`}
+                      className={`border-b border-gray-200 text-sm ${index % 2 === 0 ? "bg-gray-50" : "bg-[#ccdaf8]"}`}
                     >
                       <td className="p-3 flex items-center gap-2">
                         <img
@@ -270,7 +268,9 @@ const ModalLicense = () => {
                       </td>
                       <td className="p-3">{item.publisher}</td>
                       <td className="p-3">{item.serverVersion}</td>
-                      <td className="p-3">{item.agentVersion ? "" : "0.0.1"}</td>
+                      <td className="p-3">
+                        {item.agentVersion ? item.agentVersion : "0.0.0"}
+                      </td>
                       <td className="p-3">{item.serverFileSize}</td>
                     </tr>
                   ))}
@@ -307,9 +307,7 @@ const ModalLicense = () => {
               <button
                 key={i}
                 onClick={() => handleChangePage(i)}
-                className={`px-3 py-1 border border-gray-300 rounded text-gray-700 ${
-                  page === i ? "bg-gray-200" : "hover:bg-gray-50"
-                }`}
+                className={`px-3 py-1 border border-gray-300 rounded text-gray-700 ${page === i ? "bg-gray-200" : "hover:bg-gray-50"}`}
               >
                 {i + 1}
               </button>
@@ -343,13 +341,15 @@ const ModalLicense = () => {
                     <p className="text-gray-700 font-medium">Product icon</p>
                     <label className="flex items-center gap-2 mb-[30px]">
                       {formData.icon ? (
-                        <p className="text-sm text-gray-600 mt-1">File selected</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Selected file: {formData?.icon.name}
+                        </p>
                       ) : (
                         <input
                           type="file"
                           accept="image/*"
                           name="icon"
-                          onChange={handleTextChange}
+                          onChange={handleFileChange}
                           className="text-sm"
                         />
                       )}
@@ -451,7 +451,9 @@ const ModalLicense = () => {
                           />
                         </label>
                       ) : (
-                        <p className="text-sm text-gray-600 mt-1">File selected</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          File selected:{formData.serverFile.name}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -479,7 +481,10 @@ const ModalLicense = () => {
                           />
                         </label>
                       ) : (
-                        <p className="text-sm text-gray-600 mt-1">File selected</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {" "}
+                          File selected:{formData?.agentFile.name}
+                        </p>
                       )}
                     </div>
                   </div>

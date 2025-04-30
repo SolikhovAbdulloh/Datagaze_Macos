@@ -222,20 +222,18 @@ const useCreateApplication = () => {
           accept: "application/json",
           "Content-Type": "multipart/form-data"
         },
-        body: data // FormData to'g'ridan-to'g'ri yuboriladi
+        body: data
       });
-      return response.data; // Backend javobini qaytarish
+      return response.data;
     },
     onSuccess: (response) => {
       console.log("Muvaffaqiyatli yuborildi:", response);
-      // Bu yerda foydalanuvchiga muvaffaqiyat xabarini ko'rsatishingiz mumkin
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["application"] });
     },
     onError: (err) => {
       console.error("Xato yuz berdi:", err.message);
-      // Bu yerda foydalanuvchiga xato xabarini ko'rsatishingiz mumkin
     }
   });
 };
