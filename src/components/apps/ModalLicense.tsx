@@ -13,7 +13,7 @@ interface FormDataType {
   publisher: string;
   webVersion: string;
   agentVersion: string;
-  installScript: string; // Matn sifatida saqlanadi, keyin faylga aylanadi
+  installScript: string;
   serverFile: File | string | any;
   agentFile: File | string | any;
 }
@@ -60,6 +60,7 @@ const ModalLicense = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name } = e.target;
     const file = e.target.files?.[0];
+    console.log("File selected:", { name, file, fileType: file?.type });
     if (file) {
       setFormData((prev) => ({
         ...prev,
@@ -113,6 +114,14 @@ const ModalLicense = () => {
 
   const validateStep = (step: number) => {
     if (step === 0) {
+      console.log("Step 0 validation:", {
+        applicationName: formData.applicationName,
+        publisher: formData.publisher,
+        webVersion: formData.webVersion,
+        agentVersion: formData.agentVersion,
+        icon: formData.icon,
+        isIconFile: formData.icon instanceof File
+      });
       return (
         formData.applicationName &&
         formData.publisher &&
@@ -123,19 +132,23 @@ const ModalLicense = () => {
       );
     }
     if (step === 1) {
+      console.log("Step 1 validation:", {
+        installScript: formData.installScript,
+        length: formData.installScript.length
+      });
       return formData.installScript && formData.installScript.length > 0;
     }
     if (step === 2) {
-      const isValidFile = (file: any) =>
-        file instanceof File &&
-        file.size <= 10 * 1024 * 1024 &&
-        [
-          "application/zip",
-          "application/x-msdownload",
-          "image/png",
-          "image/jpeg",
-          "text/plain"
-        ].includes(file.type);
+      const isValidFile = (file: any) => file instanceof File;
+
+      console.log("Step 2 validation:", {
+        serverFile: formData.serverFile?.name,
+        serverFileType: formData.serverFile?.type,
+        isServerFileValid: isValidFile(formData.serverFile),
+        agentFile: formData.agentFile?.name,
+        agentFileType: formData.agentFile?.type,
+        isAgentFileValid: isValidFile(formData.agentFile)
+      });
 
       return (
         formData.serverFile &&
@@ -149,7 +162,23 @@ const ModalLicense = () => {
 
   const handleNext = () => {
     if (!validateStep(activeStep)) {
-      alert("Please fill in all required fields.");
+      let errorMessage = "Please fill in all required fields: ";
+      if (activeStep === 0) {
+        if (!formData.applicationName) errorMessage += "Product name, ";
+        if (!formData.publisher) errorMessage += "Publisher, ";
+        if (!formData.webVersion) errorMessage += "Server version, ";
+        if (!formData.agentVersion) errorMessage += "Agent version, ";
+        if (!formData.icon || !(formData.icon instanceof File))
+          errorMessage += "Product icon, ";
+      } else if (activeStep === 1) {
+        if (!formData.installScript) errorMessage += "Install script, ";
+      } else if (activeStep === 2) {
+        if (!formData.serverFile || !(formData.serverFile instanceof File))
+          errorMessage += "Server side file, ";
+        if (!formData.agentFile || !(formData.agentFile instanceof File))
+          errorMessage += "Agent side file, ";
+      }
+      alert(errorMessage.slice(0, -2));
       return;
     }
     if (activeStep < steps.length - 1) {
@@ -161,7 +190,6 @@ const ModalLicense = () => {
       formDataToSend.append("webVersion", formData.webVersion);
       formDataToSend.append("agentVersion", formData.agentVersion);
 
-      // installScript’ni fayl sifatida qo‘shish
       const scriptBlob = new Blob([formData.installScript], { type: "text/plain" });
       const scriptFile = new File([scriptBlob], "installScript.sh", {
         type: "text/plain"
@@ -169,7 +197,7 @@ const ModalLicense = () => {
       formDataToSend.append("scriptFile", scriptFile);
 
       if (formData.icon) {
-        formDataToSend.append("iconFile ", formData.icon);
+        formDataToSend.append("iconFile", formData.icon);
       }
       if (formData.serverFile) {
         formDataToSend.append("serverFile", formData.serverFile);
@@ -177,11 +205,16 @@ const ModalLicense = () => {
       if (formData.agentFile) {
         formDataToSend.append("agentFile", formData.agentFile);
       }
+      console.log("FormData to send:", formDataToSend);
 
       mutate(formDataToSend, {
         onSuccess: () => {
           setIsOpen(false);
           resetForm();
+        },
+        onError: (error) => {
+          console.error("Backend error:", error);
+          alert("Failed to save: " + error.message);
         }
       });
     }
@@ -214,7 +247,7 @@ const ModalLicense = () => {
             onClick={() => setIsOpen(true)}
             className="gap-2 bg-white w-[130px] text-[13px] cursor-pointer h-[32px] rounded-[8px] flex items-center justify-center px-2"
           >
-            <AddIcon fontSize="small" /> Add new user
+            <AddIcon fontSize="small" /> <span className="text-[12px]">New Product</span>
           </div>
         </div>
 
@@ -261,7 +294,7 @@ const ModalLicense = () => {
                       <td className="p-3 flex items-center gap-2">
                         <img
                           className="w-[30px] rounded-[8px] h-[30px]"
-                          src={`/icons/${item.pathToIcon}`}
+                          src={`https://datagaze-platform-9cab2c02bc91.herokuapp.com/icons/${item?.pathToIcon}`}
                           alt="icon"
                         />
                         {item.applicationName}
@@ -448,11 +481,12 @@ const ModalLicense = () => {
                             onChange={handleFileChange}
                             className="hidden"
                             required
+                            accept=".zip,.rar,.tar.gz"
                           />
                         </label>
                       ) : (
                         <p className="text-sm text-gray-600 mt-1">
-                          File selected:{formData.serverFile.name}
+                          File selected: {formData.serverFile.name}
                         </p>
                       )}
                     </div>
@@ -478,12 +512,12 @@ const ModalLicense = () => {
                             onChange={handleFileChange}
                             className="hidden"
                             required
+                            accept=".exe,.msi"
                           />
                         </label>
                       ) : (
                         <p className="text-sm text-gray-600 mt-1">
-                          {" "}
-                          File selected:{formData?.agentFile.name}
+                          File selected: {formData?.agentFile.name}
                         </p>
                       )}
                     </div>
@@ -491,7 +525,7 @@ const ModalLicense = () => {
                 </div>
               )}
             </div>
-            <div className="flex gap-2 justify-between items-center mt-[30px]">
+            <div className="flex gap-2 justify-between items-center mt-30px">
               <ReportGmailerrorredIcon className="text-[#1380ED] cursor-pointer" />
               <div className="flex gap-3">
                 <Button

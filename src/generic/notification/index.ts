@@ -18,7 +18,7 @@ export const notificationApi = () => {
         toast.error("Error registering ❌", { closeButton: true });
         break;
       case "Install":
-        toast.info("Succsess install !", { closeButton: true });
+        toast.success("Succsess install !", { closeButton: true });
         break;
       case "Uninstall":
         toast.success("Delete succsess !", { closeButton: true });

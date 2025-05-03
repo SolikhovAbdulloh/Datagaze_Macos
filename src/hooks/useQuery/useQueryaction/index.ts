@@ -163,9 +163,9 @@ const useInstallApplication = () => {
   const queryClient = useQueryClient();
   const axios = useAxios();
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: object }) => {
+    mutationFn: async ({ data }: { data: object }) => {
       await axios({
-        url: `/api/1/desktop/install/${id}`,
+        url: `/api/1/ssh/connect`,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: data

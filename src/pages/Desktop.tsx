@@ -145,7 +145,7 @@ export default function Desktop(props: DesktopState | any) {
   };
 
   const renderAppWindows = () => {
-    return apps.map((app:any) => {
+    return apps.map((app: any) => {
       if (app.desktop && state.showApps[app.id]) {
         const props = {
           id: app.id,
@@ -262,17 +262,15 @@ export default function Desktop(props: DesktopState | any) {
                       }
                     >
                       <img
-                        src={`/icons/${app?.pathToIcon !== "/any.png" ? app?.pathToIcon : "soc.png"}`}
+                        src={`https://datagaze-platform-9cab2c02bc91.herokuapp.com/icons/${app?.pathToIcon}`}
                         alt={app?.applicationName}
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain  rounded-[18px]"
                       />
                     </a>
                     <span className="mt-2 flex items-center gap-1 text-white text-center">
                       {!app?.isInstalled && <AiOutlineCloudUpload size={16} />}
                       <p className="text-xs xs:text-sm sm:text-[16px] font-medium truncate max-w-full">
-                        {app?.applicationName === "index.html"
-                          ? "SOC"
-                          : `${app?.applicationName}`}
+                        {`${app?.applicationName}`}
                       </p>
                     </span>
                   </div>

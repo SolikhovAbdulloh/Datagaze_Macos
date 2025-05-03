@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Modal, Box, Typography, LinearProgress } from "@mui/material";
 import { ApplicationType, InstallAppInfoType } from "~/types";
 import { BiMemoryCard } from "react-icons/bi";
@@ -11,11 +11,10 @@ import { FiGlobe } from "react-icons/fi";
 import { Stepper, Step, StepLabel, Button } from "@mui/material";
 import { useQueryApi } from "~/hooks/useQuery";
 import TerminalApp from "../apps/Terminal";
-import { useProgressStore } from "~/stores/slices/progress";
-import {
-  useInstallApplication,
-  useTransferApplication
-} from "~/hooks/useQuery/useQueryaction";
+// import { useProgressStore } from "~/stores/slices/progress";
+import { useInstallApplication } from "~/hooks/useQuery/useQueryaction";
+import { io } from "socket.io-client";
+import { getToken } from "~/utils";
 
 const steps = ["System requirements", "Server configs", "Completed"];
 
@@ -26,24 +25,24 @@ const LicenseModalinstall = ({
   app: ApplicationType;
   onClose: () => void;
 }) => {
-  const progress = useProgressStore((prog) => prog.progressMessage);
-  const progressId = useProgressStore((id) => id.progressId);
-  const setsocketId = useProgressStore((id) => id.socketId);
-
+  
+  // const progress = useProgressStore((prog) => prog.progressMessage);
+  // const progressId = useProgressStore((id) => id.progressId);
+  // const setsocketId = useProgressStore((id) => id.socketId);
   // console.log(setsocketId);
+
+  const socketconnect = useRef<any>(null);
+
   const { mutate: install } = useInstallApplication();
-  const { mutate } = useTransferApplication();
   const [activeStep, setActiveStep] = useState(0);
   const [openModal, setOpenModal] = useState(false);
-  const [progressOpen, setProgressOpen] = useState(false);
-  const [terminalOpen, setTerminalOpen] = useState(false);
 
   const { data } = useQueryApi({
     pathname: "information_app",
     url: `/api/1/desktop/${app.id}`
   });
 
-  const configs: InstallAppInfoType = data;
+  const configs: InstallAppInfoType = data || {};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -79,21 +78,41 @@ const LicenseModalinstall = ({
     port: 22,
     username: "root",
     password: "ubuntu123New",
-    socketId: progressId
+    productId: configs.id
   });
-  console.log(setsocketId);
+  console.log(formData);
 
-  const installApp = {
-    id: app.id,
-    socketId: setsocketId
-  };
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    mutate({ id: app.id, data: formData }, { onSuccess: () => setProgressOpen(false) });
     setActiveStep((prev) => prev + 1);
-    setProgressOpen(true);
-    install({ id: app.id, data: installApp });
+    install(
+      { data: formData },
+      {
+        onSuccess: () => {
+          socketconnect.current.emit("commandToServer", { productId: configs?.id });
+          socketconnect.current.on("ssh_error", (err: any) => {
+            console.log(err);
+          });
+          socketconnect.current.on("ssh_output", (data: any) => {
+            console.log(data);
+          });
+          socketconnect.current.on("message", (message: any) => {
+            console.log(message);
+          });
+        }
+      }
+    );
   };
+  const token = getToken();
+  socketconnect.current = io(
+    "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal1",
+    {
+      transports: ["websocket"],
+
+      auth: { token: `Bearer ${token}` }
+    }
+  );
+
   return (
     <Modal open={true} onClose={onClose} aria-labelledby="modal-title">
       <Box
@@ -120,11 +139,7 @@ const LicenseModalinstall = ({
             className="cursor-pointer text-gray-500 hover:text-gray-700"
             onClick={onClose}
           />
-          <p className="text-[13px] font-600 text-[grey]">
-            {configs?.applicationName === "index.html" || "Datagaze"
-              ? "SOC"
-              : `${app?.applicationName}`}
-          </p>
+          <p className="text-[13px] font-600 text-[grey]">{`${app?.applicationName}`}</p>
         </div>
         <Typography
           variant="h4"
@@ -132,8 +147,8 @@ const LicenseModalinstall = ({
           sx={{ fontWeight: "bold", textAlign: "center", mt: 1 }}
         >
           <img
-            className="w-[56px] h-[56px]"
-            src={`/icons/${configs?.pathToIcon !== "/any.png" || "/logo.png" ? configs?.pathToIcon : "soc.png"}`}
+            className="w-[56px] h-[56px] rounded-4"
+            src={`https://datagaze-platform-9cab2c02bc91.herokuapp.com/icons/${configs?.pathToIcon}`}
             alt={configs?.applicationName}
           />
           <p className="text-[40px] font-[500]">{configs?.applicationName}</p>
@@ -203,8 +218,8 @@ const LicenseModalinstall = ({
                     <h2 className="text-2xl font-semibold flex justify-between">
                       Datagaze {configs?.applicationName}
                       <img
-                        className="w-[70px] h-[70px]"
-                        src={`/icons/${configs?.pathToIcon !== "/any.png" ? configs?.pathToIcon : "soc.png"}`}
+                        className="w-[70px] h-[70px] rounded-4"
+                        src={`${import.meta.env.VITE_BASE_URL}/icons/${configs?.pathToIcon}`}
                         alt="logo"
                       />
                     </h2>
@@ -303,7 +318,6 @@ const LicenseModalinstall = ({
                             name="socketId"
                             onChange={handleChange}
                             type="text"
-                            value={formData.socketId}
                             className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
                             placeholder="Remind it checkbox"
                           />
@@ -334,52 +348,6 @@ const LicenseModalinstall = ({
                     )}
                     {activeStep === 2 && (
                       <>
-                        <Modal open={progressOpen}>
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                              borderRadius: "8px",
-                              padding: 2,
-                              paddingX: 2,
-                              paddingY: 1,
-                              backgroundColor: "#e7ecf8",
-                              height: 150,
-                              width: 406,
-                              alignItems: "center",
-                              boxShadow: 124,
-                              display: "flex",
-                              flexDirection: "column",
-                              justifyContent: "center"
-                            }}
-                          >
-                            <Typography
-                              variant="h6"
-                              sx={{ mb: 2, fontWeight: "bold", color: "#1A79D8" }}
-                            >
-                              Installing {configs?.applicationName}
-                            </Typography>
-                            <LinearProgress
-                              variant="determinate"
-                              color="success"
-                              value={progress}
-                              sx={{
-                                width: "100%",
-                                height: 10,
-                                borderRadius: 5,
-                                bgcolor: "#d3d8e6",
-                                "& .MuiLinearProgress-bar": {
-                                  bgcolor: "#1A79D8"
-                                }
-                              }}
-                            />
-                            <Typography sx={{ mt: 2, color: "#333" }}>
-                              Progress: {progress}%
-                            </Typography>
-                          </Box>
-                        </Modal>
                         <div>
                           <div className="fixed inset-0 bg-white flex flex-col items-center justify-start">
                             <div className="flex items-center p-1 gap-2 justify-start w-full bg-gray-200">

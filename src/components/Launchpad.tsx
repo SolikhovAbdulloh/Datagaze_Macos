@@ -11,7 +11,6 @@ interface LaunchpadProps {
   toggleLaunchpad: (target: boolean) => void;
 }
 
-const placeholderText = "Search";
 
 export default function Launchpad({ show, toggleLaunchpad }: LaunchpadProps) {
   const [searchText, setSearchText] = useState("");
@@ -25,7 +24,6 @@ export default function Launchpad({ show, toggleLaunchpad }: LaunchpadProps) {
   });
 
   const applications: ApplicationType[] = data || [];
-  console.log(applications);
 
   const OpenModal = (app: ApplicationType) => setSelectedApp(app);
   const OpenModalinstall = (app: ApplicationType) => setSelectedApp1(app);
@@ -67,7 +65,7 @@ export default function Launchpad({ show, toggleLaunchpad }: LaunchpadProps) {
           </div>
           <input
             className="flex-1 min-w-0 outline-none bg-transparent px-2 text-sm text-white placeholder-gray-300"
-            placeholder={placeholderText}
+            placeholder={'Search'}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
