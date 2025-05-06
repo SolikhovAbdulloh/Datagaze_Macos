@@ -38,9 +38,8 @@ const LicenseModalinstall = ({
   });
 
   const configs: InstallAppInfoType = data || {};
-  const id = configs.id;
   const [formData, setFormData] = useState({
-    productId: id,
+    productId: configs.id,
     host: "170.64.141.16",
     port: 22,
     username: "root",
@@ -82,6 +81,95 @@ const LicenseModalinstall = ({
       setActiveStep((prev) => prev + 1);
     }
   };
+  useEffect(() => {
+    if (activeStep !== 2) return;
+
+    let term: Terminal;
+    let socket: any;
+
+    const initializeTerminal = async () => {
+      try {
+        // 1. Terminal yaratish
+        term = new Terminal({
+          cursorBlink: true,
+          fontFamily: "monospace",
+          fontSize: 14,
+          theme: { background: "#1a1a1a", foreground: "#00ff00" },
+          disableStdin: false,
+          scrollback: 1000
+        });
+        termRef.current = term;
+
+        const fitAddon = new FitAddon();
+        term.loadAddon(fitAddon);
+
+        if (!terminalRef.current) {
+          console.error("Terminal container not found");
+          return;
+        }
+
+        term.open(terminalRef.current);
+        fitAddon.fit();
+        term.focus();
+
+        socket = io("wss://d.dev-baxa.me/terminal1", {
+          transports: ["websocket"]
+        });
+        socketRef.current = socket;
+
+        socket.on("connect", () => {
+          term.write("Connected to server\r\n");
+          socket.emit("connectToServer", {
+            productId: configs?.id // DLP ID
+          });
+        });
+
+        socket.on("ssh_output", (output: string) => {
+          term.write(output);
+          term.scrollToBottom();
+        });
+
+        socket.on("ssh_error", (error: string) => {
+          term.write(`\r\nError: ${error}\r\n`);
+          term.scrollToBottom();
+        });
+
+        socket.on("message", (message: string) => {
+          term.write(`${message}\r\n`);
+          term.scrollToBottom();
+        });
+
+        term.onData((data: string) => {
+          socket.emit("terminalData", {
+            data: data
+          });
+        });
+
+        // Resize handler
+        const handleResize = () => {
+          fitAddon.fit();
+          term.scrollToBottom();
+        };
+        window.addEventListener("resize", handleResize);
+
+        // Cleanup
+        return () => {
+          socket?.disconnect();
+          term?.dispose();
+          window.removeEventListener("resize", handleResize);
+        };
+      } catch (err) {
+        console.error("Terminal initialization error:", err);
+      }
+    };
+
+    initializeTerminal();
+
+    return () => {
+      if (socketRef.current) socketRef.current.disconnect();
+      if (termRef.current) termRef.current.dispose();
+    };
+  }, [activeStep, configs?.id]);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -95,116 +183,6 @@ const LicenseModalinstall = ({
       }
     );
   };
-
-  useEffect(() => {
-    termRef.current = new Terminal({
-      cursorBlink: true,
-      fontFamily: "monospace",
-      fontSize: 14,
-      theme: { background: "#1a1a1a", foreground: "#00ff00" },
-      disableStdin: false,
-      scrollback: 1000
-    });
-
-    const fitAddon = new FitAddon();
-    termRef.current.loadAddon(fitAddon);
-    termRef.current.open(terminalRef.current);
-    fitAddon.fit();
-    const token = getToken();
-    termRef.current.focus();
-
-    socketRef.current = io(
-      "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal1",
-      {
-        transports: ["websocket"],
-        auth: { token: `Bearer ${token}` }
-      }
-    );
-
-    let rawInputMode = false;
-    let inputBuffer = "";
-
-    const scrollToBottom = () => {
-      termRef.current.scrollToBottom();
-    };
-
-    socketRef.current.on("disconnect", () => {
-      termRef.current.write("\r\nStatus: Disconnect!\r\n");
-      scrollToBottom();
-      setTimeout(() => {
-        if (!socketRef.current.connected) socketRef.current.connect();
-      }, 1000);
-    });
-
-    socketRef.current.on("data", ({ output }: any) => {
-      termRef.current.write("\r\n" + output + "");
-      scrollToBottom();
-    });
-
-    socketRef.current.on("terminalData", ({ data }: any) => {
-      if (data.result) {
-        rawInputMode = true;
-        termRef.current.write("\r\nSuccses row situton\r\n");
-      } else {
-        termRef.current.write(data.result + "");
-      }
-      scrollToBottom();
-    });
-    socketRef.current.on("connect", () => {
-      termRef.current.write("Connect to server!\n\r");
-    });
-    // \r-bu qator boshiga otkazadi \n-bu esa ENTER \b-backspace ASCII dagi kodi
-    socketRef.current.on("ssh_error", (err: any) => {
-      termRef.current.write("\r\nServer error: " + err + "\r\n");
-      scrollToBottom();
-    });
-
-    socketRef.current.on("ssh_error", (err: any) => {
-      termRef.current.write("\r\Connect error: " + err.message + "\r\n");
-      scrollToBottom();
-    });
-
-    termRef.current.onData((data: any) => {
-      if (rawInputMode) {
-        socketRef.current.emit("terminalData", { command: data });
-      } else {
-        if (data === "\r") {
-          if (socketRef.current.connected && inputBuffer.trim()) {
-            socketRef.current.emit("terminalData", { data: inputBuffer });
-            termRef.current.write("\r\n");
-            inputBuffer = "";
-          } else {
-            termRef.current.write("\r\nXato: Server not found!\r\n");
-          }
-        } else if (data === "\u007F" || data === "\b") {
-          if (inputBuffer.length > 0) {
-            inputBuffer = inputBuffer.slice(0, -1);
-            termRef.current.write("\b \b");
-          }
-        } else {
-          inputBuffer += data;
-          termRef.current.write(data);
-        }
-      }
-      scrollToBottom();
-    });
-
-    terminalRef.current.addEventListener("click", () => {
-      termRef.current.focus();
-    });
-
-    const handleResize = () => {
-      fitAddon.fit();
-      scrollToBottom();
-    };
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      if (socketRef.current) socketRef.current.disconnect();
-      if (termRef.current) termRef.current.dispose();
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   return (
     <Modal open={true} onClose={onClose} aria-labelledby="modal-title">

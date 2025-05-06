@@ -7,7 +7,6 @@ import { getToken } from "~/utils";
 import { useProgressStore } from "~/stores/slices/progress";
 
 const TerminalComponent = () => {
-  // const setProgressMessage = useProgressStore((state) => state.setProgressMessage);
   const setSocketId = useProgressStore((state) => state.setSocketId);
   const terminalRef = useRef<any>(null);
   const socketRef = useRef<any>(null);
@@ -19,8 +18,7 @@ const TerminalComponent = () => {
       fontFamily: "monospace",
       fontSize: 14,
       theme: { background: "#1a1a1a", foreground: "#00ff00" },
-      disableStdin: false,
-      scrollback: 1000
+      disableStdin: false
     });
 
     const fitAddon = new FitAddon();
