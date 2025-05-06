@@ -294,7 +294,7 @@ const ModalLicense = () => {
                       <td className="p-3 flex items-center gap-2">
                         <img
                           className="w-[30px] rounded-[8px] h-[30px]"
-                          src={`https://datagaze-platform-9cab2c02bc91.herokuapp.com/icons/${item?.pathToIcon}`}
+                          src={`${import.meta.env.VITE_BASE_URL}/icons/${item?.pathToIcon}`}
                           alt="icon"
                         />
                         {item.applicationName}

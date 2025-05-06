@@ -7,12 +7,10 @@ import { getToken } from "~/utils";
 import { useProgressStore } from "~/stores/slices/progress";
 
 const TerminalComponent = () => {
-  const setProgressMessage = useProgressStore((state) => state.setProgressMessage);
+  // const setProgressMessage = useProgressStore((state) => state.setProgressMessage);
   const setSocketId = useProgressStore((state) => state.setSocketId);
-  const progressId = useProgressStore((state) => state.setProgressId);
   const terminalRef = useRef<any>(null);
   const socketRef = useRef<any>(null);
-  const progressSocketRef = useRef<any>(null);
   const termRef = useRef<any>(null);
 
   useEffect(() => {
@@ -31,7 +29,6 @@ const TerminalComponent = () => {
     fitAddon.fit();
     const token = getToken();
     termRef.current.focus();
-
 
     socketRef.current = io(
       "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal",
@@ -114,31 +111,6 @@ const TerminalComponent = () => {
 
     terminalRef.current.addEventListener("click", () => {
       termRef.current.focus();
-    });
-
-    progressSocketRef.current = io(
-      "https://datagaze-platform-9cab2c02bc91.herokuapp.com/progress",
-      {
-        transports: ["websocket"],
-
-        auth: { token: `Bearer ${token}` }
-      }
-    );
-
-    progressSocketRef.current.on("connect", () => {
-      progressId(progressSocketRef.current.id);
-    });
-
-    progressSocketRef.current.on("progressUpdate", (data: any) => {
-      setProgressMessage(data.progress);
-    });
-
-    progressSocketRef.current.on("disconnect", () => {
-      setProgressMessage(0);
-    });
-
-    progressSocketRef.current.on("connect_error", (err: any) => {
-      setProgressMessage(err.message);
     });
 
     const handleResize = () => {

@@ -104,13 +104,10 @@ const Computers = () => {
     setPage(0);
   };
   const token = getToken();
-  computersSocketRef.current = io(
-    "https://datagaze-platform-9cab2c02bc91.herokuapp.com/computer",
-    {
-      transports: ["websocket"],
-      auth: { token: `Bearer ${token}` }
-    }
-  );
+  computersSocketRef.current = io("https://d.dev-baxa.me/computer", {
+    transports: ["websocket"],
+    auth: { token: `Bearer ${token}` }
+  });
 
   const DeleteAgent = (id: string) => {
     computersSocketRef.current.emit("delete_agent", {

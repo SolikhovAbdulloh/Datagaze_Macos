@@ -39,9 +39,9 @@ const useLogin = () => {
       Cookies.set(
         "user",
         JSON.stringify({
-          username: userData?.username,
-          fullName: userData?.fullName,
-          email: userData?.email
+          username: userData.username,
+          fullName: userData.fullName,
+          email: userData.email
         }),
         { expires: 1, path: "/", secure: true, sameSite: "Strict" }
       );

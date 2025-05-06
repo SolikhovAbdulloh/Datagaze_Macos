@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Modal, Box, Typography, LinearProgress } from "@mui/material";
+import React, { useState, useRef } from "react";
+import { Modal, Box, Typography, Button, Stepper, Step, StepLabel } from "@mui/material";
 import { ApplicationType, InstallAppInfoType } from "~/types";
 import { BiMemoryCard } from "react-icons/bi";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -8,13 +8,13 @@ import { BsCpuFill } from "react-icons/bs";
 import { RiComputerLine } from "react-icons/ri";
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { FiGlobe } from "react-icons/fi";
-import { Stepper, Step, StepLabel, Button } from "@mui/material";
 import { useQueryApi } from "~/hooks/useQuery";
-import TerminalApp from "../apps/Terminal";
-// import { useProgressStore } from "~/stores/slices/progress";
 import { useInstallApplication } from "~/hooks/useQuery/useQueryaction";
 import { io } from "socket.io-client";
 import { getToken } from "~/utils";
+import "xterm/css/xterm.css";
+import { Terminal } from "xterm";
+import { FitAddon } from "xterm-addon-fit";
 
 const steps = ["System requirements", "Server configs", "Completed"];
 
@@ -25,14 +25,9 @@ const LicenseModalinstall = ({
   app: ApplicationType;
   onClose: () => void;
 }) => {
-  
-  // const progress = useProgressStore((prog) => prog.progressMessage);
-  // const progressId = useProgressStore((id) => id.progressId);
-  // const setsocketId = useProgressStore((id) => id.socketId);
-  // console.log(setsocketId);
-
-  const socketconnect = useRef<any>(null);
-
+  const socketRef = useRef<any>(null);
+  const termRef = useRef<any>(null);
+  const terminalRef = useRef<any>(null);
   const { mutate: install } = useInstallApplication();
   const [activeStep, setActiveStep] = useState(0);
   const [openModal, setOpenModal] = useState(false);
@@ -43,7 +38,22 @@ const LicenseModalinstall = ({
   });
 
   const configs: InstallAppInfoType = data || {};
-
+  const id = configs.id;
+  const [formData, setFormData] = useState({
+    productId: id,
+    host: "170.64.141.16",
+    port: 22,
+    username: "root",
+    password: "ubuntu123New"
+  });
+  useEffect(() => {
+    if (configs.id && formData.productId !== configs.id) {
+      setFormData((prev) => ({
+        ...prev,
+        productId: configs.id
+      }));
+    }
+  }, [configs.id]);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -73,15 +83,6 @@ const LicenseModalinstall = ({
     }
   };
 
-  const [formData, setFormData] = useState({
-    host: "170.64.141.16",
-    port: 22,
-    username: "root",
-    password: "ubuntu123New",
-    productId: configs.id
-  });
-  console.log(formData);
-
   const handleSubmit = (e: any) => {
     e.preventDefault();
     setActiveStep((prev) => prev + 1);
@@ -89,29 +90,121 @@ const LicenseModalinstall = ({
       { data: formData },
       {
         onSuccess: () => {
-          socketconnect.current.emit("commandToServer", { productId: configs?.id });
-          socketconnect.current.on("ssh_error", (err: any) => {
-            console.log(err);
-          });
-          socketconnect.current.on("ssh_output", (data: any) => {
-            console.log(data);
-          });
-          socketconnect.current.on("message", (message: any) => {
-            console.log(message);
-          });
+          socketRef.current.emit("connectToServer", { productId: configs?.id });
         }
       }
     );
   };
-  const token = getToken();
-  socketconnect.current = io(
-    "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal1",
-    {
-      transports: ["websocket"],
 
-      auth: { token: `Bearer ${token}` }
-    }
-  );
+  useEffect(() => {
+    termRef.current = new Terminal({
+      cursorBlink: true,
+      fontFamily: "monospace",
+      fontSize: 14,
+      theme: { background: "#1a1a1a", foreground: "#00ff00" },
+      disableStdin: false,
+      scrollback: 1000
+    });
+
+    const fitAddon = new FitAddon();
+    termRef.current.loadAddon(fitAddon);
+    termRef.current.open(terminalRef.current);
+    fitAddon.fit();
+    const token = getToken();
+    termRef.current.focus();
+
+    socketRef.current = io(
+      "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal1",
+      {
+        transports: ["websocket"],
+        auth: { token: `Bearer ${token}` }
+      }
+    );
+
+    let rawInputMode = false;
+    let inputBuffer = "";
+
+    const scrollToBottom = () => {
+      termRef.current.scrollToBottom();
+    };
+
+    socketRef.current.on("disconnect", () => {
+      termRef.current.write("\r\nStatus: Disconnect!\r\n");
+      scrollToBottom();
+      setTimeout(() => {
+        if (!socketRef.current.connected) socketRef.current.connect();
+      }, 1000);
+    });
+
+    socketRef.current.on("data", ({ output }: any) => {
+      termRef.current.write("\r\n" + output + "");
+      scrollToBottom();
+    });
+
+    socketRef.current.on("terminalData", ({ data }: any) => {
+      if (data.result) {
+        rawInputMode = true;
+        termRef.current.write("\r\nSuccses row situton\r\n");
+      } else {
+        termRef.current.write(data.result + "");
+      }
+      scrollToBottom();
+    });
+    socketRef.current.on("connect", () => {
+      termRef.current.write("Connect to server!\n\r");
+    });
+    // \r-bu qator boshiga otkazadi \n-bu esa ENTER \b-backspace ASCII dagi kodi
+    socketRef.current.on("ssh_error", (err: any) => {
+      termRef.current.write("\r\nServer error: " + err + "\r\n");
+      scrollToBottom();
+    });
+
+    socketRef.current.on("ssh_error", (err: any) => {
+      termRef.current.write("\r\Connect error: " + err.message + "\r\n");
+      scrollToBottom();
+    });
+
+    termRef.current.onData((data: any) => {
+      if (rawInputMode) {
+        socketRef.current.emit("terminalData", { command: data });
+      } else {
+        if (data === "\r") {
+          if (socketRef.current.connected && inputBuffer.trim()) {
+            socketRef.current.emit("terminalData", { data: inputBuffer });
+            termRef.current.write("\r\n");
+            inputBuffer = "";
+          } else {
+            termRef.current.write("\r\nXato: Server not found!\r\n");
+          }
+        } else if (data === "\u007F" || data === "\b") {
+          if (inputBuffer.length > 0) {
+            inputBuffer = inputBuffer.slice(0, -1);
+            termRef.current.write("\b \b");
+          }
+        } else {
+          inputBuffer += data;
+          termRef.current.write(data);
+        }
+      }
+      scrollToBottom();
+    });
+
+    terminalRef.current.addEventListener("click", () => {
+      termRef.current.focus();
+    });
+
+    const handleResize = () => {
+      fitAddon.fit();
+      scrollToBottom();
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      if (socketRef.current) socketRef.current.disconnect();
+      if (termRef.current) termRef.current.dispose();
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <Modal open={true} onClose={onClose} aria-labelledby="modal-title">
@@ -133,7 +226,7 @@ const LicenseModalinstall = ({
           boxShadow: 124
         }}
       >
-        <div className="flex items-center absolute top-0 w-[100%] left-0  m-auto  bg-[#fdfcfe]  px-4 h-[30px] gap-2  rounded-[2px]">
+        <div className="flex items-center absolute top-0 w-[100%] left-0 m-auto bg-[#fdfcfe] px-4 h-[30px] gap-2 rounded-[2px]">
           <IoMdCloseCircle
             size={18}
             className="cursor-pointer text-gray-500 hover:text-gray-700"
@@ -148,14 +241,13 @@ const LicenseModalinstall = ({
         >
           <img
             className="w-[56px] h-[56px] rounded-4"
-            src={`https://datagaze-platform-9cab2c02bc91.herokuapp.com/icons/${configs?.pathToIcon}`}
+            src={`https://d.dev-baxa.me/icons/${configs?.pathToIcon}`}
             alt={configs?.applicationName}
           />
           <p className="text-[40px] font-[500]">{configs?.applicationName}</p>
         </Typography>
         <div className="mt-[30px] mb-[20px]">
           <p className="text-[grey] text-[14px] font-400">Basic requirements</p>
-
           <div className="w-[100%] mt-1 p-6 gap-[30px] pt-4 justify-center h-[200px] grid grid-cols-2 rounded-[8px] bg-[#fdfcfe]">
             <div className="flex flex-col items-start gap-3">
               <div className="flex items-center gap-3">
@@ -191,7 +283,6 @@ const LicenseModalinstall = ({
         <div className="flex text-[10px] font-normal items-center justify-end">
           <div className="flex items-center gap-1">
             <Button
-              onChange={CloseModal}
               sx={{
                 textTransform: "capitalize",
                 mr: 1,
@@ -275,7 +366,7 @@ const LicenseModalinstall = ({
                               value={formData.host}
                               type="text"
                               className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
-                              placeholder="Ip adress"
+                              placeholder="IP address"
                             />
                           </label>
                           <label className="flex flex-col text-[13px] font-600 gap-1">
@@ -286,7 +377,7 @@ const LicenseModalinstall = ({
                               onChange={handleChange}
                               type="number"
                               className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
-                              placeholder="Port number "
+                              placeholder="Port number"
                             />
                           </label>
                           <label className="flex flex-col text-[13px] font-600 gap-1">
@@ -347,23 +438,30 @@ const LicenseModalinstall = ({
                       </form>
                     )}
                     {activeStep === 2 && (
-                      <>
-                        <div>
-                          <div className="fixed inset-0 bg-white flex flex-col items-center justify-start">
-                            <div className="flex items-center p-1 gap-2 justify-start w-full bg-gray-200">
-                              <IoMdCloseCircle
-                                onClick={CloseModal}
-                                size={15}
-                                className="cursor-pointer text-gray-500 hover:text-gray-700"
-                              />
-                              <span className="text-sm font-normal">Terminal</span>
-                            </div>
-                            <div className="w-full">
-                              <TerminalApp />
-                            </div>
-                          </div>
+                      <div>
+                        <div
+                          style={{
+                            background: "#1e1e1e",
+                            height: 300,
+                            borderRadius: 6
+                          }}
+                        >
+                          <div
+                            ref={terminalRef}
+                            style={{ width: "100%", height: "100%" }}
+                          />
                         </div>
-                      </>
+                        <Button variant="outlined" onClick={handleBack} sx={{ mt: 2 }}>
+                          Back
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={onClose}
+                          sx={{ mt: 2, ml: 1 }}
+                        >
+                          Close
+                        </Button>
+                      </div>
                     )}
                   </div>
 

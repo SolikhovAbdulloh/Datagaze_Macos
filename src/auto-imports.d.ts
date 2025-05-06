@@ -42,6 +42,7 @@ declare global {
   const startTransition: typeof import('react')['startTransition']
   const superAdminUsers: (typeof import("./components/apps/SuperAdmin_Users"))["default"]
   const tab: (typeof import("./components/modal_app"))["default"]
+  const terminalInstall: typeof import('./components/apps/Terminal_install')['default']
   const useAudio: typeof import('./hooks/useAudio')['useAudio']
   const useBattery: typeof import('./hooks/useBattery')['useBattery']
   const useCallback: typeof import('react')['useCallback']

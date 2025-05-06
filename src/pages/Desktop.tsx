@@ -262,7 +262,7 @@ export default function Desktop(props: DesktopState | any) {
                       }
                     >
                       <img
-                        src={`https://datagaze-platform-9cab2c02bc91.herokuapp.com/icons/${app?.pathToIcon}`}
+                        src={`${import.meta.env.VITE_BASE_URL}/icons/${app?.pathToIcon}`}
                         alt={app?.applicationName}
                         className="w-full h-full object-contain  rounded-[18px]"
                       />
