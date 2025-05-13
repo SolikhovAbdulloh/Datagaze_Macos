@@ -28,15 +28,12 @@ const TerminalComponent = () => {
     const token = getToken();
     termRef.current.focus();
 
-    socketRef.current = io(
-      "https://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal",
-      {
-        transports: ["websocket"],
-        auth: {
-          token: `Bearer ${token}`
-        }
+    socketRef.current = io("https://d.dev-baxa.me/terminal", {
+      transports: ["websocket"],
+      auth: {
+        token: `Bearer ${token}`
       }
-    );
+    });
 
     let rawInputMode = false;
     let inputBuffer = "";
@@ -81,7 +78,7 @@ const TerminalComponent = () => {
       termRef.current.write("\r\Connect error: " + err.message + "\r\n");
       scrollToBottom();
     });
-
+    
     termRef.current.onData((data: any) => {
       if (rawInputMode) {
         socketRef.current.emit("command", { command: data });

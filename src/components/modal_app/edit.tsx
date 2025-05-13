@@ -31,15 +31,22 @@ export const EditDetailsModal = ({ onClose, app }: EditDetailsModalProps) => (
           className="cursor-pointer text-gray-500 hover:text-gray-700"
           onClick={onClose}
         />
-        <p className="text-[13px] font-600 text-[grey]">{app.title}</p>
+        <p className="text-[13px] font-600 text-[grey]">{app.applicationName}</p>
       </div>
       <Typography
         variant="h4"
         className="flex items-center gap-3"
         sx={{ fontWeight: "bold", textAlign: "center", mt: 1 }}
       >
-        <img className="w-[56px] h-[56px]" src={app.img} alt="" />
-        <p className="text-[40px] font-500">{app.title}</p>
+        <img
+          className="w-[56px] h-[56px] rounded-4"
+          src={`${import.meta.env.VITE_BASE_URL}/icons/${app?.pathToIcon}`}
+          alt={app?.applicationName}
+          onError={(e) => {
+            e.currentTarget.src = "/icons/zoom1.png";
+          }}
+        />
+        <p className="text-[40px] font-500">{app.applicationName}</p>
       </Typography>
 
       <div>

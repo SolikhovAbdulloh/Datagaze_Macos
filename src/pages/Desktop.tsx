@@ -193,7 +193,7 @@ export default function Desktop(props: DesktopState | any) {
   const close = showLaunchpad
     ? ""
     : "opacity-0 invisible transition-opacity duration-200";
-
+  let error = "icons/dlp.png";
   return (
     <div
       className="size-full overflow-hidden bg-center bg-cover"
@@ -264,6 +264,9 @@ export default function Desktop(props: DesktopState | any) {
                       <img
                         src={`${import.meta.env.VITE_BASE_URL}/icons/${app?.pathToIcon}`}
                         alt={app?.applicationName}
+                        onError={(e) => {
+                          e.currentTarget.src = "/icons/zoom1.png";
+                        }}
                         className="w-full h-full object-contain  rounded-[18px]"
                       />
                     </a>

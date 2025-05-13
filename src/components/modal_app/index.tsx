@@ -42,7 +42,8 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     setIsModalOpen(false);
     onClose();
   };
-
+  console.log(app);
+  
   return (
     <Modal open={isModalOpen} onClose={handleModalClose} aria-labelledby="modal-title">
       <Box
@@ -67,15 +68,22 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
             className="cursor-pointer text-gray-500 hover:text-gray-700"
             onClick={handleModalClose}
           />
-          <p className="text-[13px] font-600 text-gray-500">{app.title}</p>
+          <p className="text-[13px] font-600 text-gray-500">{app.applicationName}</p>
         </div>
         <Typography
           variant="h4"
           className="flex items-center gap-3 !mt-[50px]"
           sx={{ fontWeight: "bold", textAlign: "center", mt: 1 }}
         >
-          <img className="w-[56px] h-[56px]" src={app.img} alt={app.title} />
-          <p className="text-[40px] font-500">{app.title}</p>
+          <img
+            className="w-[56px] h-[56px] rounded-4"
+            src={`${import.meta.env.VITE_BASE_URL}/icons/${app?.pathToIcon}`}
+            alt={app?.applicationName}
+            onError={(e) => {
+              e.currentTarget.src = "/icons/zoom1.png";
+            }}
+          />
+          <p className="text-[40px] font-500">{app?.applicationName}</p>
         </Typography>
         <Tabs
           value={tabValue}

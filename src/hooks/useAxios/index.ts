@@ -2,7 +2,7 @@ import api from "./api";
 
 interface PropsType {
   url?: string;
-  method?: "GET" | "DELETE" | "PUT" | "POST";
+  method?: "GET" | "DELETE" | "PUT" | "POST" | "PATCH";
   params?: object;
   headers?: object;
   body?: object;

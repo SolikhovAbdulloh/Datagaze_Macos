@@ -238,6 +238,27 @@ const useCreateApplication = () => {
   });
 };
 
+const useUploadApplication = () => {
+  const axios = useAxios();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: any) =>
+      await axios({
+        url: `/api/1/desktop/update/is-installed/${id}`,
+        method: "PATCH",
+        body: { id: id }
+      }),
+    onSuccess: () => {
+      console.log("Success");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["application"] });
+    },
+    onError: (err) => {
+      console.log(err.message);
+    }
+  });
+};
 export {
   useLogin,
   useTransferApplication,
@@ -246,5 +267,6 @@ export {
   useRegister,
   useDeleteRegister,
   useInstallApplication,
-  useUpdateRegister
+  useUpdateRegister,
+  useUploadApplication
 };

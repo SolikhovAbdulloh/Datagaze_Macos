@@ -11,6 +11,7 @@ declare global {
   const ControlCenterMenu: typeof import('./components/menus/ControlCenterMenu')['default']
   const Dock: typeof import('./components/dock/Dock')['default']
   const DockItem: typeof import('./components/dock/DockItem')['default']
+  const DockerInstallCommands: typeof import('./components/modal_app/sedoinstall')['DockerInstallCommands']
   const EditDetailsModal: typeof import('./components/modal_app/edit')['EditDetailsModal']
   const FaceTime: typeof import('./components/apps/FaceTime')['default']
   const Launchpad: typeof import('./components/Launchpad')['default']

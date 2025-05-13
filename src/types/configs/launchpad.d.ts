@@ -1,7 +1,7 @@
 export interface LaunchpadData {
   id: string;
   icon?: any;
-  title: string;
+  applicationName: string;
   img: string;
   link?: string;
   License_count?: number;
@@ -13,6 +13,12 @@ export interface LaunchpadData {
   CPU?: string;
   Network?: string;
   Storage?: string;
+  agentVersion: string;
+  isInstalled: boolean;
+  pathToIcon: string;
+  publisher: string;
+  serverFileSize: string;
+  serverVersion: string;
 }
 export interface InstallAppInfoType {
   applicationName?: string;
