@@ -8,8 +8,8 @@ import { BsCpuFill } from "react-icons/bs";
 import { RiComputerLine } from "react-icons/ri";
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { FiGlobe } from "react-icons/fi";
-import CheckIcon from "@mui/icons-material/Check";
 import { useQueryApi } from "~/hooks/useQuery";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import {
   useInstallApplication,
   useUploadApplication
@@ -21,6 +21,7 @@ import { FitAddon } from "xterm-addon-fit";
 import { IconButton, Tooltip } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { getToken } from "~/utils";
+import { toast } from "sonner";
 const steps = ["System requirements", "Server configs", "Completed"];
 const LicenseModalinstall = ({
   app,
@@ -42,6 +43,7 @@ const LicenseModalinstall = ({
   const [openModal, setOpenModal] = useState(false);
   const [codeModalOpen, setCodeModalOpen] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
+  const [socketPanding, setSocketPanding] = useState([]);
   const { data } = useQueryApi({
     pathname: "information_app",
     url: `/api/1/desktop/${app.id}`
@@ -59,6 +61,8 @@ const LicenseModalinstall = ({
   const { mutate, isPending } = useUploadApplication();
 
   const UploadApplication = () => {
+    console.log("bosildi");
+
     mutate(app.id, {
       onSuccess: () => {
         setOpenModal(false);
@@ -94,10 +98,10 @@ const LicenseModalinstall = ({
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        alert("Nusxa olindi ✅");
+        toast.success("Copied to clipboard", { closeButton: true });
       })
-      .catch((err) => {
-        alert("Nusxa olishda xatolik ❌");
+      .catch(() => {
+        toast.error("Not Copied", { closeButton: true });
       });
   };
   const handleBack = () => {
@@ -182,8 +186,7 @@ const LicenseModalinstall = ({
           });
           socket.on("command_progress", (prog: any) => {
             console.log("command_progress:", prog);
-            //  term.write(`\r\nCommand progress: ${JSON.stringify(prog)}\r\n`);
-            //  term.scrollToBottom();
+            setSocketPanding(prog.pending);
           });
           const handleResize = () => {
             fitAddon.fit();
@@ -224,6 +227,7 @@ const LicenseModalinstall = ({
       }
     );
   };
+  console.log("usestate", socketPanding);
 
   return (
     <>
@@ -507,7 +511,7 @@ const LicenseModalinstall = ({
             left: "50%",
             transform: "translate(-50%, -50%)",
             bgcolor: "white",
-            borderRadius: "1px",
+            borderRadius: "6px",
             padding: 2,
             width: "90vw",
             height: "auto",
@@ -565,41 +569,80 @@ const LicenseModalinstall = ({
               bgcolor: "#f5f5f5",
               borderRadius: 1,
               overflowY: "auto",
-              maxHeight: "550px" // Terminal balandligiga teng
+              maxHeight: "550px"
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: "medium" }}>
               Commands
             </Typography>
             {sections.map((section, index) => (
-              <Box key={index} sx={{ mb: 2 }}>
-                <Typography variant="subtitle1">{section.name}</Typography>
-                <Typography variant="caption">{section.description}</Typography>
+              <Box key={index} sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  {section.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {section.description}
+                </Typography>
+
                 {section.commands.map((command, cmdIndex) => (
                   <Box
                     key={cmdIndex}
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
+                      position: "relative",
+                      border: "1px solid #ddd",
                       borderRadius: 2,
-                      mt: 1,
-                      background: "#88a6fa",
-                      padding: 2
+                      mt: 2,
+                      px: 2,
+                      py: 1.5,
+                      fontFamily: "monospace",
+                      overflowX: "auto"
                     }}
                   >
-                    <Typography sx={{ fontFamily: "monospace" }}>{command}</Typography>
+                    <Typography
+                      component="pre"
+                      sx={{
+                        m: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 3,
+                        p: 1,
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word"
+                      }}
+                    >
+                      <ArrowForwardIosIcon sx={{ fontSize: 12 }} />
+                      <small>{command}</small>
+                    </Typography>
+
                     <Tooltip title="Copy">
-                      <IconButton onClick={() => handleCopy(command, cmdIndex)}>
-                        <ContentCopyIcon />
+                      <IconButton
+                        onClick={() => handleCopy(command, cmdIndex)}
+                        size="small"
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          backgroundColor: "white",
+                          boxShadow: 1,
+                          "&:hover": {
+                            backgroundColor: "#e0e0e0"
+                          }
+                        }}
+                      >
+                        <ContentCopyIcon sx={{ fontSize: 10 }} />
                       </IconButton>
                     </Tooltip>
                   </Box>
                 ))}
               </Box>
             ))}
-            <Button disabled variant="outlined">
-              Finish
+
+            <Button
+              disabled={socketPanding.length === 0 ? true : false}
+              onClick={() => UploadApplication()}
+              variant="outlined"
+            >
+              {isPending ? "loading" : "Finish"}
             </Button>
           </Box>
         </Box>

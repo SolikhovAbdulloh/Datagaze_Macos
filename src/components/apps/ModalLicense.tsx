@@ -6,6 +6,7 @@ import { FiUploadCloud } from "react-icons/fi";
 import { Button, Skeleton, Step, StepLabel, Stepper, TextField } from "@mui/material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { useCreateApplication } from "~/hooks/useQuery/useQueryaction";
+import { toast } from "sonner";
 
 interface FormDataType {
   icon: File | string | any;
@@ -13,7 +14,11 @@ interface FormDataType {
   publisher: string;
   webVersion: string;
   agentVersion: string;
-  installScript: string;
+  Cpu: string;
+  Ram: string;
+  Storage: string;
+  networkBandwidth: string;
+  installScript: File | string | any;
   serverFile: File | string | any;
   agentFile: File | string | any;
 }
@@ -35,12 +40,15 @@ const ModalLicense = () => {
 
   const [formData, setFormData] = useState<FormDataType>({
     icon: "",
+    Ram: "",
+    Storage: "",
+    networkBandwidth: "",
+    Cpu: "",
     applicationName: "Tedy",
     publisher: "Datagaze123 LLC",
     webVersion: "1.0.0",
     agentVersion: "2.0.0",
-    installScript:
-      "sudo timedatectl set-timezone Asia/Tashkent && sudo apt update && sudo apt upgrade -y",
+    installScript: "",
     serverFile: "",
     agentFile: ""
   });
@@ -100,12 +108,15 @@ const ModalLicense = () => {
   const resetForm = () => {
     setFormData({
       icon: "",
+      Ram: "",
+      Storage: "",
+      networkBandwidth: "",
+      Cpu: "",
       applicationName: "Tedy",
       publisher: "Datagaze123 LLC",
       webVersion: "1.0.0",
       agentVersion: "2.0.0",
-      installScript:
-        "sudo timedatectl set-timezone Asia/Tashkent && sudo apt update && sudo apt upgrade -y",
+      installScript: "",
       serverFile: "",
       agentFile: ""
     });
@@ -134,9 +145,18 @@ const ModalLicense = () => {
     if (step === 1) {
       console.log("Step 1 validation:", {
         installScript: formData.installScript,
-        length: formData.installScript.length
+        cpu: formData.Cpu,
+        network: formData.networkBandwidth,
+        storage: formData.Storage,
+        ram: formData.Ram
       });
-      return formData.installScript && formData.installScript.length > 0;
+      return (
+        formData.Cpu &&
+        formData.networkBandwidth &&
+        formData.Ram &&
+        formData.Storage &&
+        formData.installScript instanceof File
+      );
     }
     if (step === 2) {
       const isValidFile = (file: any) => file instanceof File;
@@ -178,24 +198,29 @@ const ModalLicense = () => {
         if (!formData.agentFile || !(formData.agentFile instanceof File))
           errorMessage += "Agent side file, ";
       }
-      alert(errorMessage.slice(0, -2));
+      toast.error(errorMessage.slice(0, -2));
       return;
     }
     if (activeStep < steps.length - 1) {
       setActiveStep((prev) => prev + 1);
     } else if (activeStep === 2) {
       const formDataToSend = new FormData();
+      formDataToSend.append("ram", formData.Ram);
+      formDataToSend.append("cpu", formData.Cpu);
+      formDataToSend.append("storage", formData.Storage);
+      formDataToSend.append("networkBandwidth", formData.networkBandwidth);
       formDataToSend.append("applicationName", formData.applicationName);
       formDataToSend.append("publisher", formData.publisher);
       formDataToSend.append("webVersion", formData.webVersion);
       formDataToSend.append("agentVersion", formData.agentVersion);
 
-      const scriptBlob = new Blob([formData.installScript], { type: "text/plain" });
-      const scriptFile = new File([scriptBlob], "installScript.sh", {
-        type: "text/plain"
-      });
-      formDataToSend.append("scriptFile", scriptFile);
-
+      // const scriptBlob = new Blob([formData.installScript], { type: "text/plain" });
+      // const scriptFile = new File([scriptBlob], "installScript.sh", {
+      //   type: "text/plain"
+      // });
+      if (formData.installScript) {
+        formDataToSend.append("scriptFile", formData.installScript);
+      }
       if (formData.icon) {
         formDataToSend.append("iconFile", formData.icon);
       }
@@ -205,6 +230,7 @@ const ModalLicense = () => {
       if (formData.agentFile) {
         formDataToSend.append("agentFile", formData.agentFile);
       }
+
       console.log("FormData to send:", formDataToSend);
 
       mutate(formDataToSend, {
@@ -295,6 +321,9 @@ const ModalLicense = () => {
                         <img
                           className="w-[30px] rounded-[8px] h-[30px]"
                           src={`${import.meta.env.VITE_BASE_URL}/icons/${item?.pathToIcon}`}
+                          onError={(e) => {
+                            e.currentTarget.src = "/icons/zoom1.png";
+                          }}
                           alt="icon"
                         />
                         {item.applicationName}
@@ -447,15 +476,88 @@ const ModalLicense = () => {
                 </div>
               )}
               {activeStep === 1 && (
-                <div>
+                <div className="flex justify-content-center flex-col gap-3">
                   <p className="text-gray-700 font-medium mb-4">Install Script</p>
-                  <textarea
-                    name="installScript"
-                    value={formData.installScript}
-                    onChange={handleTextChange}
-                    className="w-[100%] h-[200px] bg-[black] text-white p-2 rounded-[8px]"
-                    required
-                  />
+                  {!formData.installScript ? (
+                    <label className="text-center text-[13px] font-400 text-[grey]">
+                      <FiUploadCloud
+                        size={25}
+                        color="grey"
+                        className="m-auto mb-[15px]"
+                      />
+                      <span className="text-[black] ">Drop your files here, or </span>
+                      <span className="text-[#1A79D8] cursor-pointer">
+                        click to browse
+                      </span>
+                      <br /> Only .Json File
+                      <input
+                        type="file"
+                        name="installScript"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        required
+                        accept=".json"
+                      />
+                    </label>
+                  ) : (
+                    <p className="text-sm text-gray-600 mt-1">
+                      File selected: {formData.installScript.name}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[13px] font-bold text-black">
+                        Cpu
+                      </label>
+                      <input
+                        type="text"
+                        name="Cpu"
+                        value={formData.Cpu}
+                        onChange={handleTextChange}
+                        className="w-full border rounded-lg p-2 mt-1"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-bold text-black">
+                        Ram
+                      </label>
+                      <input
+                        type="text"
+                        name="Ram"
+                        value={formData.Ram}
+                        onChange={handleTextChange}
+                        className="w-full border rounded-lg p-2 mt-1"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-bold text-black">
+                        Storage
+                      </label>
+                      <input
+                        type="text"
+                        name="Storage"
+                        value={formData.Storage}
+                        onChange={handleTextChange}
+                        className="w-full border rounded-lg p-2 mt-1"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-bold text-black">
+                        networkBandwidth
+                      </label>
+                      <input
+                        type="text"
+                        name="networkBandwidth"
+                        value={formData.networkBandwidth}
+                        onChange={handleTextChange}
+                        className="w-full border rounded-lg p-2 mt-1"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
               {activeStep === 2 && (

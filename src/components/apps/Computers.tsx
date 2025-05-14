@@ -13,6 +13,7 @@ import { io } from "socket.io-client";
 import { toast } from "sonner";
 
 const Computers = () => {
+ 
   const [params, setSearchparams] = useSearchParams();
   const [openModal, setOpenModal] = useState(false);
   const [openTable, setOpenTable] = useState(false);
@@ -36,7 +37,10 @@ const Computers = () => {
     setOpenModal(true);
     setSelected(id);
   };
-
+const closeTable = () => {
+  setOpenTable(false);
+  setSelectedTable(null);
+};
   const closeModal = () => {
     setOpenModal(false);
     setSelected(null);
@@ -126,7 +130,7 @@ const Computers = () => {
   });
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
-      {openTable && selectedTableId && <Computers_app id={selectedTableId || ""} />}
+      {openTable && selectedTableId && <Computers_app id={selectedTableId || ""} closeTable={closeTable} />}
 
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
         <div className="bg-[#e2eafb] w-full flex items-center justify-between h-[64px] px-4">

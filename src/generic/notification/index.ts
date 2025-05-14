@@ -18,10 +18,10 @@ export const notificationApi = () => {
         toast.error("Error registering ❌", { closeButton: true });
         break;
       case "Install":
-        toast.success("Succsess install !", { closeButton: true });
+        toast.success("Success install !", { closeButton: true });
         break;
       case "Uninstall":
-        toast.success("Delete succsess !", { closeButton: true });
+        toast.success("Delete success !", { closeButton: true });
         break;
       case "Add new user":
         toast.success("Customer added to table !", { closeButton: true });
@@ -33,7 +33,7 @@ export const notificationApi = () => {
         toast.error(`Error !!!`, { closeButton: true });
         break;
       case "Update":
-        toast.info(`Succsess update!`, { closeButton: true });
+        toast.info(`Success update!`, { closeButton: true });
         break;
     }
   };

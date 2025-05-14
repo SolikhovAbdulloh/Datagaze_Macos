@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
-import { FormControl, Select, MenuItem } from "@mui/material";
+import { FormControl, Select, MenuItem, Button } from "@mui/material";
 import { FilterList } from "@mui/icons-material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { ComputersAppType } from "~/types/configs/computers";
@@ -8,8 +8,12 @@ import Skeleton from "@mui/material/Skeleton";
 import { io } from "socket.io-client";
 import { getToken } from "~/utils";
 import { toast } from "sonner";
-
-const Computers_app = ({ id }: { id: string }) => {
+import { useNavigate } from "react-router-dom";
+interface ComputersAppProps {
+    id: string;
+    closeTable: () => void; 
+  }
+const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
   const { data, isLoading, isError } = useQueryApi({
     url: `/api/1/device/${id}/apps`,
     pathname: "apps"
@@ -45,6 +49,7 @@ const Computers_app = ({ id }: { id: string }) => {
     console.log("connect error computer :", error);
     error && toast.error(`Error ${error.message}`);
   });
+ 
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
@@ -130,6 +135,9 @@ const Computers_app = ({ id }: { id: string }) => {
                 <MenuItem value="option2">Option 2</MenuItem>
               </Select>
             </FormControl>
+            <Button type="button" variant="contained" size="small" onClick={closeTable}>
+              Back
+            </Button>
           </div>
         </div>
         <div className="max-h-[600px] overflow-y-auto">
