@@ -56,6 +56,13 @@ export interface NetworkDetail {
   Ethernet: string;
   ip_address: number;
 }
+export interface EditInfoApplication {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  productId: string;
+}
 
 export interface RamType {
   drive_name: string;

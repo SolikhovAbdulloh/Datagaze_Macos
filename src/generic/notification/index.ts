@@ -5,8 +5,9 @@ type NotificationType =
   | "Install"
   | "Uninstall"
   | "Add new user"
-  | "o'chirildi"
+  | "Delete"
   | "Xatolik"
+  | "Upload"
   | "Update";
 export const notificationApi = () => {
   const notify = (type: NotificationType, user?: string) => {
@@ -26,14 +27,17 @@ export const notificationApi = () => {
       case "Add new user":
         toast.success("Customer added to table !", { closeButton: true });
         break;
-      case "o'chirildi":
-        toast.success(`Deleted !!!`, { closeButton: true });
+      case "Delete":
+        toast.success(`Delete succsess !!!`, { closeButton: true });
         break;
       case "Xatolik":
         toast.error(`Error !!!`, { closeButton: true });
         break;
       case "Update":
-        toast.info(`Success update!`, { closeButton: true });
+        toast.success(`Success update!`, { closeButton: true });
+        break;
+      case "Upload":
+        toast.info(`Success upload!`, { closeButton: true });
         break;
     }
   };

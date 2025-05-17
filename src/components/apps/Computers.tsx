@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import { ComputersType } from "~/types/configs/computers";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import TextField from "@mui/material/TextField";
-import { FormControl, Select, MenuItem, CircularProgress } from "@mui/material";
+import { FormControl, Select, MenuItem, CircularProgress, Button } from "@mui/material";
 import Computers_app from "./Computer_app";
 import { useQueryApi } from "~/hooks/useQuery";
+import AddIcon from "@mui/icons-material/Add";
 import { useSearchParams } from "react-router-dom";
 import About_fc from "../modal_app/aboutFc";
 import Skeleton from "@mui/material/Skeleton";
 import { getToken } from "~/utils";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
+import { useUploadInstalldApplication } from "~/hooks/useQuery/useQueryaction";
 
 const Computers = () => {
- 
   const [params, setSearchparams] = useSearchParams();
   const [openModal, setOpenModal] = useState(false);
   const [openTable, setOpenTable] = useState(false);
@@ -24,23 +25,52 @@ const Computers = () => {
   const [allComputers, setAllComputers] = useState<ComputersType[]>([]);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
+  const [modal, setModal] = useState(false);
+  const [checkapp, setCheckapp] = useState<any>([]);
   const computersSocketRef = useRef<any>(null);
-
+  const [appname, setappName] = useState("");
+  const [filename, setfileName] = useState<File | null>(null);
+  const [argument, setArgutment] = useState("");
   const Status = params.get("status") || "all";
-
+  const [isFormValid, setIsFormValid] = useState(false);
   const { data, isLoading, isError } = useQueryApi({
     url: `/api/1/device/computers?page=${page + 1}&limit=${rowsPerPage}`,
     pathname: "computers"
   });
 
+  useEffect(() => {
+    setIsFormValid(
+      appname.trim() !== "" &&
+        filename !== null &&
+        argument.trim() !== "" &&
+        checkapp.length > 0
+    );
+  }, [appname, filename, argument, checkapp]);
   const showModal = (id: string) => {
     setOpenModal(true);
     setSelected(id);
   };
-const closeTable = () => {
-  setOpenTable(false);
-  setSelectedTable(null);
-};
+  const handleCheckboxChange = (id: string, checked: boolean) => {
+    setCheckapp((prev: any) => {
+      if (checked) {
+        return prev.includes(id) ? prev : [...prev, id];
+      } else {
+        return prev.filter((item: any) => item !== id);
+      }
+    });
+  };
+
+  const { mutate, isPending } = useUploadInstalldApplication();
+
+  const closeTable = () => {
+    setOpenTable(false);
+    setSelectedTable(null);
+    setModal(false);
+    setappName("");
+    setfileName(null);
+    setArgutment("");
+    setCheckapp([]);
+  };
   const closeModal = () => {
     setOpenModal(false);
     setSelected(null);
@@ -51,7 +81,9 @@ const closeTable = () => {
       filterComputers(data, Status, value);
     }
   }, [data]);
-
+  const AddModalOpen = () => {
+    setModal(true);
+  };
   const filterComputers = (
     computers: ComputersType[],
     status: string,
@@ -65,7 +97,7 @@ const closeTable = () => {
 
     if (search) {
       filtered = filtered.filter((comp) =>
-        comp?.computerName?.toLowerCase().includes(search.toLowerCase())
+        comp?.hostname?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -107,30 +139,56 @@ const closeTable = () => {
     setRowsPerPage(newRowsPerPage);
     setPage(0);
   };
-  const token = getToken();
-  computersSocketRef.current = io("https://d.dev-baxa.me/computer", {
-    transports: ["websocket"],
-    auth: { token: `Bearer ${token}` }
-  });
+  useEffect(() => {
+    const token = getToken();
 
+    computersSocketRef.current = io("https://d.dev-baxa.me/computer", {
+      transports: ["websocket"],
+      auth: { token: `Bearer ${token}` }
+    });
+
+    computersSocketRef.current.on("connect", () => {
+      console.log("Socket connected12:", computersSocketRef.current.connected);
+    });
+
+    computersSocketRef.current.on("response", (data: any) => {
+      console.log("response", data);
+      data.success === false
+        ? toast.error(`${data.message}`)
+        : toast.success(`${data.message}`);
+    });
+
+    computersSocketRef.current.on("error", (error: string) => {
+      console.log("connect error computer :", error);
+    });
+
+    return () => {
+      computersSocketRef.current?.disconnect();
+    };
+  }, []);
   const DeleteAgent = (id: string) => {
     computersSocketRef.current.emit("delete_agent", {
       computerId: id
     });
   };
-  computersSocketRef.current.on("response", (data: any) => {
-    console.log("response", data);
-    data.success === false
-      ? toast.error(`${data.message} `)
-      : toast.success(`${data.message}`);
-  });
+  // console.log("id:", checkapp, "appname:", appname, "file", filename, "arg:", argument);
+  const CheckApplication = () => {
+    if (!filename) return;
+    const computerIdsStr = Array.isArray(checkapp) ? checkapp.join(",") : checkapp;
+    const formData: any = new FormData();
+    formData.append("appName", appname);
+    formData.append("file", filename!);
+    formData.append("argument", argument);
+    formData.append("computerIds", computerIdsStr);
 
-  computersSocketRef.current.on("error", (error: string) => {
-    console.log("connect error computer :", error);
-  });
+    mutate(formData, { onSuccess: () => closeTable() });
+  };
+
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
-      {openTable && selectedTableId && <Computers_app id={selectedTableId || ""} closeTable={closeTable} />}
+      {openTable && selectedTableId && (
+        <Computers_app id={selectedTableId || ""} closeTable={closeTable} />
+      )}
 
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
         <div className="bg-[#e2eafb] w-full flex items-center justify-between h-[64px] px-4">
@@ -147,6 +205,14 @@ const closeTable = () => {
             }}
           />
           <div className="flex gap-2">
+            {checkapp.length > 0 && (
+              <button
+                onClick={AddModalOpen}
+                className="gap-2 bg-white w-[130px] text-[13px] cursor-pointer h-[32px] rounded-[8px] flex items-center justify-center px-2"
+              >
+                <AddIcon sx={{ fontSize: 15 }} /> Install app
+              </button>
+            )}
             <FormControl sx={{ minWidth: 140 }}>
               <Select
                 size="small"
@@ -173,32 +239,6 @@ const closeTable = () => {
                 <MenuItem value="inactive">Inactive</MenuItem>
               </Select>
             </FormControl>
-            {/* <FormControl sx={{ minWidth: 180 }}>
-              <Select
-                size="small"
-                displayEmpty
-                defaultValue=""
-                sx={{
-                  height: 30,
-                  borderRadius: "8px",
-                  backgroundColor: "#fff",
-                  fontSize: "14px",
-                  boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
-                  "& .MuiSelect-select": {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    padding: "8px 12px"
-                  }
-                }}
-              >
-                <MenuItem value="" disabled>
-                  <FiColumns /> Customize columns
-                </MenuItem>
-                <MenuItem value="column1">Column 1</MenuItem>
-                <MenuItem value="column2">Column 2</MenuItem>
-              </Select>
-            </FormControl> */}
           </div>
         </div>
         <div className="max-h-[600px] overflow-y-auto">
@@ -206,6 +246,7 @@ const closeTable = () => {
             <thead>
               <tr className="border-b border-gray-300 text-gray-600 text-sm bg-[#ccdaf8]">
                 <th className="p-3">#</th>
+                <th className="p-3">No</th>
                 <th className="p-3">Computer name</th>
                 <th className="p-3">Operation System (OS)</th>
                 <th className="p-3">IP address</th>
@@ -214,6 +255,81 @@ const closeTable = () => {
                 <th className="p-3"></th>
               </tr>
             </thead>
+            {modal && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[550px] h-[400px]">
+                  <h2 className="text-xl font-semibold mb-4">Install app</h2>
+
+                  <form>
+                    <div className="grid grid-cols-1  gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm text-gray-700">Name</label>
+                        <input
+                          type="text"
+                          required
+                          onChange={(e) => setappName(e.target.value)}
+                          placeholder="name"
+                          className="w-full border rounded-lg p-2 mt-1"
+                        />
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-700">File Name</label>
+                        {filename ? (
+                          <div>{filename.name}</div>
+                        ) : (
+                          <input
+                            required
+                            type="file"
+                            onChange={(e) => {
+                              const selectedFile = e.target.files?.[0];
+                              if (selectedFile) {
+                                setfileName(selectedFile);
+                              }
+                            }}
+                            className="w-[50%] rounded-lg p-2 mt-1"
+                          />
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-700">Arguments</label>
+                        <input
+                          type="text"
+                          required
+                          onChange={(e) => setArgutment(e.target.value)}
+                          placeholder="arguments"
+                          className="w-full border rounded-lg p-2 mt-1"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center  justify-end mt-4">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          disabled={isPending}
+                          onClick={closeTable}
+                          className="border px-4 py-2 rounded-lg"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={CheckApplication}
+                          disabled={!isFormValid || isPending}
+                          size="small"
+                          variant="contained"
+                        >
+                          {isPending ? (
+                            <CircularProgress color="secondary" size={20} />
+                          ) : (
+                            "Add"
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
             <tbody>
               {isLoading || isError
                 ? Array.from({ length: 5 }).map((_, index) => (
@@ -221,6 +337,9 @@ const closeTable = () => {
                       key={index}
                       className="border-b border-gray-200 p-4 text-sm bg-gray-50"
                     >
+                      <td className="p-3">
+                        <Skeleton variant="rectangular" width={20} height={20} />
+                      </td>
                       <td className="p-3">
                         <Skeleton variant="rectangular" width={20} height={20} />
                       </td>
@@ -251,6 +370,15 @@ const closeTable = () => {
                         index % 2 === 0 ? "bg-[grey-50]" : "bg-[#ccdaf8]"
                       }`}
                     >
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          checked={checkapp.includes(item.id)}
+                          onChange={(e) =>
+                            handleCheckboxChange(item.id, e.target.checked)
+                          }
+                        />
+                      </td>
                       <td className="p-3">{index + 1}</td>
                       <td
                         className="p-3 cursor-pointer"
@@ -258,8 +386,18 @@ const closeTable = () => {
                       >
                         {item.hostname}
                       </td>
-                      <td className="p-3">{item.operation_system}</td>
-                      <td className="p-3">{item.ip_address}</td>
+                      <td
+                        className="p-3 cursor-pointer"
+                        onClick={() => apptable(item.id)}
+                      >
+                        {item.operation_system}
+                      </td>
+                      <td
+                        className="p-3 cursor-pointer"
+                        onClick={() => apptable(item.id)}
+                      >
+                        {item.ip_address}
+                      </td>
                       <td>
                         <p
                           className={`${

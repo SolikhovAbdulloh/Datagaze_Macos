@@ -17,6 +17,18 @@ export interface LaunchpadData {
   isInstalled: boolean;
   pathToIcon: string;
   publisher: string;
+  serverDetails: {
+    lisenceCount: string;
+    ipAddress: string;
+    serverVersion: string;
+    serverFileSize: string;
+  };
+  agentDetails: {
+    firstUploadDate: string;
+    lastUploadDate: string;
+    agentVersion: string;
+    agentFileSize: string;
+  };
   serverFileSize: string;
   serverVersion: string;
 }
@@ -31,4 +43,10 @@ export interface InstallAppInfoType {
   releaseDate?: string;
   storage?: string;
   webVersion?: string;
+}
+export interface CreateAppPayload {
+  appName: string;
+  file: File;
+  argument: string;
+  computerIds: string[];
 }

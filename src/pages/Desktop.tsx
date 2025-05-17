@@ -6,6 +6,7 @@ import { ApplicationType } from "~/types";
 import LicenseModal from "~/components/modal_app";
 import LicenseModalinstall from "~/components/modal_app/install";
 import { AiOutlineCloudUpload } from "react-icons/ai";
+import { CircularProgress } from "@mui/material";
 
 interface DesktopState {
   showApps: { [key: string]: boolean };
@@ -37,7 +38,7 @@ export default function Desktop(props: DesktopState | any) {
   const [searchText, setSearchText] = useState("");
   const [focus, setFocus] = useState(false);
   const [selectedApp, setSelectedApp] = useState<any>(null);
-  const [selectedApp1, setSelectedApp1] = useState<any>(null);
+  const [selectedAppInstall, setSelectedAppInstall] = useState<any>(null);
 
   const { data, isLoading, isError } = useQueryApi({
     pathname: "application",
@@ -175,10 +176,10 @@ export default function Desktop(props: DesktopState | any) {
     });
   };
 
-  const OpenModal = (app: ApplicationType) => setSelectedApp(app);
-  const OpenModalinstall = (app: ApplicationType) => setSelectedApp1(app);
+  const OpenModal = (app: any) => setSelectedApp(app);
+  const OpenModalinstall = (app: ApplicationType) => setSelectedAppInstall(app);
   const CloseModal = () => setSelectedApp(null);
-  const CloseModalInstall = () => setSelectedApp1(null);
+  const CloseModalInstall = () => setSelectedAppInstall(null);
 
   const search = (): ApplicationType[] => {
     if (!searchText.trim()) return applications;
@@ -193,7 +194,7 @@ export default function Desktop(props: DesktopState | any) {
   const close = showLaunchpad
     ? ""
     : "opacity-0 invisible transition-opacity duration-200";
-  let error = "icons/dlp.png";
+
   return (
     <div
       className="size-full overflow-hidden bg-center bg-cover"
@@ -246,7 +247,9 @@ export default function Desktop(props: DesktopState | any) {
           <div className="max-w-[1100px] mx-auto mt-6 w-full">
             <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-4 sm:gap-6">
               {isLoading || isError ? (
-                <p className="text-white text-center col-span-full">Loading...</p>
+                <div className="text-white text-center col-span-full">
+                  <CircularProgress size="40px" color="inherit" />
+                </div>
               ) : Array.isArray(search()) ? (
                 search().map((app: ApplicationType) => (
                   <div
@@ -267,7 +270,7 @@ export default function Desktop(props: DesktopState | any) {
                         onError={(e) => {
                           e.currentTarget.src = "/icons/zoom1.png";
                         }}
-                        className="w-full h-full object-contain  rounded-[18px]"
+                        className="w-[56px] h-[56px] rounded-4"
                       />
                     </a>
                     <span className="mt-2 flex items-center gap-1 text-white text-center">
@@ -286,8 +289,8 @@ export default function Desktop(props: DesktopState | any) {
         </div>
 
         {selectedApp && <LicenseModal app={selectedApp} onClose={CloseModal} />}
-        {selectedApp1 && (
-          <LicenseModalinstall app={selectedApp1} onClose={CloseModalInstall} />
+        {selectedAppInstall && (
+          <LicenseModalinstall app={selectedAppInstall} onClose={CloseModalInstall} />
         )}
       </div>
     </div>

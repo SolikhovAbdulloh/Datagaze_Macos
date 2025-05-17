@@ -80,7 +80,9 @@ const ModalLicense = () => {
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
-    const filtered = data.filter((comp: any) => comp.name?.toLowerCase().includes(query));
+    const filtered = data.filter((comp: any) =>
+      comp.applicationName?.toLowerCase().includes(query)
+    );
     setFilteredComputers(filtered);
     setPage(0);
   };
@@ -125,14 +127,14 @@ const ModalLicense = () => {
 
   const validateStep = (step: number) => {
     if (step === 0) {
-      console.log("Step 0 validation:", {
-        applicationName: formData.applicationName,
-        publisher: formData.publisher,
-        webVersion: formData.webVersion,
-        agentVersion: formData.agentVersion,
-        icon: formData.icon,
-        isIconFile: formData.icon instanceof File
-      });
+      // console.log("Step 0 validation:", {
+      //   applicationName: formData.applicationName,
+      //   publisher: formData.publisher,
+      //   webVersion: formData.webVersion,
+      //   agentVersion: formData.agentVersion,
+      //   icon: formData.icon,
+      //   isIconFile: formData.icon instanceof File
+      // });
       return (
         formData.applicationName &&
         formData.publisher &&
@@ -143,13 +145,13 @@ const ModalLicense = () => {
       );
     }
     if (step === 1) {
-      console.log("Step 1 validation:", {
-        installScript: formData.installScript,
-        cpu: formData.Cpu,
-        network: formData.networkBandwidth,
-        storage: formData.Storage,
-        ram: formData.Ram
-      });
+      // console.log("Step 1 validation:", {
+      //   installScript: formData.installScript,
+      //   cpu: formData.Cpu,
+      //   network: formData.networkBandwidth,
+      //   storage: formData.Storage,
+      //   ram: formData.Ram
+      // });
       return (
         formData.Cpu &&
         formData.networkBandwidth &&
@@ -161,14 +163,14 @@ const ModalLicense = () => {
     if (step === 2) {
       const isValidFile = (file: any) => file instanceof File;
 
-      console.log("Step 2 validation:", {
-        serverFile: formData.serverFile?.name,
-        serverFileType: formData.serverFile?.type,
-        isServerFileValid: isValidFile(formData.serverFile),
-        agentFile: formData.agentFile?.name,
-        agentFileType: formData.agentFile?.type,
-        isAgentFileValid: isValidFile(formData.agentFile)
-      });
+      // console.log("Step 2 validation:", {
+      //   serverFile: formData.serverFile?.name,
+      //   serverFileType: formData.serverFile?.type,
+      //   isServerFileValid: isValidFile(formData.serverFile),
+      //   agentFile: formData.agentFile?.name,
+      //   agentFileType: formData.agentFile?.type,
+      //   isAgentFileValid: isValidFile(formData.agentFile)
+      // });
 
       return (
         formData.serverFile &&
@@ -214,10 +216,6 @@ const ModalLicense = () => {
       formDataToSend.append("webVersion", formData.webVersion);
       formDataToSend.append("agentVersion", formData.agentVersion);
 
-      // const scriptBlob = new Blob([formData.installScript], { type: "text/plain" });
-      // const scriptFile = new File([scriptBlob], "installScript.sh", {
-      //   type: "text/plain"
-      // });
       if (formData.installScript) {
         formDataToSend.append("scriptFile", formData.installScript);
       }
@@ -256,8 +254,8 @@ const ModalLicense = () => {
   };
 
   return (
-    <div className="p-4 bg-gray-100 min-h-screen">
-      <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
+    <div className="p-4 bg-gray-100 min-h-screen ">
+      <div className="overflow-x-auto bg-white shadow-lg rounded-lg ">
         <div className="bg-[#e1e9fb] w-full flex items-center justify-between h-[64px] px-4">
           <div className="flex items-center relative gap-2">
             <TextField
@@ -276,68 +274,75 @@ const ModalLicense = () => {
             <AddIcon fontSize="small" /> <span className="text-[12px]">New Product</span>
           </div>
         </div>
+        <div className="relative">
+          <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+            <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg">
+              <thead className="sticky top-0 bg-[#d4e0f9]  z-4">
+                <tr className="border-b border-gray-300 text-gray-600 text-sm">
+                  <th className="p-1">No</th>
+                  <th className="p-3">Product name</th>
+                  <th className="p-3">Publisher</th>
+                  <th className="p-3">Server version</th>
+                  <th className="p-3">Agent version</th>
+                  <th className="p-3">File size</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading || isError
+                  ? Array.from({ length: 3 }).map((_, index) => (
+                      <tr
+                        key={index}
+                        className="border fellows border-gray-200 p-4 text-sm bg-gray-50"
+                      >
+                        <td className="p-3">
+                          <Skeleton variant="rectangular" width={20} height={20} />
+                        </td>
+                        <td className="p-3">
+                          <Skeleton variant="rectangular" width={20} height={20} />
+                        </td>
+                        <td className="p-3">
+                          <Skeleton variant="text" width={20} />
+                        </td>
+                        <td className="p-3">
+                          <Skeleton variant="text" width={100} />
+                        </td>
+                        <td className="p-3">
+                          <Skeleton variant="text" width={120} />
+                        </td>
+                        <td className="p-3">
+                          <Skeleton variant="text" width={100} />
+                        </td>
+                      </tr>
+                    ))
+                  : paginatedComputers.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className={`border-b border-gray-200 text-sm ${index % 2 === 0 ? "bg-gray-50" : "bg-[#ccdaf8]"}`}
+                      >
+                        <td className="p-3">{index + 1}</td>
 
-        <div className="max-h-[600px] overflow-y-auto">
-          <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg">
-            <thead className="sticky top-0 bg-[#d4e0f9]">
-              <tr className="border-b border-gray-300 text-gray-600 text-sm">
-                <th className="p-3">Product name</th>
-                <th className="p-3">Publisher</th>
-                <th className="p-3">Server version</th>
-                <th className="p-3">Agent version</th>
-                <th className="p-3">File size</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading || isError
-                ? Array.from({ length: 3 }).map((_, index) => (
-                    <tr
-                      key={index}
-                      className="border fellows border-gray-200 p-4 text-sm bg-gray-50"
-                    >
-                      <td className="p-3">
-                        <Skeleton variant="rectangular" width={20} height={20} />
-                      </td>
-                      <td className="p-3">
-                        <Skeleton variant="text" width={20} />
-                      </td>
-                      <td className="p-3">
-                        <Skeleton variant="text" width={100} />
-                      </td>
-                      <td className="p-3">
-                        <Skeleton variant="text" width={120} />
-                      </td>
-                      <td className="p-3">
-                        <Skeleton variant="text" width={100} />
-                      </td>
-                    </tr>
-                  ))
-                : paginatedComputers.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className={`border-b border-gray-200 text-sm ${index % 2 === 0 ? "bg-gray-50" : "bg-[#ccdaf8]"}`}
-                    >
-                      <td className="p-3 flex items-center gap-2">
-                        <img
-                          className="w-[30px] rounded-[8px] h-[30px]"
-                          src={`${import.meta.env.VITE_BASE_URL}/icons/${item?.pathToIcon}`}
-                          onError={(e) => {
-                            e.currentTarget.src = "/icons/zoom1.png";
-                          }}
-                          alt="icon"
-                        />
-                        {item.applicationName}
-                      </td>
-                      <td className="p-3">{item.publisher}</td>
-                      <td className="p-3">{item.serverVersion}</td>
-                      <td className="p-3">
-                        {item.agentVersion ? item.agentVersion : "0.0.0"}
-                      </td>
-                      <td className="p-3">{item.serverFileSize}</td>
-                    </tr>
-                  ))}
-            </tbody>
-          </table>
+                        <td className="p-3 flex items-center gap-2">
+                          <img
+                            className="w-[30px] rounded-[8px] h-[30px]"
+                            src={`${import.meta.env.VITE_BASE_URL}/icons/${item?.pathToIcon}`}
+                            onError={(e) => {
+                              e.currentTarget.src = "/icons/zoom1.png";
+                            }}
+                            alt="icon"
+                          />
+                          {item.applicationName}
+                        </td>
+                        <td className="p-3">{item.publisher}</td>
+                        <td className="p-3">{item.serverVersion}</td>
+                        <td className="p-3">
+                          {item.agentVersion ? item.agentVersion : "0.0.0"}
+                        </td>
+                        <td className="p-3">{item.serverFileSize}</td>
+                      </tr>
+                    ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="flex items-center justify-between px-4 py-2 border-t border-gray-200 bg-white">

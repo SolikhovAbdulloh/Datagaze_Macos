@@ -13,7 +13,8 @@ import { BiMemoryCard } from "react-icons/bi";
 import { IoMdCloseCircle } from "react-icons/io";
 import { EditDetailsModal } from "./edit";
 import { useDeleteApplication } from "~/hooks/useQuery/useQueryaction";
-import { useState } from "react"; 
+import { useState } from "react";
+import { useQueryApi } from "~/hooks/useQuery";
 
 const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => void }) => {
   const [tabValue, setTabValue] = useState("Server Details");
@@ -25,6 +26,10 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     event.preventDefault();
     setTabValue(newValue);
   };
+  const { data, isLoading } = useQueryApi({
+    pathname: "installApplication",
+    url: `/api/1/desktop/${app.id}`
+  });
 
   const handleEditClick = () => {
     setEditModalOpen(true);
@@ -42,8 +47,9 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     setIsModalOpen(false);
     onClose();
   };
-  console.log(app);
-  
+  if (isLoading) {
+    return <CircularProgress size="30px" />;
+  }
   return (
     <Modal open={isModalOpen} onClose={handleModalClose} aria-labelledby="modal-title">
       <Box
@@ -68,7 +74,7 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
             className="cursor-pointer text-gray-500 hover:text-gray-700"
             onClick={handleModalClose}
           />
-          <p className="text-[13px] font-600 text-gray-500">{app.applicationName}</p>
+          <p className="text-[13px] font-600 text-gray-500">{data?.applicationName}</p>
         </div>
         <Typography
           variant="h4"
@@ -77,13 +83,13 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
         >
           <img
             className="w-[56px] h-[56px] rounded-4"
-            src={`${import.meta.env.VITE_BASE_URL}/icons/${app?.pathToIcon}`}
-            alt={app?.applicationName}
+            src={`${import.meta.env.VITE_BASE_URL}/icons/${data?.pathToIcon}`}
+            alt={data?.applicationName}
             onError={(e) => {
               e.currentTarget.src = "/icons/zoom1.png";
             }}
           />
-          <p className="text-[40px] font-500">{app?.applicationName}</p>
+          <p className="text-[40px] font-500">{data?.applicationName}</p>
         </Typography>
         <Tabs
           value={tabValue}
@@ -137,28 +143,34 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
                   <img src="/icons/file_market.png" alt="count" />
                   <p>License count</p>
                 </div>
-                <p className="text-[16px] font-500">{app.License_count}</p>
+                <p className="text-[16px] font-500">
+                  {data?.serverDetails?.lisenceCount}
+                </p>
               </div>
               <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <img src="/icons/Vector.png" alt="version" />
                   <p>Agent version</p>
                 </div>
-                <p className="text-[16px] font-500">{app.Agent_version}</p>
+                <p className="text-[16px] font-500">
+                  {data?.serverDetails?.serverVersion}
+                </p>
               </div>
               <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <img src="/icons/computer.png" alt="address" />
                   <p>IP address</p>
                 </div>
-                <p className="text-[16px] font-500">{app.adress}</p>
+                <p className="text-[16px] font-500">{data?.serverDetails?.ipAddress}</p>
               </div>
               <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <BiMemoryCard />
                   <p>File size</p>
                 </div>
-                <p className="text-[16px] font-500">{app.File_size}GB</p>
+                <p className="text-[16px] font-500">
+                  {data?.serverDetails?.serverFileSize}GB
+                </p>
               </div>
             </div>
           </div>
@@ -170,28 +182,34 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
                   <CiClock2 />
                   <p>First upload date</p>
                 </div>
-                <p className="text-[16px] font-500">{app.First_upload_date}</p>
+                <p className="text-[16px] font-500">
+                  {data?.agentDetails?.firstUploadDate}
+                </p>
               </div>
               <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <CiClock2 />
                   <p>Last upload date</p>
                 </div>
-                <p className="text-[16px] font-500">{app.Last_upload_date}</p>
+                <p className="text-[16px] font-500">
+                  {data?.agentDetails?.lastUploadDate}
+                </p>
               </div>
               <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <img src="/icons/Vector.png" alt="version" />
                   <p>Agent version</p>
                 </div>
-                <p className="text-[16px] font-500">{app.Agent_version}</p>
+                <p className="text-[16px] font-500">{data?.agentDetails?.agentVersion}</p>
               </div>
               <div className="flex flex-col items-start gap-3">
                 <div className="flex items-center gap-3">
                   <BiMemoryCard />
                   <p>File size</p>
                 </div>
-                <p className="text-[16px] font-500">{app.File_size}GB</p>
+                <p className="text-[16px] font-500">
+                  {data?.agentDetails?.agentFileSize}GB
+                </p>
               </div>
             </div>
           </div>
@@ -199,7 +217,7 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
 
         <div className="flex text-[18px] font-700 items-center justify-between">
           <Button
-            onClick={() => UninstallApplication(app.id)}
+            onClick={() => UninstallApplication(data.id)}
             sx={{
               textTransform: "capitalize",
               mr: 1,
@@ -235,7 +253,7 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
             </Button>
           </div>
         </div>
-        {isEditModalOpen && <EditDetailsModal app={app} onClose={handleEditClose} />}
+        {isEditModalOpen && <EditDetailsModal app={data} onClose={handleEditClose} />}
       </Box>
     </Modal>
   );

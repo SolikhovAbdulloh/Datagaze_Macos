@@ -1,5 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Box, Typography, Button, Stepper, Step, StepLabel } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Typography,
+  Button,
+  Stepper,
+  Step,
+  StepLabel,
+  CircularProgress,
+  LinearProgress
+} from "@mui/material";
 import { ApplicationType, InstallAppInfoType } from "~/types";
 import { BiMemoryCard } from "react-icons/bi";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -43,11 +53,12 @@ const LicenseModalinstall = ({
   const [openModal, setOpenModal] = useState(false);
   const [codeModalOpen, setCodeModalOpen] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
-  const [socketPanding, setSocketPanding] = useState([]);
+  const [percentage, setpercentage] = useState<number>(0);
   const { data } = useQueryApi({
     pathname: "information_app",
     url: `/api/1/desktop/${app.id}`
   });
+
   const { data: sudo } = useQueryApi({
     url: `/api/1/desktop/download/script/${app.id}`,
     pathname: "SUDO"
@@ -61,11 +72,10 @@ const LicenseModalinstall = ({
   const { mutate, isPending } = useUploadApplication();
 
   const UploadApplication = () => {
-    console.log("bosildi");
-
     mutate(app.id, {
       onSuccess: () => {
         setOpenModal(false);
+        onClose();
       }
     });
   };
@@ -186,7 +196,7 @@ const LicenseModalinstall = ({
           });
           socket.on("command_progress", (prog: any) => {
             console.log("command_progress:", prog);
-            setSocketPanding(prog.pending);
+            setpercentage(prog.percentage);
           });
           const handleResize = () => {
             fitAddon.fit();
@@ -227,7 +237,7 @@ const LicenseModalinstall = ({
       }
     );
   };
-  console.log("usestate", socketPanding);
+  // console.log("persent:", percentage);
 
   return (
     <>
@@ -543,9 +553,7 @@ const LicenseModalinstall = ({
                 className="cursor-pointer text-gray-500 hover:text-red-700"
                 onClick={onClose}
               />
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                Installation Terminal
-              </Typography>
+              <Typography variant="h6">Installation Terminal</Typography>
               <Box
                 ref={terminalRef}
                 sx={{
@@ -636,13 +644,29 @@ const LicenseModalinstall = ({
                 ))}
               </Box>
             ))}
-
+            <Box position="relative" className="flex items-center justify-center">
+              <CircularProgress variant="determinate" size={40} value={percentage} />
+              <Box
+                top={0}
+                left={0}
+                bottom={0}
+                right={0}
+                position="absolute"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Typography variant="caption" component="div" color="textSecondary">
+                  {`${Math.round(percentage)}%`}
+                </Typography>
+              </Box>
+            </Box>
             <Button
-              disabled={socketPanding.length === 0 ? true : false}
+              disabled={percentage == 100 ? false : true}
               onClick={() => UploadApplication()}
               variant="outlined"
             >
-              {isPending ? "loading" : "Finish"}
+              {isPending ? <CircularProgress size="30px" /> : "Finish"}
             </Button>
           </Box>
         </Box>

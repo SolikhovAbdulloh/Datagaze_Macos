@@ -1,9 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
 import { LoginType } from "~/types/configs";
+import { EditInfoApplication } from "~/types/configs/computers";
+import { CreateAppPayload } from "~/types/configs/launchpad";
 import { RegisterUser } from "~/types/configs/register";
 import { getUserInfo, setToken } from "~/utils";
 
@@ -96,7 +99,7 @@ const useDeleteRegister = () => {
     },
     onSuccess: () => {
       console.log("success DELETE");
-      notify("o'chirildi");
+      notify('Delete');
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["superadmin_Users"] });
@@ -159,7 +162,7 @@ const useDeleteApplication = () => {
   });
 };
 const useInstallApplication = () => {
-  const notify = notificationApi();
+  // const notify = notificationApi();
   const queryClient = useQueryClient();
   const axios = useAxios();
   return useMutation({
@@ -172,8 +175,9 @@ const useInstallApplication = () => {
       });
     },
     onSuccess: (res) => {
-      console.log(res);
-      notify("Install");
+      console.log(res, "success");
+
+      // notify("Install");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["application"] });
@@ -241,8 +245,9 @@ const useCreateApplication = () => {
 const useUploadApplication = () => {
   const axios = useAxios();
   const queryClient = useQueryClient();
+  const notify = notificationApi();
   return useMutation({
-    mutationFn: async (id: any) =>
+    mutationFn: async (id: string) =>
       await axios({
         url: `/api/1/desktop/update/is-installed/${id}`,
         method: "PATCH",
@@ -250,12 +255,78 @@ const useUploadApplication = () => {
       }),
     onSuccess: () => {
       console.log("Success");
+      notify('Install');
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["application"] });
     },
     onError: (err) => {
       console.log(err.message);
+    }
+  });
+};
+const useUploadInstalldApplication = () => {
+  const axios = useAxios();
+  const queryClient = useQueryClient();
+  const notify = notificationApi();
+
+  return useMutation({
+    mutationFn: async (formData: FormData) => {
+      return axios({
+        url: `/api/1/installers/upload`,
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data"
+        },
+        body: formData
+      });
+    },
+
+    onSuccess: () => {
+      console.log("Success");
+      notify("Install");
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["computers"] });
+    },
+
+    onError: (err: any) => {
+      console.log(err.message);
+    }
+  });
+};
+const useEditApplication = () => {
+  const axios = useAxios();
+  const queryClient = useQueryClient();
+  const notify = notificationApi();
+
+  return useMutation({
+    mutationFn: async (data: EditInfoApplication) => {
+      const { username, host, productId, password, port } = data;
+
+      return await axios({
+        url: `/api/1/ssh/update`,
+        method: "PUT",
+        body: {
+          username,
+          host,
+          productId,
+          password,
+          port
+        }
+      });
+    },
+    onSuccess: () => {
+      console.log("Success");
+      notify("Update");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["application"] });
+    },
+    onError: (err: any) => {
+      toast.error(`${err.message}`);
+      console.error(err.message);
     }
   });
 };
@@ -268,5 +339,7 @@ export {
   useDeleteRegister,
   useInstallApplication,
   useUpdateRegister,
-  useUploadApplication
+  useUploadApplication,
+  useEditApplication,
+  useUploadInstalldApplication
 };

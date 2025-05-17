@@ -8,7 +8,7 @@ import {
 } from "~/hooks/useQuery/useQueryaction";
 import { useQueryApi } from "~/hooks/useQuery";
 import { superadmin_users } from "~/types/configs/superadmin_users";
-import { Skeleton } from "@mui/material";
+import { Button, Skeleton } from "@mui/material";
 
 export const SuperAdmin_users = () => {
   const [page, setPage] = useState(0);
@@ -33,7 +33,7 @@ export const SuperAdmin_users = () => {
   const [username, setUsername] = useState<string>("");
   const [fullname, setFullname] = useState<string>("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
-  const { mutate } = useRegister();
+  const { mutate, isPending } = useRegister();
   const { mutate: deleteRegisterMutate } = useDeleteRegister();
   const { mutate: UpdateRegisterUser } = useUpdateRegister();
 
@@ -137,12 +137,12 @@ export const SuperAdmin_users = () => {
               }
             }}
           />
-          <div
+          <button
             onClick={AddModalOpen}
             className="gap-2 bg-white w-[130px] text-[13px] cursor-pointer h-[32px] rounded-[8px] flex items-center justify-center px-2"
           >
             <AddIcon fontSize="small" /> Add new user
-          </div>
+          </button>
         </div>
         <div className="max-h-[600px] overflow-y-auto">
           <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg">
@@ -204,18 +204,22 @@ export const SuperAdmin_users = () => {
                     </div>
                     <div className="flex items-center  justify-end mt-4">
                       <div className="flex gap-2">
-                        <button
+                        <Button
                           onClick={CloseModal}
+                          variant="outlined"
+                          size="small"
                           className="border px-4 py-2 rounded-lg"
                         >
                           Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="submit"
-                          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                          size="small"
+                          variant="contained"
+                          disabled={isPending}
                         >
-                          Next
-                        </button>
+                          {isPending ? "Loading" : "Next"}
+                        </Button>
                       </div>
                     </div>
                   </form>
@@ -276,7 +280,7 @@ export const SuperAdmin_users = () => {
           </div>
           <span className="text-gray-700 text-sm">
             {page * rowsPerPage + 1}–
-            {Math.min((page + 1) * rowsPerPage, filteredComputers?.length)} of 
+            {Math.min((page + 1) * rowsPerPage, filteredComputers?.length)} of
             {filteredComputers?.length}
           </span>
           <div className="flex items-center gap-2">

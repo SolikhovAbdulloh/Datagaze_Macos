@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
-import { FormControl, Select, MenuItem, Button } from "@mui/material";
+import {
+  FormControl,
+  Select,
+  MenuItem,
+  Button,
+  Input,
+  CircularProgress
+} from "@mui/material";
 import { FilterList } from "@mui/icons-material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { ComputersAppType } from "~/types/configs/computers";
@@ -8,11 +15,12 @@ import Skeleton from "@mui/material/Skeleton";
 import { io } from "socket.io-client";
 import { getToken } from "~/utils";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { notificationApi } from "~/generic/notification";
+import { useAxios } from "~/hooks/useAxios";
 interface ComputersAppProps {
-    id: string;
-    closeTable: () => void; 
-  }
+  id: string;
+  closeTable: () => void;
+}
 const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
   const { data, isLoading, isError } = useQueryApi({
     url: `/api/1/device/${id}/apps`,
@@ -21,35 +29,38 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
   const computersSocketRef = useRef<any>(null);
   let token = getToken();
   const [value, setValue] = useState("");
+  const [modal, setModal] = useState(false);
   const [filteredComputers, setFilteredComputers] = useState<ComputersAppType[]>([]);
   const [page, setPage] = useState(0);
+  const [name, setName] = useState("");
+  const [argument, setargument] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [DeleteModal, setDeleteModal] = useState(false);
   useEffect(() => {
     if (data?.data && Array.isArray(data?.data)) {
       setFilteredComputers(data?.data);
     }
   }, [data]);
 
-  computersSocketRef.current = io(
-    "https://datagaze-platform-9cab2c02bc91.herokuapp.com/computer",
-    {
-      transports: ["websocket"],
-      auth: { token: `Bearer ${token}` }
-    }
-  );
-
+  computersSocketRef.current = io("https://d.dev-baxa.me/computer", {
+    transports: ["websocket"],
+    auth: { token: `Bearer ${token}` }
+  });
   computersSocketRef.current.on("response", (data: any) => {
     console.log("response", data);
     data.success === false
       ? toast.error(`${data.appName}  ${data.message} `)
       : toast.success(`response ${(data.name, data.status)}`);
   });
+  computersSocketRef.current.on("connect", () => {
+    console.log("Socket connected1:", computersSocketRef.current.connected);
+  });
 
   computersSocketRef.current.on("error", (error: any) => {
     console.log("connect error computer :", error);
     error && toast.error(`Error ${error.message}`);
   });
- 
+
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
     setValue(query);
@@ -74,20 +85,65 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
-  const DeleteAppBySocket = (name: string) => {
-    console.log(name, id);
-    computersSocketRef.current.emit("delete_app", {
-      computerId: id,
-      appName: name
+  const DeleteAppBySocket = async (name: string) => {
+    setName(name);
+    const axios = useAxios();
+    const response = await axios({
+      url: `/api/1/device/${id}/${name}/is-exist`,
+      method: "GET"
     });
-  };
-  const UpdateAppBySocket = (name: string) => {
-    computersSocketRef.current.emit("update_app", {
-      computerId: id,
-      appName: name
-    });
+    if (response.isInput === true) {
+      setDeleteModal(true);
+    } else {
+      if (computersSocketRef.current?.connected) {
+        computersSocketRef.current.emit("delete_app", {
+          computerId: id,
+          appName: name
+        });
+      } else {
+        console.log("❌ Socket hali ulangan emas!");
+      }
+      // computersSocketRef.current.emit("delete_app", {
+      //   computerId: id,
+      //   appName: name
+      // });
+
+      notify("Delete");
+    }
   };
 
+  // const {
+  //   data: Delete,
+  //   refetch,
+  //   isLoading: DeleteLoader
+  // } = useQueryApi({
+  //   url: `/api/1/device/${id}/${name}/is-exist`,
+  //   pathname: "DeleteSocketApplication",
+  //   options: { enabled: !!name }
+  // });
+
+  const notify = notificationApi();
+
+  const UpdateAppBySocket = (name: string) => {
+    setModal(true);
+    // computersSocketRef.current.emit("update_app", {
+    //   computerId: id,
+    //   appName: name
+    // });
+  };
+  function CloseeDeleteModal() {
+    setDeleteModal(false);
+  }
+
+  function SendArgumentfuction() {
+    computersSocketRef.current.emit("delete_app", {
+      computerId: id,
+      appName: name,
+      argument: argument
+    });
+    CloseeDeleteModal();
+    notify("Delete");
+  }
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
@@ -109,32 +165,6 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
             }}
           />
           <div className="flex gap-2">
-            <FormControl sx={{ minWidth: 140 }}>
-              <Select
-                size="small"
-                displayEmpty
-                defaultValue=""
-                sx={{
-                  height: 36,
-                  borderRadius: "8px",
-                  backgroundColor: "#fff",
-                  fontSize: "14px",
-                  boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
-                  "& .MuiSelect-select": {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    padding: "8px 12px"
-                  }
-                }}
-              >
-                <MenuItem value="" disabled>
-                  <FilterList fontSize="small" /> Filters
-                </MenuItem>
-                <MenuItem value="option1">Option 1</MenuItem>
-                <MenuItem value="option2">Option 2</MenuItem>
-              </Select>
-            </FormControl>
             <Button type="button" variant="contained" size="small" onClick={closeTable}>
               Back
             </Button>
@@ -145,6 +175,7 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
             <thead className="sticky top-0 bg-[#ccdbf7]">
               <tr className="border-b border-gray-300 text-gray-600 text-sm">
                 <th className="p-3">Product name</th>
+                <th className="p-3">Version</th>
                 <th className="p-3">File size</th>
                 <th className="p-3">Type</th>
                 <th className="p-3">Installed date</th>
@@ -152,6 +183,65 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
                 <th className="p-3"></th>
               </tr>
             </thead>
+            {modal && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[450px] h-[350px]">
+                  <h2 className="text-xl font-semibold mb-4">Install app</h2>
+
+                  <form>
+                    <div className="grid grid-cols-1  gap-4 mb-4">
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-700">File Name</label>
+                        {/* {filename ? (
+                                        <div>{filename.name}</div>
+                                      ) : ( */}
+                        <input
+                          required
+                          type="file"
+                          className="w-[50%] rounded-lg p-2 mt-1"
+                        />
+                        {/* )} */}
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-700">Arguments</label>
+                        <input
+                          type="text"
+                          required
+                          // onChange={(e) => setArgutment(e.target.value)}
+                          placeholder="arguments"
+                          className="w-full border rounded-lg p-2 mt-1"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center  justify-end mt-4">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          // disabled={isPending}
+                          onClick={closeTable}
+                          className="border px-4 py-2 rounded-lg"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          // onClick={CheckApplication}
+                          // disabled={!isFormValid || isPending}
+                          size="small"
+                          variant="contained"
+                        >
+                          {/* {isPending ? (
+                            <CircularProgress color="secondary" size={20} />
+                          ) : (
+                            "Add"
+                          )} */}
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
             <tbody>
               {isLoading || isError
                 ? Array.from({ length: 3 }).map((_, index) => (
@@ -161,6 +251,9 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
                     >
                       <td className="p-3">
                         <Skeleton variant="rectangular" width={20} height={20} />
+                      </td>
+                      <td className="p-3">
+                        <Skeleton variant="text" width={20} />
                       </td>
                       <td className="p-3">
                         <Skeleton variant="text" width={20} />
@@ -187,6 +280,7 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
                       }`}
                     >
                       <td className="p-3">{item.name}</td>
+                      <td className="p-3">{item.version}</td>
                       <td className="p-3">{item.size} MB</td>
                       <td className="p-3">{item.type}</td>
                       <td className="p-3">{item.installed_date}</td>
@@ -205,6 +299,36 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
             </tbody>
           </table>
         </div>
+        {DeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex  items-center justify-center z-50">
+            <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 ">
+              <h2 className="text-xl font-semibold mb-4">Delete App</h2>
+              <div className="flex gap-2 p-3">
+                <Input
+                  placeholder="argument"
+                  className="p-1"
+                  onChange={(e) => setargument(e.target.value)}
+                />
+                <Button
+                  variant="outlined"
+                  onClick={CloseeDeleteModal}
+                  size="small"
+                  className="border rounded-lg"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={SendArgumentfuction}
+                  size="small"
+                  color="error"
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between px-4 py-2 bg-white border-t">
           <div>
             <span>Rows per page: </span>
