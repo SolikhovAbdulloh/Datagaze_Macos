@@ -32,6 +32,8 @@ import { IconButton, Tooltip } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { getToken } from "~/utils";
 import { toast } from "sonner";
+import { error } from "console";
+import { useQueryClient } from "@tanstack/react-query";
 const steps = ["System requirements", "Server configs", "Completed"];
 const LicenseModalinstall = ({
   app,
@@ -54,9 +56,15 @@ const LicenseModalinstall = ({
   const [codeModalOpen, setCodeModalOpen] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
   const [percentage, setpercentage] = useState<number>(0);
-  const { data } = useQueryApi({
-    pathname: "information_app",
-    url: `/api/1/desktop/${app.id}`
+  const { data, isLoading, isError } = useQueryApi({
+    pathname: "Not_Installed_app",
+    url: `/api/1/desktop/${app.id}`,
+    options: {
+      staleTime: 0,
+      enabled: !!app?.id,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false
+    }
   });
 
   const { data: sudo } = useQueryApi({
@@ -162,7 +170,7 @@ const LicenseModalinstall = ({
           fitAddon.fit();
           term.focus();
 
-          socket = io("wss://datagaze-platform-9cab2c02bc91.herokuapp.com/terminal1", {
+          socket = io("wss://d.dev-baxa.me/terminal1", {
             transports: ["websocket"],
             auth: {
               token: `Bearer ${token}`

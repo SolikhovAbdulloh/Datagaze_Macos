@@ -1,13 +1,6 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
-import {
-  FormControl,
-  Select,
-  MenuItem,
-  Button,
-  Input,
-  CircularProgress
-} from "@mui/material";
+import { Button, Input, CircularProgress } from "@mui/material";
 
 import { useQueryApi } from "~/hooks/useQuery";
 import { ComputersAppType } from "~/types/configs/computers";
@@ -36,6 +29,7 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
   });
 
   const [loadingItem, setLoadingItem] = useState<string | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
   const [modal, setModal] = useState(false);
   const [filteredComputers, setFilteredComputers] = useState<ComputersAppType[]>([]);
   const [page, setPage] = useState(0);
@@ -135,7 +129,7 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
     setArgutmentUpload("");
   };
   const UpdateAppBySocket = async (name: string, id: string) => {
-    setModal(true);
+    setLoading(name);
     const axios = useAxios();
     const response = await axios({
       url: `/api/1/device/${ID}/${name}/is-exist`,
@@ -143,7 +137,14 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
     });
     const result = response.isInput;
     setRes(result);
-    console.log(response);
+    // console.log(response);
+    if (result) {
+      setModal(true);
+      setLoading(null);
+    }
+    setModal(true);
+
+    setLoading(null);
 
     setPendingUpload({ name, id });
   };
@@ -151,15 +152,6 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
     setDeleteModal(false);
   }
   const handleUpload = async () => {
-    if (!filename) {
-      toast.error("File required!");
-      return;
-    }
-
-    if (!res && !argumentUpload) {
-      toast.error("Argument required!");
-      return;
-    }
     const formData = new FormData();
     if (filename) formData.append("file", filename);
     formData.append("id", pendingUpload.id);
@@ -269,7 +261,11 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
                       <td className="p-3">{item.installed_date}</td>
                       <td className="p-3 text-[#1A79D8] ">
                         <button onClick={() => UpdateAppBySocket(item.name, item.id)}>
-                          Update
+                          {loading === item.name ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            "Update"
+                          )}
                         </button>
                       </td>
                       <td className="p-3 text-red-600">
@@ -293,7 +289,7 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
               <div
                 className={`bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[450px] ${res ? "h-[350px]" : "h-[220px]"}`}
               >
-                <h2 className="text-xl font-semibold mb-4">Install app</h2>
+                <h2 className="text-xl font-semibold mb-4">Update </h2>
 
                 <form
                   onSubmit={(e) => {
@@ -348,7 +344,11 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
                         Cancel
                       </Button>
                       <Button size="small" variant="contained" type="submit">
-                        {isPending ? <CircularProgress size={20} /> : "Update"}
+                        {isPending ? (
+                          <CircularProgress color="warning" size={20} />
+                        ) : (
+                          "Update"
+                        )}
                       </Button>
                     </div>
                   </div>

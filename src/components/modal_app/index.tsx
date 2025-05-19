@@ -26,9 +26,16 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     event.preventDefault();
     setTabValue(newValue);
   };
+
   const { data, isLoading } = useQueryApi({
     pathname: "installApplication",
-    url: `/api/1/desktop/${app.id}`
+    url: `/api/1/desktop/${app.id}`,
+    options: {
+      staleTime: 0,
+      enabled: !!app?.id,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false
+    }
   });
 
   const handleEditClick = () => {

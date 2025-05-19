@@ -42,7 +42,12 @@ export default function Desktop(props: DesktopState | any) {
 
   const { data, isLoading, isError } = useQueryApi({
     pathname: "application",
-    url: "/api/1/desktop/web-applications"
+    url: "/api/1/desktop/web-applications",
+    options: {
+      staleTime: 0,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false
+    }
   });
 
   const applications: ApplicationType[] = data || [];
@@ -144,6 +149,7 @@ export default function Desktop(props: DesktopState | any) {
       }
     }
   };
+  if (!applications || isLoading) return;
 
   const renderAppWindows = () => {
     return apps.map((app: any) => {
@@ -176,8 +182,16 @@ export default function Desktop(props: DesktopState | any) {
     });
   };
 
-  const OpenModal = (app: any) => setSelectedApp(app);
-  const OpenModalinstall = (app: ApplicationType) => setSelectedAppInstall(app);
+  const OpenModal = (app: ApplicationType) => {
+    const found = applications.find((a) => a.id === app.id);
+    if (found) setSelectedApp(found);
+  };
+
+  const OpenModalinstall = (app: ApplicationType) => {
+    const found = applications.find((a) => a.id === app.id);
+    if (found) setSelectedAppInstall(found);
+  };
+
   const CloseModal = () => setSelectedApp(null);
   const CloseModalInstall = () => setSelectedAppInstall(null);
 
@@ -258,11 +272,14 @@ export default function Desktop(props: DesktopState | any) {
                   >
                     <a
                       className="w-12 xs:w-14 sm:w-16 mx-auto cursor-pointer"
-                      onClick={
-                        app?.isInstalled
-                          ? () => OpenModal(app)
-                          : () => OpenModalinstall(app)
-                      }
+                      onClick={() => {
+                        if (isLoading || isError) return;
+                        if (app?.isInstalled) {
+                          OpenModal(app);
+                        } else {
+                          OpenModalinstall(app);
+                        }
+                      }}
                     >
                       <img
                         src={`${import.meta.env.VITE_BASE_URL}/icons/${app?.pathToIcon}`}
@@ -288,8 +305,10 @@ export default function Desktop(props: DesktopState | any) {
           </div>
         </div>
 
-        {selectedApp && <LicenseModal app={selectedApp} onClose={CloseModal} />}
-        {selectedAppInstall && (
+        {selectedApp && !isLoading && !isError && (
+          <LicenseModal app={selectedApp} onClose={CloseModal} />
+        )}
+        {selectedAppInstall && !isLoading && !isError && (
           <LicenseModalinstall app={selectedAppInstall} onClose={CloseModalInstall} />
         )}
       </div>

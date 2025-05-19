@@ -16,6 +16,7 @@ import { useUploadInstalldApplication } from "~/hooks/useQuery/useQueryaction";
 
 const Computers = () => {
   const [params, setSearchparams] = useSearchParams();
+
   const [openModal, setOpenModal] = useState(false);
   const [openTable, setOpenTable] = useState(false);
   const [selectedId, setSelected] = useState<string | null>(null);
