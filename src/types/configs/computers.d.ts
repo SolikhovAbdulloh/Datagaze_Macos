@@ -63,6 +63,11 @@ export interface EditInfoApplication {
   password: string;
   productId: string;
 }
+export interface EditApplication {
+  id: string;
+  file: File | null;
+  args?: string | undefined;
+}
 
 export interface RamType {
   drive_name: string;

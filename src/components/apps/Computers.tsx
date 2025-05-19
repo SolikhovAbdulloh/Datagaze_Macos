@@ -19,6 +19,7 @@ const Computers = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openTable, setOpenTable] = useState(false);
   const [selectedId, setSelected] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [selectedTableId, setSelectedTable] = useState<string | null>(null);
   const [value, setValue] = useState("");
   const [filteredComputers, setFilteredComputers] = useState<ComputersType[]>([]);
@@ -170,6 +171,7 @@ const Computers = () => {
     computersSocketRef.current.emit("delete_agent", {
       computerId: id
     });
+    toast.success("success");
   };
   // console.log("id:", checkapp, "appname:", appname, "file", filename, "arg:", argument);
   const CheckApplication = () => {

@@ -8,7 +8,7 @@ import {
   Input,
   CircularProgress
 } from "@mui/material";
-import { FilterList } from "@mui/icons-material";
+
 import { useQueryApi } from "~/hooks/useQuery";
 import { ComputersAppType } from "~/types/configs/computers";
 import Skeleton from "@mui/material/Skeleton";
@@ -17,22 +17,33 @@ import { getToken } from "~/utils";
 import { toast } from "sonner";
 import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
+import { useUpload } from "~/hooks/useQuery/useQueryaction";
 interface ComputersAppProps {
   id: string;
   closeTable: () => void;
 }
-const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
+const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
   const { data, isLoading, isError } = useQueryApi({
-    url: `/api/1/device/${id}/apps`,
+    url: `/api/1/device/${ID}/apps`,
     pathname: "apps"
   });
   const computersSocketRef = useRef<any>(null);
   let token = getToken();
   const [value, setValue] = useState("");
+  const [pendingUpload, setPendingUpload] = useState<{ name: string; id: string }>({
+    name: "",
+    id: ""
+  });
+
+  const [loadingItem, setLoadingItem] = useState<string | null>(null);
   const [modal, setModal] = useState(false);
   const [filteredComputers, setFilteredComputers] = useState<ComputersAppType[]>([]);
   const [page, setPage] = useState(0);
+  const [filename, setfileName] = useState<File | null>(null);
   const [name, setName] = useState("");
+  const [res, setRes] = useState("");
+  const [argumentUpload, setArgutmentUpload] = useState("");
+
   const [argument, setargument] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [DeleteModal, setDeleteModal] = useState(false);
@@ -41,7 +52,7 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
       setFilteredComputers(data?.data);
     }
   }, [data]);
-
+  const { mutate, isPending } = useUpload();
   computersSocketRef.current = io("https://d.dev-baxa.me/computer", {
     transports: ["websocket"],
     auth: { token: `Bearer ${token}` }
@@ -58,7 +69,6 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
 
   computersSocketRef.current.on("error", (error: any) => {
     console.log("connect error computer :", error);
-    error && toast.error(`Error ${error.message}`);
   });
 
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,64 +96,95 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
     page * rowsPerPage + rowsPerPage
   );
   const DeleteAppBySocket = async (name: string) => {
+    setLoadingItem(name);
     setName(name);
     const axios = useAxios();
+    const notify = notificationApi();
     const response = await axios({
-      url: `/api/1/device/${id}/${name}/is-exist`,
+      url: `/api/1/device/${ID}/${name}/is-exist`,
       method: "GET"
     });
     if (response.isInput === true) {
+      setLoadingItem(null);
+
       setDeleteModal(true);
     } else {
-      if (computersSocketRef.current?.connected) {
-        computersSocketRef.current.emit("delete_app", {
-          computerId: id,
+      const emitDelete = () => {
+        computersSocketRef.current?.emit("delete_app", {
+          computerId: ID,
           appName: name
         });
-      } else {
-        console.log("❌ Socket hali ulangan emas!");
-      }
-      // computersSocketRef.current.emit("delete_app", {
-      //   computerId: id,
-      //   appName: name
-      // });
+        notify("Delete");
+        console.log("✅ Emit sent");
+        setLoadingItem(null);
+      };
 
-      notify("Delete");
+      if (computersSocketRef.current?.connected) {
+        emitDelete();
+      } else {
+        setLoadingItem(null);
+
+        console.log("❌ Socket hali ulangan emas, kutyapman...");
+        computersSocketRef.current?.once("connect", emitDelete);
+      }
     }
   };
-
-  // const {
-  //   data: Delete,
-  //   refetch,
-  //   isLoading: DeleteLoader
-  // } = useQueryApi({
-  //   url: `/api/1/device/${id}/${name}/is-exist`,
-  //   pathname: "DeleteSocketApplication",
-  //   options: { enabled: !!name }
-  // });
-
-  const notify = notificationApi();
-
-  const UpdateAppBySocket = (name: string) => {
+  const closeTableApp = () => {
+    setModal(false);
+    setfileName(null);
+    setArgutmentUpload("");
+  };
+  const UpdateAppBySocket = async (name: string, id: string) => {
     setModal(true);
-    // computersSocketRef.current.emit("update_app", {
-    //   computerId: id,
-    //   appName: name
-    // });
+    const axios = useAxios();
+    const response = await axios({
+      url: `/api/1/device/${ID}/${name}/is-exist`,
+      method: "GET"
+    });
+    const result = response.isInput;
+    setRes(result);
+    console.log(response);
+
+    setPendingUpload({ name, id });
   };
   function CloseeDeleteModal() {
     setDeleteModal(false);
   }
+  const handleUpload = async () => {
+    if (!filename) {
+      toast.error("File required!");
+      return;
+    }
 
+    if (!res && !argumentUpload) {
+      toast.error("Argument required!");
+      return;
+    }
+    const formData = new FormData();
+    if (filename) formData.append("file", filename);
+    formData.append("id", pendingUpload.id);
+    if (argumentUpload) formData.append("argument", argumentUpload);
+    mutate(formData, {
+      onSuccess: () => {
+        setModal(false);
+        setfileName(null);
+        setArgutmentUpload("");
+      }
+    });
+  };
   function SendArgumentfuction() {
+    const notify = notificationApi();
+
+    setLoadingItem(argument);
     computersSocketRef.current.emit("delete_app", {
-      computerId: id,
+      computerId: ID,
       appName: name,
-      argument: argument
+      arguments: argument
     });
     CloseeDeleteModal();
     notify("Delete");
   }
+
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
@@ -183,65 +224,7 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
                 <th className="p-3"></th>
               </tr>
             </thead>
-            {modal && (
-              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[450px] h-[350px]">
-                  <h2 className="text-xl font-semibold mb-4">Install app</h2>
 
-                  <form>
-                    <div className="grid grid-cols-1  gap-4 mb-4">
-                      <div className="mb-4">
-                        <label className="block text-sm text-gray-700">File Name</label>
-                        {/* {filename ? (
-                                        <div>{filename.name}</div>
-                                      ) : ( */}
-                        <input
-                          required
-                          type="file"
-                          className="w-[50%] rounded-lg p-2 mt-1"
-                        />
-                        {/* )} */}
-                      </div>
-                      <div className="mb-4">
-                        <label className="block text-sm text-gray-700">Arguments</label>
-                        <input
-                          type="text"
-                          required
-                          // onChange={(e) => setArgutment(e.target.value)}
-                          placeholder="arguments"
-                          className="w-full border rounded-lg p-2 mt-1"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center  justify-end mt-4">
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          // disabled={isPending}
-                          onClick={closeTable}
-                          className="border px-4 py-2 rounded-lg"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          // onClick={CheckApplication}
-                          // disabled={!isFormValid || isPending}
-                          size="small"
-                          variant="contained"
-                        >
-                          {/* {isPending ? (
-                            <CircularProgress color="secondary" size={20} />
-                          ) : (
-                            "Add"
-                          )} */}
-                        </Button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
             <tbody>
               {isLoading || isError
                 ? Array.from({ length: 3 }).map((_, index) => (
@@ -285,19 +268,94 @@ const Computers_app = ({ id, closeTable }: ComputersAppProps) => {
                       <td className="p-3">{item.type}</td>
                       <td className="p-3">{item.installed_date}</td>
                       <td className="p-3 text-[#1A79D8] ">
-                        <button onClick={() => UpdateAppBySocket(item.name)}>
+                        <button onClick={() => UpdateAppBySocket(item.name, item.id)}>
                           Update
                         </button>
                       </td>
                       <td className="p-3 text-red-600">
-                        <button onClick={() => DeleteAppBySocket(item.name)}>
-                          Delete
+                        <button
+                          disabled={loadingItem === item.name}
+                          onClick={() => DeleteAppBySocket(item.name)}
+                        >
+                          {loadingItem === item.name ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            "Delete"
+                          )}
                         </button>
                       </td>
                     </tr>
                   ))}
             </tbody>
           </table>
+          {modal && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <div
+                className={`bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[450px] ${res ? "h-[350px]" : "h-[220px]"}`}
+              >
+                <h2 className="text-xl font-semibold mb-4">Install app</h2>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleUpload();
+                  }}
+                >
+                  <div className="grid grid-cols-1 gap-4 mb-4">
+                    <div className="mb-4">
+                      <label className="block text-sm text-gray-700">File Name</label>
+                      {filename ? (
+                        <div>{filename.name}</div>
+                      ) : (
+                        <input
+                          required
+                          type="file"
+                          onChange={(e) => {
+                            const selectedFile = e.target.files?.[0];
+                            if (selectedFile) {
+                              setfileName(selectedFile);
+                            }
+                          }}
+                          className="w-[50%] rounded-lg p-2 mt-1"
+                        />
+                      )}
+                    </div>
+
+                    {res && (
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-700">Argument</label>
+                        <input
+                          type="text"
+                          required
+                          value={argumentUpload}
+                          onChange={(e) => setArgutmentUpload(e.target.value)}
+                          placeholder="argument"
+                          className="w-full border rounded-lg p-2 mt-1"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-end mt-4">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={closeTableApp}
+                        className="border px-4 py-2 rounded-lg"
+                        type="button"
+                      >
+                        Cancel
+                      </Button>
+                      <Button size="small" variant="contained" type="submit">
+                        {isPending ? <CircularProgress size={20} /> : "Update"}
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
         {DeleteModal && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex  items-center justify-center z-50">

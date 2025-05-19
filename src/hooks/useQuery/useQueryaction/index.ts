@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
 import { LoginType } from "~/types/configs";
-import { EditInfoApplication } from "~/types/configs/computers";
+import { EditApplication, EditInfoApplication } from "~/types/configs/computers";
 import { CreateAppPayload } from "~/types/configs/launchpad";
 import { RegisterUser } from "~/types/configs/register";
 import { getUserInfo, setToken } from "~/utils";
@@ -99,7 +99,7 @@ const useDeleteRegister = () => {
     },
     onSuccess: () => {
       console.log("success DELETE");
-      notify('Delete');
+      notify("Delete");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["superadmin_Users"] });
@@ -255,7 +255,7 @@ const useUploadApplication = () => {
       }),
     onSuccess: () => {
       console.log("Success");
-      notify('Install');
+      notify("Install");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["application"] });
@@ -330,6 +330,35 @@ const useEditApplication = () => {
     }
   });
 };
+const useUpload = () => {
+  const axios = useAxios();
+  const queryClient = useQueryClient();
+  const notify = notificationApi();
+
+  return useMutation({
+    mutationFn: async (formData: FormData) => {
+      return await axios({
+        url: `/api/1/installers/upload/for-update`,
+        method: "PUT",
+        body: formData, 
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+    },
+    onSuccess: () => {
+      console.log("✅ Success");
+      notify("Update");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["application"] });
+    },
+    onError: (err: any) => {
+      toast.error(`${err.message}`);
+      console.error(err.message);
+    }
+  });
+};
 export {
   useLogin,
   useTransferApplication,
@@ -341,5 +370,6 @@ export {
   useUpdateRegister,
   useUploadApplication,
   useEditApplication,
-  useUploadInstalldApplication
+  useUploadInstalldApplication,
+  useUpload
 };
