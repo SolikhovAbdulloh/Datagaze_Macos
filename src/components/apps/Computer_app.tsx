@@ -294,8 +294,7 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
               <div
                 className={`bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[450px] ${res ? "h-[350px]" : "h-[220px]"}`}
               >
-                <h2 className="text-xl font-semibold mb-4">Update </h2>
-
+                <h2 className="text-xl font-semibold mb-4">Update</h2>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
