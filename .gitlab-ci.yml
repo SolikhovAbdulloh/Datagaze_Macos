@@ -8,7 +8,7 @@ deploy-prod:
     
   script:
     - ssh -o StrictHostKeyChecking=no -i ~/.ssh/gitlab_deploy_key $USERNAME@$SERVER_HOST "
-      cd $BACKEN_PATH &&
+      cd $FRONT_PATH &&
       bash deploy.prod"
   only:
     - main
