@@ -183,13 +183,11 @@ export default function Desktop(props: DesktopState | any) {
   };
 
   const OpenModal = (app: ApplicationType) => {
-    const found = applications.find((a) => a.id === app.id);
-    if (found) setSelectedApp(found);
+    setSelectedApp(app);
   };
 
   const OpenModalinstall = (app: ApplicationType) => {
-    const found = applications.find((a) => a.id === app.id);
-    if (found) setSelectedAppInstall(found);
+    setSelectedAppInstall(app);
   };
 
   const CloseModal = () => setSelectedApp(null);
@@ -207,8 +205,7 @@ export default function Desktop(props: DesktopState | any) {
 
   const close = showLaunchpad
     ? ""
-    : "opacity-0 invisible transition-opacity duration-200";
-
+    : "opacity-4 invisible transition-opacity duration-200";
   return (
     <div
       className="size-full overflow-hidden bg-center bg-cover"

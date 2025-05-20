@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { ComputersType } from "~/types/configs/computers";
-import { RiDeleteBin5Line } from "react-icons/ri";
 import TextField from "@mui/material/TextField";
 import { FormControl, Select, MenuItem, CircularProgress, Button } from "@mui/material";
 import Computers_app from "./Computer_app";
@@ -13,6 +12,7 @@ import { getToken } from "~/utils";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
 import { useUploadInstalldApplication } from "~/hooks/useQuery/useQueryaction";
+import { IoTrashBinOutline } from "react-icons/io5";
 
 const Computers = () => {
   const [params, setSearchparams] = useSearchParams();
@@ -41,12 +41,7 @@ const Computers = () => {
   });
 
   useEffect(() => {
-    setIsFormValid(
-      appname.trim() !== "" &&
-        filename !== null &&
-        argument.trim() !== "" &&
-        checkapp.length > 0
-    );
+    setIsFormValid(appname.trim() !== "" && filename !== null && checkapp.length > 0);
   }, [appname, filename, argument, checkapp]);
   const showModal = (id: string) => {
     setOpenModal(true);
@@ -120,8 +115,9 @@ const Computers = () => {
     setPage(0);
   };
 
-  const apptable = (id: string) => {
+  const apptable = (id: string, status: string) => {
     setOpenTable(true);
+    setStatus(status);
     setSelectedTable(id);
   };
 
@@ -156,8 +152,8 @@ const Computers = () => {
     computersSocketRef.current.on("response", (data: any) => {
       console.log("response", data);
       data.success === false
-        ? toast.error(`${data.message}`)
-        : toast.success(`${data.message}`);
+        ? toast.error(`${data.message}`, { closeButton: true })
+        : toast.success(`${data.message}`, { closeButton: true });
     });
 
     computersSocketRef.current.on("error", (error: string) => {
@@ -172,7 +168,7 @@ const Computers = () => {
     computersSocketRef.current.emit("delete_agent", {
       computerId: id
     });
-    toast.success("success");
+    toast.success("success", { closeButton: true });
   };
   // console.log("id:", checkapp, "appname:", appname, "file", filename, "arg:", argument);
   const CheckApplication = () => {
@@ -190,7 +186,11 @@ const Computers = () => {
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
       {openTable && selectedTableId && (
-        <Computers_app id={selectedTableId || ""} closeTable={closeTable} />
+        <Computers_app
+          id={selectedTableId || ""}
+          status={status || ""}
+          closeTable={closeTable}
+        />
       )}
 
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
@@ -209,12 +209,16 @@ const Computers = () => {
           />
           <div className="flex gap-2">
             {checkapp.length > 0 && (
-              <button
+              <Button
+                variant="outlined"
+                sx={{ textTransform: "capitalize" }}
+                color="info"
                 onClick={AddModalOpen}
-                className="gap-2 bg-white w-[130px] text-[13px] cursor-pointer h-[32px] rounded-[8px] flex items-center justify-center px-2"
+                className="gap-2 bg-white w-[130px] cursor-pointer h-[33px] rounded-[8px] flex items-center justify-center px-2"
               >
-                <AddIcon sx={{ fontSize: 15 }} /> Install app
-              </button>
+                <AddIcon sx={{ fontSize: 14 }} />{" "}
+                <span className="text-[11px]">Install app</span>
+              </Button>
             )}
             <FormControl sx={{ minWidth: 140 }}>
               <Select
@@ -260,8 +264,10 @@ const Computers = () => {
             </thead>
             {modal && (
               <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[550px] h-[400px]">
-                  <h2 className="text-xl font-semibold mb-4">Install app</h2>
+                <div
+                  className={`bg-[#e7ecf8] rounded-2xl shadow-lg p-6  ${filename?.name.endsWith(".msi") ? "w-[450px] h-[300px]" : "w-[550px] h-[400px]"} `}
+                >
+                  <h2 className="text-xl font-semibold mb-4">Install application</h2>
 
                   <form>
                     <div className="grid grid-cols-1  gap-4 mb-4">
@@ -293,16 +299,20 @@ const Computers = () => {
                           />
                         )}
                       </div>
-                      <div className="mb-4">
-                        <label className="block text-sm text-gray-700">Arguments</label>
-                        <input
-                          type="text"
-                          required
-                          onChange={(e) => setArgutment(e.target.value)}
-                          placeholder="arguments"
-                          className="w-full border rounded-lg p-2 mt-1"
-                        />
-                      </div>
+                      {filename && filename.name.endsWith(".msi") ? (
+                        ""
+                      ) : (
+                        <div className="mb-4">
+                          <label className="block text-sm text-gray-700">Arguments</label>
+                          <input
+                            type="text"
+                            required
+                            onChange={(e) => setArgutment(e.target.value)}
+                            placeholder="arguments"
+                            className="w-full border rounded-lg p-2 mt-1"
+                          />
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center  justify-end mt-4">
                       <div className="flex gap-2">
@@ -338,7 +348,7 @@ const Computers = () => {
                 ? Array.from({ length: 5 }).map((_, index) => (
                     <tr
                       key={index}
-                      className="border-b border-gray-200 p-4 text-sm bg-gray-50"
+                      className="border-b border-gray-200 p-4  text-sm bg-gray-50"
                     >
                       <td className="p-3">
                         <Skeleton variant="rectangular" width={20} height={20} />
@@ -369,7 +379,7 @@ const Computers = () => {
                 : paginatedComputers.map((item, index) => (
                     <tr
                       key={item.id}
-                      className={`border-b border-gray-200 p-4 text-sm ${
+                      className={`border-b border-gray-200 p-4  text-sm ${
                         index % 2 === 0 ? "bg-[grey-50]" : "bg-[#ccdaf8]"
                       }`}
                     >
@@ -385,45 +395,45 @@ const Computers = () => {
                       <td className="p-3">{index + 1}</td>
                       <td
                         className="p-3 cursor-pointer"
-                        onClick={() => apptable(item.id)}
+                        onClick={() => apptable(item.id, item.status)}
                       >
                         {item.hostname}
                       </td>
                       <td
                         className="p-3 cursor-pointer"
-                        onClick={() => apptable(item.id)}
+                        onClick={() => apptable(item.id, item.status)}
                       >
                         {item.operation_system}
                       </td>
                       <td
                         className="p-3 cursor-pointer"
-                        onClick={() => apptable(item.id)}
+                        onClick={() => apptable(item.id, item.status)}
                       >
                         {item.ip_address}
                       </td>
-                      <td>
+                      <td className=" flex justify-center mt-3 mr-7">
                         <p
                           className={`${
                             item.status === "active"
-                              ? "bg-[#DCFCE7] flex text-green-600 w-[49px] h-[20px] items-center justify-center p-2 rounded-[8px] text-[12px]"
-                              : "text-[grey] bg-[#dfe8fb] flex w-[49px] h-[20px] text-[12px] items-center justify-center px-2 py-2 rounded-[8px]"
+                              ? "bg-[#DCFCE7] flex text-green-600 w-[55px] h-[25px]  items-center justify-center p-2 rounded-[8px] text-[12px]"
+                              : "text-[grey] bg-[#dfe8fb] flex w-[55px] h-[25px] text-[12px] items-center justify-center px-2 py-2 rounded-[8px]"
                           }`}
                         >
                           {item.status}
                         </p>
                       </td>
                       <td
-                        className="p-3 text-blue-500 cursor-pointer"
+                        className="hover:text-[blue]  text-[#1A79D8]"
                         onClick={() => showModal(item.id)}
                       >
-                        About PC
+                        <span className="cursor-pointer"> About PC</span>
                       </td>
-                      <td>
+                      <td className="p-1">
                         <button
                           onClick={() => DeleteAgent(item.id)}
                           className="text-[18px] text-[red]"
                         >
-                          <RiDeleteBin5Line />
+                          <IoTrashBinOutline className="hover:text-[#a13738] " />
                         </button>
                       </td>
                     </tr>

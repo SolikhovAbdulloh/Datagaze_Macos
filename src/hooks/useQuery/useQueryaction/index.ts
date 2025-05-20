@@ -5,8 +5,7 @@ import { toast } from "sonner";
 import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
 import { LoginType } from "~/types/configs";
-import { EditApplication, EditInfoApplication } from "~/types/configs/computers";
-import { CreateAppPayload } from "~/types/configs/launchpad";
+import { EditInfoApplication } from "~/types/configs/computers";
 import { RegisterUser } from "~/types/configs/register";
 import { getUserInfo, setToken } from "~/utils";
 
@@ -340,7 +339,7 @@ const useUpload = () => {
       return await axios({
         url: `/api/1/installers/upload/for-update`,
         method: "PUT",
-        body: formData, 
+        body: formData,
         headers: {
           "Content-Type": "multipart/form-data"
         }

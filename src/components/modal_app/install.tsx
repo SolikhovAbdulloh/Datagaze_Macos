@@ -32,8 +32,6 @@ import { IconButton, Tooltip } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { getToken } from "~/utils";
 import { toast } from "sonner";
-import { error } from "console";
-import { useQueryClient } from "@tanstack/react-query";
 const steps = ["System requirements", "Server configs", "Completed"];
 const LicenseModalinstall = ({
   app,
@@ -56,16 +54,11 @@ const LicenseModalinstall = ({
   const [codeModalOpen, setCodeModalOpen] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
   const [percentage, setpercentage] = useState<number>(0);
-  const { data, isLoading, isError } = useQueryApi({
+  const { data, isLoading, refetch } = useQueryApi({
     pathname: "Not_Installed_app",
-    url: `/api/1/desktop/${app.id}`,
-    options: {
-      staleTime: 0,
-      enabled: !!app?.id,
-      refetchOnMount: true,
-      refetchOnWindowFocus: false
-    }
+    url: `/api/1/desktop/${app.id}`
   });
+  console.log("holat", isLoading);
 
   const { data: sudo } = useQueryApi({
     url: `/api/1/desktop/download/script/${app.id}`,
@@ -232,6 +225,7 @@ const LicenseModalinstall = ({
       setCodeModalOpen(false);
     }
   }, [activeStep, configs?.id]);
+  if (!data) return null;
 
   const handleSubmit = (e: any) => {
     e.preventDefault();

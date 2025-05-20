@@ -27,16 +27,11 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     setTabValue(newValue);
   };
 
-  const { data, isLoading } = useQueryApi({
+  const { data, isLoading, isError } = useQueryApi({
     pathname: "installApplication",
-    url: `/api/1/desktop/${app.id}`,
-    options: {
-      staleTime: 0,
-      enabled: !!app?.id,
-      refetchOnMount: true,
-      refetchOnWindowFocus: false
-    }
+    url: `/api/1/desktop/${app.id}`
   });
+  console.log("holat", isLoading, "iserror", isError);
 
   const handleEditClick = () => {
     setEditModalOpen(true);

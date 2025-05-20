@@ -8,7 +8,7 @@ import {
 } from "~/hooks/useQuery/useQueryaction";
 import { useQueryApi } from "~/hooks/useQuery";
 import { superadmin_users } from "~/types/configs/superadmin_users";
-import { Button, Skeleton } from "@mui/material";
+import { Button, CircularProgress, Skeleton } from "@mui/material";
 
 export const SuperAdmin_users = () => {
   const [page, setPage] = useState(0);
@@ -35,7 +35,7 @@ export const SuperAdmin_users = () => {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const { mutate, isPending } = useRegister();
   const { mutate: deleteRegisterMutate } = useDeleteRegister();
-  const { mutate: UpdateRegisterUser } = useUpdateRegister();
+  const { mutate: UpdateRegisterUser, isPending: updatepending } = useUpdateRegister();
 
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -137,12 +137,15 @@ export const SuperAdmin_users = () => {
               }
             }}
           />
-          <button
+          <Button
+            variant="outlined"
+            sx={{ textTransform: "capitalize" }}
             onClick={AddModalOpen}
-            className="gap-2 bg-white w-[130px] text-[13px] cursor-pointer h-[32px] rounded-[8px] flex items-center justify-center px-2"
+            className="gap-2 bg-white w-[140px] text-[13px] cursor-pointer h-[32px] rounded-[8px] flex items-center justify-center px-2"
           >
-            <AddIcon fontSize="small" /> Add new user
-          </button>
+            <AddIcon fontSize="small" />
+            <span className="text-[11px] text-uppercase">new user</span>
+          </Button>
         </div>
         <div className="max-h-[600px] overflow-y-auto">
           <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg">
@@ -218,7 +221,7 @@ export const SuperAdmin_users = () => {
                           variant="contained"
                           disabled={isPending}
                         >
-                          {isPending ? "Loading" : "Next"}
+                          {isPending ? <CircularProgress size={20} /> : "Next"}
                         </Button>
                       </div>
                     </div>
@@ -367,7 +370,7 @@ export const SuperAdmin_users = () => {
 
             <div className="flex justify-between items-center mt-4">
               <button onClick={DeleteModal} className="text-red-500 text-sm font-medium">
-                Delete user
+                Delete
               </button>
               <div className="flex gap-2">
                 <button onClick={CloseModal} className="border px-4 py-2 rounded-lg">
@@ -402,9 +405,10 @@ export const SuperAdmin_users = () => {
               </button>
               <button
                 onClick={DeleteShure}
+                disabled={updatepending}
                 className="text-red-500 font-medium text-[14px] px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
-                Yes
+                {updatepending ? <CircularProgress size={20} /> : "Yes"}
               </button>
             </div>
           </div>

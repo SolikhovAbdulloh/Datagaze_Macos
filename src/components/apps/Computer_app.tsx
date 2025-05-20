@@ -13,9 +13,10 @@ import { useAxios } from "~/hooks/useAxios";
 import { useUpload } from "~/hooks/useQuery/useQueryaction";
 interface ComputersAppProps {
   id: string;
+  status: string;
   closeTable: () => void;
 }
-const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
+const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
   const { data, isLoading, isError } = useQueryApi({
     url: `/api/1/device/${ID}/apps`,
     pathname: "apps"
@@ -37,7 +38,6 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
   const [name, setName] = useState("");
   const [res, setRes] = useState("");
   const [argumentUpload, setArgutmentUpload] = useState("");
-
   const [argument, setargument] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [DeleteModal, setDeleteModal] = useState(false);
@@ -54,8 +54,8 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
   computersSocketRef.current.on("response", (data: any) => {
     console.log("response", data);
     data.success === false
-      ? toast.error(`${data.appName}  ${data.message} `)
-      : toast.success(`response ${(data.name, data.status)}`);
+      ? toast.error(`${data.appName}  ${data.message},`, { closeButton: true })
+      : toast.success(`response ${(data.name, data.status)}`, { closeButton: true });
   });
   computersSocketRef.current.on("connect", () => {
     console.log("Socket connected1:", computersSocketRef.current.connected);
@@ -90,6 +90,9 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
     page * rowsPerPage + rowsPerPage
   );
   const DeleteAppBySocket = async (name: string) => {
+    if (status === "inactive") {
+      return toast.error("You are activen't now", { closeButton: true });
+    }
     setLoadingItem(name);
     setName(name);
     const axios = useAxios();
@@ -109,7 +112,6 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
           appName: name
         });
         notify("Delete");
-        console.log("✅ Emit sent");
         setLoadingItem(null);
       };
 
@@ -129,6 +131,9 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
     setArgutmentUpload("");
   };
   const UpdateAppBySocket = async (name: string, id: string) => {
+    if (status === "inactive") {
+      return toast.error("You are activen't now", { closeButton: true });
+    }
     setLoading(name);
     const axios = useAxios();
     const response = await axios({
@@ -264,7 +269,7 @@ const Computers_app = ({ id: ID, closeTable }: ComputersAppProps) => {
                           {loading === item.name ? (
                             <CircularProgress size={20} />
                           ) : (
-                            "Update"
+                            <span className="cursor-pointer">Update</span>
                           )}
                         </button>
                       </td>

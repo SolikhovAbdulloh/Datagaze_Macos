@@ -81,7 +81,7 @@ export default function Login() {
                           className="w-full px-2 py-2 h-10 rounded-lg text-black font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white pr-10"
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter password"
-                          {...register("password", { required: "Password is required" })}
+                          {...register("password")}
                         />
                         <button
                           type="button"
