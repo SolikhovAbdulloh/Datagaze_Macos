@@ -1,0 +1,14 @@
+deploy-prod:
+  stage: deploy
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$PRIVATE_KEY" > ~/.ssh/gitlab_deploy_key
+    - chmod 400 ~/.ssh/gitlab_deploy_key
+    - pwd
+    
+  script:
+    - ssh -o StrictHostKeyChecking=no -i ~/.ssh/gitlab_deploy_key $USERNAME@$SERVER_HOST "
+      cd $BACKEN_PATH &&
+      bash deploy.prod"
+  only:
+    - main
