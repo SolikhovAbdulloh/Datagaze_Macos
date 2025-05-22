@@ -1,17 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Modal,
-  Box,
-  Typography,
-  Button,
-  Stepper,
-  Step,
-  StepLabel,
-  CircularProgress,
-  LinearProgress
-} from "@mui/material";
+import { Modal, Box, Typography, Button, Stepper, Step, StepLabel } from "@mui/material";
 import { ApplicationType, InstallAppInfoType } from "~/types";
 import { BiMemoryCard } from "react-icons/bi";
+
 import { IoMdCloseCircle } from "react-icons/io";
 import { FiCheck } from "react-icons/fi";
 import { BsCpuFill } from "react-icons/bs";
@@ -19,7 +10,6 @@ import { RiComputerLine } from "react-icons/ri";
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { FiGlobe } from "react-icons/fi";
 import { useQueryApi } from "~/hooks/useQuery";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import {
   useInstallApplication,
   useUploadApplication
@@ -28,10 +18,8 @@ import { io } from "socket.io-client";
 import "xterm/css/xterm.css";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
-import { IconButton, Tooltip } from "@mui/material";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { getToken } from "~/utils";
-import { toast } from "sonner";
+import MarkdownViewer from "../Markdown";
 const steps = ["System requirements", "Server configs", "Completed"];
 const LicenseModalinstall = ({
   app,
@@ -40,11 +28,6 @@ const LicenseModalinstall = ({
   app: ApplicationType;
   onClose: () => void;
 }) => {
-  interface Section {
-    name: string;
-    description: string;
-    commands: string[];
-  }
   const socketRef = useRef<any>(null);
   const termRef = useRef<any>(null);
   const terminalRef = useRef<any>(null);
@@ -52,26 +35,21 @@ const LicenseModalinstall = ({
   const [activeStep, setActiveStep] = useState(0);
   const [openModal, setOpenModal] = useState(false);
   const [codeModalOpen, setCodeModalOpen] = useState(false);
-  const [sections, setSections] = useState<Section[]>([]);
   const [percentage, setpercentage] = useState<number>(0);
-  const { data, isLoading, refetch } = useQueryApi({
+  const { data, isLoading } = useQueryApi({
     pathname: "Not_Installed_app",
-    url: `/api/1/desktop/${app.id}`
+    url: `/api/1/desktop/${app.id}`,
+    options: {
+      staleTime: 0
+    }
   });
-  console.log("holat", isLoading);
 
-  const { data: sudo } = useQueryApi({
+  const { data: markdown } = useQueryApi({
     url: `/api/1/desktop/download/script/${app.id}`,
     pathname: "SUDO"
   });
-  useEffect(() => {
-    if (sudo?.sections) {
-      setSections(sudo.sections);
-    }
-  }, [sudo]);
 
   const { mutate, isPending } = useUploadApplication();
-
   const UploadApplication = () => {
     mutate(app.id, {
       onSuccess: () => {
@@ -105,16 +83,7 @@ const LicenseModalinstall = ({
       [e.target.name]: e.target.value
     }));
   };
-  const handleCopy = (text: string, index: any) => {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        toast.success("Copied to clipboard", { closeButton: true });
-      })
-      .catch(() => {
-        toast.error("Not Copied", { closeButton: true });
-      });
-  };
+
   const handleBack = () => {
     if (activeStep > 0) {
       setActiveStep((prev) => prev - 1);
@@ -197,7 +166,7 @@ const LicenseModalinstall = ({
           });
           socket.on("command_progress", (prog: any) => {
             console.log("command_progress:", prog);
-            setpercentage(prog.percentage);
+            setpercentage(prog);
           });
           const handleResize = () => {
             fitAddon.fit();
@@ -239,7 +208,11 @@ const LicenseModalinstall = ({
       }
     );
   };
-  // console.log("persent:", percentage);
+  if (isLoading) {
+    console.log(isLoading);
+    return <p>Loading...</p>;
+  }
+  console.log("persent:", percentage);
 
   return (
     <>
@@ -569,108 +542,17 @@ const LicenseModalinstall = ({
           </Box>
 
           {/* O‘ng tomon (Sudo Commands) */}
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: 3,
-              p: 3,
-              bgcolor: "#f5f5f5",
-              borderRadius: 1,
-              overflowY: "auto",
-              maxHeight: "550px"
+          <MarkdownViewer
+            content={markdown}
+            prosent={percentage}
+            upload={() => UploadApplication}
+            ispanding={isPending}
+            onRun={(cmd) => {
+              if (!socketRef.current || !termRef.current) return;
+              termRef.current.writeln(`\r\n$ ${cmd}`);
+              socketRef.current.emit("terminalData", { data: `${cmd}\n` });
             }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "medium" }}>
-              Commands
-            </Typography>
-            {sections.map((section, index) => (
-              <Box key={index} sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ mb: 1 }}>
-                  {section.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {section.description}
-                </Typography>
-
-                {section.commands.map((command, cmdIndex) => (
-                  <Box
-                    key={cmdIndex}
-                    sx={{
-                      position: "relative",
-                      border: "1px solid #ddd",
-                      borderRadius: 2,
-                      mt: 2,
-                      px: 2,
-                      py: 1.5,
-                      fontFamily: "monospace",
-                      overflowX: "auto"
-                    }}
-                  >
-                    <Typography
-                      component="pre"
-                      sx={{
-                        m: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 3,
-                        p: 1,
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word"
-                      }}
-                    >
-                      <ArrowForwardIosIcon sx={{ fontSize: 12 }} />
-                      <small>{command}</small>
-                    </Typography>
-
-                    <Tooltip title="Copy">
-                      <IconButton
-                        onClick={() => handleCopy(command, cmdIndex)}
-                        size="small"
-                        sx={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          backgroundColor: "white",
-                          boxShadow: 1,
-                          "&:hover": {
-                            backgroundColor: "#e0e0e0"
-                          }
-                        }}
-                      >
-                        <ContentCopyIcon sx={{ fontSize: 10 }} />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                ))}
-              </Box>
-            ))}
-            <Box position="relative" className="flex items-center justify-center">
-              <CircularProgress variant="determinate" size={40} value={percentage} />
-              <Box
-                top={0}
-                left={0}
-                bottom={0}
-                right={0}
-                position="absolute"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Typography variant="caption" component="div" color="textSecondary">
-                  {`${Math.round(percentage)}%`}
-                </Typography>
-              </Box>
-            </Box>
-            <Button
-              disabled={percentage == 100 ? false : true}
-              onClick={() => UploadApplication()}
-              variant="outlined"
-            >
-              {isPending ? <CircularProgress size="30px" /> : "Finish"}
-            </Button>
-          </Box>
+          />
         </Box>
       )}
     </>

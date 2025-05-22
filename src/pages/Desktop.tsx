@@ -223,7 +223,6 @@ export default function Desktop(props: DesktopState | any) {
           btnRef={spotlightBtnRef as React.RefObject<HTMLDivElement>}
         />
       )}
-      {/* <Launchpad show={showLaunchpad} toggleLaunchpad={toggleLaunchpad} /> */}
       <Dock
         open={openApp}
         showApps={state.showApps}

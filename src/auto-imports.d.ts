@@ -15,6 +15,7 @@ declare global {
   const EditDetailsModal: typeof import('./components/modal_app/edit')['EditDetailsModal']
   const FaceTime: typeof import('./components/apps/FaceTime')['default']
   const Launchpad: typeof import('./components/Launchpad')['default']
+  const Markdown: typeof import('./components/Markdown')['default']
   const MenuItem: typeof import('./components/menus/base')['MenuItem']
   const MenuItemGroup: typeof import('./components/menus/base')['MenuItemGroup']
   const ModalLicense: typeof import('./components/apps/ModalLicense')['default']

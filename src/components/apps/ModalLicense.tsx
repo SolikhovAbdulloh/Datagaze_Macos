@@ -277,7 +277,7 @@ const ModalLicense = () => {
         <div className="relative">
           <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
             <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg">
-              <thead className="sticky top-0 bg-[#d4e0f9]  z-4">
+              <thead className="sticky top-0 bg-[#d4e0f9]">
                 <tr className="border-b border-gray-300 text-gray-600 text-sm">
                   <th className="p-1">No</th>
                   <th className="p-3">Product name</th>
@@ -391,7 +391,7 @@ const ModalLicense = () => {
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+        <div className="fixed inset-0 z-2 bg-black bg-opacity-40 flex items-center justify-center">
           <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[620px] h-[610px]">
             <div className="flex flex-col gap-[40px] justify-between">
               <h2 className="text-[30px] font-bold">Add New Product</h2>
@@ -494,14 +494,14 @@ const ModalLicense = () => {
                       <span className="text-[#1A79D8] cursor-pointer">
                         click to browse
                       </span>
-                      <br /> Only .Json File
+                      <br /> Only .md or markdown file
                       <input
                         type="file"
                         name="installScript"
                         onChange={handleFileChange}
                         className="hidden"
                         required
-                        accept=".json"
+                        accept=".md,markdown"
                       />
                     </label>
                   ) : (

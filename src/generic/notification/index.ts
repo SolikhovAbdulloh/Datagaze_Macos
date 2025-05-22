@@ -28,16 +28,16 @@ export const notificationApi = () => {
         toast.success("Customer added to table !", { closeButton: true });
         break;
       case "Delete":
-        toast.success(`Delete succsess !!!`, { closeButton: true });
+        toast.success(`Delete success !!!`, { closeButton: true });
         break;
       case "Xatolik":
         toast.error(`Error !!!`, { closeButton: true });
         break;
       case "Update":
-        toast.success(`Success update!`, { closeButton: true });
+        toast.success(`Success Send update!`, { closeButton: true });
         break;
       case "Upload":
-        toast.info(`Success upload!`, { closeButton: true });
+        toast.info(`Success Send  upload!`, { closeButton: true });
         break;
     }
   };
