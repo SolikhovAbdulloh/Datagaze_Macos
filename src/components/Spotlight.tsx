@@ -1,11 +1,10 @@
 import React from "react";
 import { format } from "date-fns";
-import { apps, launchpadApps } from "~/configs";
+import { apps } from "~/configs";
 import type { LaunchpadData, AppsData } from "~/types";
 
 const APPS: { [key: string]: (LaunchpadData | AppsData)[] } = {
-  app: apps,
-  portfolio: launchpadApps
+  app: apps
 };
 
 const getRandom = (min: number, max: number) => {

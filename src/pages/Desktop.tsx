@@ -3,8 +3,8 @@ import { apps } from "~/configs";
 import { minMarginY } from "~/utils";
 import { useQueryApi } from "~/hooks/useQuery";
 import { ApplicationType } from "~/types";
-import LicenseModal from "~/components/modal_app";
-import LicenseModalinstall from "~/components/modal_app/install";
+import LicenseModal from "~/components/Modals";
+import LicenseModalinstall from "~/components/Modals/Install";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { CircularProgress } from "@mui/material";
 

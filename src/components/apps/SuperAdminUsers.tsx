@@ -10,7 +10,7 @@ import { useQueryApi } from "~/hooks/useQuery";
 import { superadmin_users } from "~/types/configs/superadmin_users";
 import { Button, CircularProgress, Skeleton } from "@mui/material";
 
-export const SuperAdmin_users = () => {
+export const SuperAdminusers = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 

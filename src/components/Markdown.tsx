@@ -175,7 +175,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
           disabled={prosent == 100 ? false : true}
           variant="contained"
         >
-          send
+          {ispanding ? <CircularProgress size={20} color="secondary" /> : "Send"}
         </Button>
       </>
     </div>

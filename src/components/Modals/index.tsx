@@ -11,7 +11,7 @@ import { LaunchpadData } from "~/types";
 import { CiClock2 } from "react-icons/ci";
 import { BiMemoryCard } from "react-icons/bi";
 import { IoMdCloseCircle } from "react-icons/io";
-import { EditDetailsModal } from "./edit";
+import { EditDetailsModal } from "./Edit";
 import { useDeleteApplication } from "~/hooks/useQuery/useQueryaction";
 import { useState } from "react";
 import { useQueryApi } from "~/hooks/useQuery";

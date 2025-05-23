@@ -166,7 +166,7 @@ const LicenseModalinstall = ({
           });
           socket.on("command_progress", (prog: any) => {
             console.log("command_progress:", prog);
-            setpercentage(prog);
+            setpercentage(prog.percentage);
           });
           const handleResize = () => {
             fitAddon.fit();
@@ -545,7 +545,7 @@ const LicenseModalinstall = ({
           <MarkdownViewer
             content={markdown}
             prosent={percentage}
-            upload={() => UploadApplication}
+            upload={UploadApplication}
             ispanding={isPending}
             onRun={(cmd) => {
               if (!socketRef.current || !termRef.current) return;

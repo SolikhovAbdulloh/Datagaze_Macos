@@ -24,7 +24,7 @@ const apps: AppsData[] = [
     desktop: true,
     width: 1100,
     height: 500,
-    content: <SuperAdmin_users />,
+    content: <SuperAdminusers />,
     img: "/icons/users.png"
   },
   {

@@ -3,7 +3,15 @@ import { ModalLicenseType } from "~/types/configs/Liceses";
 import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import AddIcon from "@mui/icons-material/Add";
 import { FiUploadCloud } from "react-icons/fi";
-import { Button, Skeleton, Step, StepLabel, Stepper, TextField } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Skeleton,
+  Step,
+  StepLabel,
+  Stepper,
+  TextField
+} from "@mui/material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { useCreateApplication } from "~/hooks/useQuery/useQueryaction";
 import { toast } from "sonner";
@@ -501,7 +509,7 @@ const ModalLicense = () => {
                         onChange={handleFileChange}
                         className="hidden"
                         required
-                        accept=".md,markdown"
+                        accept=".md,.markdown"
                       />
                     </label>
                   ) : (
@@ -652,7 +660,13 @@ const ModalLicense = () => {
                   color="primary"
                   disabled={isMutating}
                 >
-                  {isMutating ? "Saving..." : activeStep === 2 ? "Save" : "Next >"}
+                  {isMutating ? (
+                    <CircularProgress size={20} color="secondary" />
+                  ) : activeStep === 2 ? (
+                    "Save"
+                  ) : (
+                    "Next >"
+                  )}
                 </Button>
               </div>
             </div>
