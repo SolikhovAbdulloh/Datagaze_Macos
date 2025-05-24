@@ -26,8 +26,8 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         display: "flex",
         flexDirection: "column",
         gap: "16px",
-        maxHeight: "550px",
-        overflowY: "auto",
+        maxHeight: "auto",
+        overflow: "auto",
         paddingRight: "10px"
       }}
     >
@@ -82,7 +82,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                       key={index}
                       style={{
                         position: "relative",
-                        borderRadius: "8px",
+                        borderRadius: "2px",
                         overflow: "hidden",
                         boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
                       }}
@@ -138,7 +138,8 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                   borderRadius: "8px",
                   fontSize: "14px",
                   margin: 0,
-                  overflowX: "auto"
+                  overflowX: "auto",
+                  height: 300
                 }}
               >
                 {code}

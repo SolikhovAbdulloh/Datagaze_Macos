@@ -3,6 +3,7 @@ import { Box, Button, CircularProgress, Modal, Typography } from "@mui/material"
 import { IoMdCloseCircle } from "react-icons/io";
 import { LaunchpadData } from "~/types";
 import { useEditApplication } from "~/hooks/useQuery/useQueryaction";
+import { useQueryApi } from "~/hooks/useQuery";
 
 interface EditDetailsModalProps {
   onClose: () => void;
@@ -27,7 +28,33 @@ export const EditDetailsModal = ({ onClose, app }: EditDetailsModalProps) => {
       { onSuccess: () => onClose() }
     );
   };
-
+  const { data, isLoading } = useQueryApi({
+    url: `/api/1/desktop/server-information/${app.id}`,
+    pathname: "EditInformation"
+  });
+  if (isLoading) {
+    return (
+      <Modal open={true} onClose={onClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "white",
+            borderRadius: "10px",
+            height: 50,
+            width: 50
+          }}
+        >
+          <CircularProgress size={20} />
+        </Box>
+      </Modal>
+    );
+  }
   return (
     <Modal open={true} onClose={onClose} aria-labelledby="modal-title">
       <Box
@@ -79,7 +106,7 @@ export const EditDetailsModal = ({ onClose, app }: EditDetailsModalProps) => {
               value={ipAddress}
               onChange={(e) => setIpAddress(e.target.value)}
               className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
-              placeholder="Ip address"
+              placeholder={data?.hostname}
             />
           </label>
           <label className="flex flex-col text-[13px] font-600 gap-1">
@@ -89,7 +116,7 @@ export const EditDetailsModal = ({ onClose, app }: EditDetailsModalProps) => {
               value={portNumber || ""}
               onChange={(e) => setPortNumber(e.target.value)}
               className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
-              placeholder="Port number"
+              placeholder={data?.port}
             />
           </label>
           <label className="flex flex-col text-[13px] font-600 gap-1">
@@ -99,7 +126,7 @@ export const EditDetailsModal = ({ onClose, app }: EditDetailsModalProps) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
-              placeholder="Username"
+              placeholder={data?.username}
             />
           </label>
           <label className="flex flex-col text-[13px] font-600 gap-1">
@@ -109,7 +136,7 @@ export const EditDetailsModal = ({ onClose, app }: EditDetailsModalProps) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="rounded-[8px] bg-white font-500 w-[232px] h-[32px] p-1 px-2"
-              placeholder="Password"
+              placeholder="*****"
             />
           </label>
         </div>

@@ -27,11 +27,11 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     setTabValue(newValue);
   };
 
-  const { data, isLoading, isError } = useQueryApi({
+  const { data, isLoading, isFetching } = useQueryApi({
     pathname: "installApplication",
     url: `/api/1/desktop/${app.id}`
   });
-  console.log("holat", isLoading, "iserror", isError);
+  // console.log("holat", isLoading, "iserror", isError);
 
   const handleEditClick = () => {
     setEditModalOpen(true);
@@ -49,8 +49,28 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     setIsModalOpen(false);
     onClose();
   };
-  if (isLoading) {
-    return <CircularProgress size="30px" />;
+  if (isLoading || isFetching) {
+    return (
+      <Modal open={true} onClose={onClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "white",
+            borderRadius: "10px",
+            height: 50,
+            width: 50
+          }}
+        >
+          <CircularProgress size={20} />
+        </Box>
+      </Modal>
+    );
   }
   return (
     <Modal open={isModalOpen} onClose={handleModalClose} aria-labelledby="modal-title">

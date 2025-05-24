@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Modal, Box, Typography, Button, Stepper, Step, StepLabel } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Typography,
+  Button,
+  Stepper,
+  Step,
+  StepLabel,
+  CircularProgress
+} from "@mui/material";
 import { ApplicationType, InstallAppInfoType } from "~/types";
 import { BiMemoryCard } from "react-icons/bi";
 
@@ -36,13 +45,11 @@ const LicenseModalinstall = ({
   const [openModal, setOpenModal] = useState(false);
   const [codeModalOpen, setCodeModalOpen] = useState(false);
   const [percentage, setpercentage] = useState<number>(0);
-  const { data, isLoading } = useQueryApi({
+  const { data, isLoading, isFetching } = useQueryApi({
     pathname: "Not_Installed_app",
-    url: `/api/1/desktop/${app.id}`,
-    options: {
-      staleTime: 0
-    }
+    url: `/api/1/desktop/${app.id}`
   });
+  console.log(isLoading);
 
   const { data: markdown } = useQueryApi({
     url: `/api/1/desktop/download/script/${app.id}`,
@@ -194,7 +201,6 @@ const LicenseModalinstall = ({
       setCodeModalOpen(false);
     }
   }, [activeStep, configs?.id]);
-  if (!data) return null;
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -208,10 +214,31 @@ const LicenseModalinstall = ({
       }
     );
   };
-  if (isLoading) {
-    console.log(isLoading);
-    return <p>Loading...</p>;
+
+  if (isLoading || isFetching) {
+    return (
+      <Modal open={true} onClose={onClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "white",
+            borderRadius: "10px",
+            height: 50,
+            width: 50
+          }}
+        >
+          <CircularProgress size={20} />
+        </Box>
+      </Modal>
+    );
   }
+
   console.log("persent:", percentage);
 
   return (

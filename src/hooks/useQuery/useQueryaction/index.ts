@@ -346,15 +346,13 @@ const useUpload = () => {
       });
     },
     onSuccess: () => {
-      console.log("✅ Success");
       notify("Update");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["application"] });
     },
     onError: (err: any) => {
-      toast.error(`${err.message}`);
-      console.error(err.message);
+      toast.error(`${err.message}bad request`);
     }
   });
 };
