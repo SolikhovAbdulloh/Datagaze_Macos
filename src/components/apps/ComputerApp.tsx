@@ -41,7 +41,7 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [DeleteModal, setDeleteModal] = useState(false);
   const socket = useComputersSocket();
-  console.log("Socket holati - 2", socket);
+  // console.log("Socket holati - 2", socket);
 
   useEffect(() => {
     if (data?.data && Array.isArray(data?.data)) {
@@ -49,21 +49,6 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
     }
   }, [data]);
   const { mutate, isPending } = useUpload();
-  useEffect(() => {
-    socket.on("response", (data: any) => {
-      console.log("response", data);
-      data.success === false
-        ? toast.error(`${data.appName}  ${data.message},`, { closeButton: true })
-        : toast.success(`response ${(data.name, data.status)}`, { closeButton: true });
-    });
-    socket.on("connect", () => {
-      console.log("Socket connected1:", socket.connected);
-    });
-
-    socket.on("error", (error: any) => {
-      console.log("connect error computer :", error);
-    });
-  }, [socket]);
 
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -96,7 +81,6 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
     setLoadingItem(name);
     setName(name);
     const axios = useAxios();
-    const notify = notificationApi();
     const response = await axios({
       url: `/api/1/device/${ID}/${name}/is-exist`,
       method: "GET"
@@ -111,7 +95,7 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
           computerId: ID,
           appName: name
         });
-        notify("Delete");
+        toast.info("Delete");
         setLoadingItem(null);
       };
 
@@ -169,8 +153,6 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
     });
   };
   function SendArgumentfuction() {
-    const notify = notificationApi();
-
     setLoadingItem(argument);
     socket.emit("delete_app", {
       computerId: ID,
@@ -178,7 +160,7 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
       arguments: argument
     });
     CloseeDeleteModal();
-    notify("Delete");
+    toast.info("Delete", { closeButton: true });
   }
 
   return (

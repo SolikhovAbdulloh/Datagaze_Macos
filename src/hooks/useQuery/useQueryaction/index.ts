@@ -285,6 +285,8 @@ const useUploadInstalldApplication = () => {
     onSuccess: () => {
       console.log("Success");
       notify("Install");
+
+      // toast.loading("Uploading...");
     },
 
     onSettled: () => {

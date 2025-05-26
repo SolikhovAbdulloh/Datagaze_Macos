@@ -136,23 +136,8 @@ const Computers = () => {
     setPage(0);
   };
   const socket = useComputersSocket();
-  console.log("Socket holati - 1", socket);
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Socket connected12:", socket.connected);
-    });
+  // console.log("Socket holati - 1", socket);
 
-    socket.on("response", (data: any) => {
-      console.log("response-commputer", data);
-      data.success === false
-        ? toast.error(`${data.message}`, { closeButton: true })
-        : toast.success(`${data.message}`, { closeButton: true });
-    });
-
-    socket.on("error", (error: string) => {
-      console.log("connect error computer :", error);
-    });
-  }, [socket]);
   const DeleteAgent = (id: string) => {
     socket.emit("delete_agent", {
       computerId: id
