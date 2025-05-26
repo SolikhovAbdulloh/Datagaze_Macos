@@ -59,7 +59,7 @@ const TopBar = () => {
           <span className="i-bx:bx-globe text-[17px]" />
           <span>Go to website</span>
         </button>
-        <div>
+        {/* <div>
           <button onClick={handleClick} className="px-4 py-2  text-white rounded">
             Notifications
           </button>
@@ -90,7 +90,7 @@ const TopBar = () => {
               </Typography>
             </div>
           </Popover>
-        </div>
+        </div> */}
         <div
           onClick={() => setShowAppleMenu(!showAppleMenu)}
           className="flex items-center gap-1 cursor-pointer"

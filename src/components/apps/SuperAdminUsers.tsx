@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
 import AddIcon from "@mui/icons-material/Add";
+import { format } from "date-fns";
+
 import {
   useDeleteRegister,
   useRegister,
@@ -257,7 +259,9 @@ export const SuperAdminusers = () => {
                     >
                       <td className="p-3">{item.fullName}</td>
                       <td className="p-3">{item.email}</td>
-                      <td className="p-3">{item.created_at}</td>
+                      <td className="p-3">
+                        {format(new Date(item.created_at), "hh.MM.yyyy")}
+                      </td>
                       <td
                         className="p-3 text-[#1A79D8] cursor-pointer"
                         onClick={() => EditOpenModal(item.id)}

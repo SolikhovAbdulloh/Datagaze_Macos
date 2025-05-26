@@ -1,4 +1,3 @@
-import { appBarHeight } from "~/utils";
 import type { AppsData } from "~/types";
 
 const apps: AppsData[] = [
@@ -27,20 +26,7 @@ const apps: AppsData[] = [
     content: <SuperAdminusers />,
     img: "/icons/users.png"
   },
-  {
-    id: "facetime",
-    title: "FaceTime",
-    desktop: true,
-    img: "/icons/facetime.png",
-    width: 500 * 1.7,
-    height: 500 + appBarHeight,
-    minWidth: 350 * 1.7,
-    minHeight: 350 + appBarHeight,
-    aspectRatio: 1.7,
-    x: -80,
-    y: 20,
-    content: <FaceTime />
-  },
+
   {
     id: "terminal",
     title: "Terminal",

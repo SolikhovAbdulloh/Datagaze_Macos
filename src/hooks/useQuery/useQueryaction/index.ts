@@ -230,6 +230,7 @@ const useCreateApplication = () => {
       return response.data;
     },
     onSuccess: (response) => {
+      toast.success("success create");
       console.log("Muvaffaqiyatli yuborildi:", response);
     },
     onSettled: () => {

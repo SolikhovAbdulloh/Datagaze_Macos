@@ -31,7 +31,6 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     pathname: "installApplication",
     url: `/api/1/desktop/${app.id}`
   });
-  // console.log("holat", isLoading, "iserror", isError);
 
   const handleEditClick = () => {
     setEditModalOpen(true);

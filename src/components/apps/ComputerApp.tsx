@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { Button, Input, CircularProgress } from "@mui/material";
-
+import { format } from "date-fns";
 import { useQueryApi } from "~/hooks/useQuery";
 import { ComputersAppType } from "~/types/configs/computers";
 import Skeleton from "@mui/material/Skeleton";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { notificationApi } from "~/generic/notification";
 import { useAxios } from "~/hooks/useAxios";
 import { useUpload } from "~/hooks/useQuery/useQueryaction";
+import { useComputersSocket } from "~/routes/SocketProvider";
 interface ComputersAppProps {
   id: string;
   status: string;
@@ -21,8 +22,6 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
     url: `/api/1/device/${ID}/apps`,
     pathname: "apps"
   });
-  const computersSocketRef = useRef<any>(null);
-  let token = getToken();
   const [value, setValue] = useState("");
   const [pendingUpload, setPendingUpload] = useState<{ name: string; id: string }>({
     name: "",
@@ -41,29 +40,30 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
   const [argument, setargument] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [DeleteModal, setDeleteModal] = useState(false);
+  const socket = useComputersSocket();
+  console.log("Socket holati - 2", socket);
+
   useEffect(() => {
     if (data?.data && Array.isArray(data?.data)) {
       setFilteredComputers(data?.data);
     }
   }, [data]);
   const { mutate, isPending } = useUpload();
-  computersSocketRef.current = io("https://d.dev-baxa.me/computer", {
-    transports: ["websocket"],
-    auth: { token: `Bearer ${token}` }
-  });
-  computersSocketRef.current.on("response", (data: any) => {
-    console.log("response", data);
-    data.success === false
-      ? toast.error(`${data.appName}  ${data.message},`, { closeButton: true })
-      : toast.success(`response ${(data.name, data.status)}`, { closeButton: true });
-  });
-  computersSocketRef.current.on("connect", () => {
-    console.log("Socket connected1:", computersSocketRef.current.connected);
-  });
+  useEffect(() => {
+    socket.on("response", (data: any) => {
+      console.log("response", data);
+      data.success === false
+        ? toast.error(`${data.appName}  ${data.message},`, { closeButton: true })
+        : toast.success(`response ${(data.name, data.status)}`, { closeButton: true });
+    });
+    socket.on("connect", () => {
+      console.log("Socket connected1:", socket.connected);
+    });
 
-  computersSocketRef.current.on("error", (error: any) => {
-    console.log("connect error computer :", error);
-  });
+    socket.on("error", (error: any) => {
+      console.log("connect error computer :", error);
+    });
+  }, [socket]);
 
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
@@ -107,7 +107,7 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
       setDeleteModal(true);
     } else {
       const emitDelete = () => {
-        computersSocketRef.current?.emit("delete_app", {
+        socket.emit("delete_app", {
           computerId: ID,
           appName: name
         });
@@ -115,13 +115,12 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
         setLoadingItem(null);
       };
 
-      if (computersSocketRef.current?.connected) {
+      if (socket.connected) {
         emitDelete();
       } else {
         setLoadingItem(null);
 
-        console.log("❌ Socket hali ulangan emas, kutyapman...");
-        computersSocketRef.current?.once("connect", emitDelete);
+        socket.once("connect", emitDelete);
       }
     }
   };
@@ -173,7 +172,7 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
     const notify = notificationApi();
 
     setLoadingItem(argument);
-    computersSocketRef.current.emit("delete_app", {
+    socket.emit("delete_app", {
       computerId: ID,
       appName: name,
       arguments: argument
@@ -263,7 +262,9 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
                       <td className="p-3">{item.version}</td>
                       <td className="p-3">{item.size} MB</td>
                       <td className="p-3">{item.type}</td>
-                      <td className="p-3">{item.installed_date}</td>
+                      <td className="p-3">
+                        {format(new Date(item.installed_date), "dd.MM.yyyy")}
+                      </td>
                       <td className="p-3 text-[#1A79D8] ">
                         <button onClick={() => UpdateAppBySocket(item.name, item.id)}>
                           {loading === item.name ? (

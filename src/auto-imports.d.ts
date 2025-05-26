@@ -15,7 +15,6 @@ declare global {
   const DockItem: typeof import('./components/dock/DockItem')['default']
   const DockerInstallCommands: (typeof import("./components/Modals/sedoinstall"))["DockerInstallCommands"]
   const EditDetailsModal: typeof import('./components/Modals/Edit')['EditDetailsModal']
-  const FaceTime: typeof import('./components/apps/FaceTime')['default']
   const Install: typeof import('./components/Modals/Install')['default']
   const Launchpad: (typeof import("./components/Launchpad"))["default"]
   const Markdown: typeof import('./components/Markdown')['default']

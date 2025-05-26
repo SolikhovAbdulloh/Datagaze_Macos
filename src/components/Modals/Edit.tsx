@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box, Button, CircularProgress, Modal, Typography } from "@mui/material";
 import { IoMdCloseCircle } from "react-icons/io";
 import { LaunchpadData } from "~/types";

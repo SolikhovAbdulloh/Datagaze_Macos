@@ -8,11 +8,10 @@ import AddIcon from "@mui/icons-material/Add";
 import { useSearchParams } from "react-router-dom";
 import About_fc from "../Modals/AboutFc";
 import Skeleton from "@mui/material/Skeleton";
-import { getToken } from "~/utils";
-import { io } from "socket.io-client";
 import { toast } from "sonner";
 import { useUploadInstalldApplication } from "~/hooks/useQuery/useQueryaction";
 import { IoTrashBinOutline } from "react-icons/io5";
+import { useComputersSocket } from "~/routes/SocketProvider";
 
 const Computers = () => {
   const [params, setSearchparams] = useSearchParams();
@@ -29,7 +28,6 @@ const Computers = () => {
   const [page, setPage] = useState(0);
   const [modal, setModal] = useState(false);
   const [checkapp, setCheckapp] = useState<any>([]);
-  const computersSocketRef = useRef<any>(null);
   const [appname, setappName] = useState("");
   const [filename, setfileName] = useState<File | null>(null);
   const [argument, setArgutment] = useState("");
@@ -137,35 +135,26 @@ const Computers = () => {
     setRowsPerPage(newRowsPerPage);
     setPage(0);
   };
+  const socket = useComputersSocket();
+  console.log("Socket holati - 1", socket);
   useEffect(() => {
-    const token = getToken();
-
-    computersSocketRef.current = io("https://d.dev-baxa.me/computer", {
-      transports: ["websocket"],
-      auth: { token: `Bearer ${token}` }
+    socket.on("connect", () => {
+      console.log("Socket connected12:", socket.connected);
     });
 
-    computersSocketRef.current.on("connect", () => {
-      console.log("Socket connected12:", computersSocketRef.current.connected);
-    });
-
-    computersSocketRef.current.on("response", (data: any) => {
-      console.log("response", data);
+    socket.on("response", (data: any) => {
+      console.log("response-commputer", data);
       data.success === false
         ? toast.error(`${data.message}`, { closeButton: true })
         : toast.success(`${data.message}`, { closeButton: true });
     });
 
-    computersSocketRef.current.on("error", (error: string) => {
+    socket.on("error", (error: string) => {
       console.log("connect error computer :", error);
     });
-
-    return () => {
-      computersSocketRef.current?.disconnect();
-    };
-  }, []);
+  }, [socket]);
   const DeleteAgent = (id: string) => {
-    computersSocketRef.current.emit("delete_agent", {
+    socket.emit("delete_agent", {
       computerId: id
     });
     toast.success("success", { closeButton: true });

@@ -10,6 +10,7 @@ import "katex/dist/katex.min.css";
 import "~/styles/index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import PrivateRoute from "./routes/PrivateRoute";
+import { SocketProvider } from "./routes/SocketProvider";
 
 const router = createBrowserRouter([
   { path: "/", element: <Login /> },
@@ -36,9 +37,11 @@ const rootElement = document.getElementById("root") as HTMLElement;
 const root = createRoot(rootElement);
 const queryClinet = new QueryClient();
 root.render(
-  <QueryClientProvider client={queryClinet}>
-    <Toaster position="top-right" richColors />
-    <ReactQueryDevtools initialIsOpen={false} />
-    <RouterProvider router={router} />
-  </QueryClientProvider>
+  <SocketProvider>
+    <QueryClientProvider client={queryClinet}>
+      <Toaster position="top-right" richColors />
+      <ReactQueryDevtools initialIsOpen={false} />
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  </SocketProvider>
 );
