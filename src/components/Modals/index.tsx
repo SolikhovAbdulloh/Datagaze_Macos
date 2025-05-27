@@ -298,6 +298,7 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
         isOpen={isServerOpen}
         onClose={GotoServerClose}
         appId={app?.id}
+        name={data?.applicationName}
       />
     </>
   );

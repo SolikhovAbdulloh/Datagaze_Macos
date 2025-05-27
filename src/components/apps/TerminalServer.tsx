@@ -9,10 +9,12 @@ import "xterm/css/xterm.css";
 
 export const TerminalModalServer = ({
   isOpen,
+  name,
   onClose,
   appId
 }: {
   isOpen: boolean;
+  name: string | undefined;
   onClose: () => void;
   appId: string | undefined;
 }) => {
@@ -96,7 +98,7 @@ export const TerminalModalServer = ({
       >
         <div className="flex items-center justify-between mb-2">
           <Typography variant="h6" sx={{ color: "white" }}>
-            Terminal - {appId || "Unknown"}
+            Terminal - {name || "Unknown"}
           </Typography>
           <IoMdCloseCircle
             size={20}
