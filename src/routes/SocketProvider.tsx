@@ -46,7 +46,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  if (!socket || !ready) return <CircularProgress />;
+  if (!socket || !ready) return null;
 
   return <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>;
 }

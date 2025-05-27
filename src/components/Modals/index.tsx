@@ -1,25 +1,26 @@
 import {
-  Modal,
   Box,
-  Typography,
   Button,
-  Tabs,
+  CircularProgress,
+  Modal,
   Tab,
-  CircularProgress
+  Tabs,
+  Typography
 } from "@mui/material";
-import { LaunchpadData } from "~/types";
-import { CiClock2 } from "react-icons/ci";
+import { format } from "date-fns";
 import { BiMemoryCard } from "react-icons/bi";
+import { CiClock2 } from "react-icons/ci";
 import { IoMdCloseCircle } from "react-icons/io";
-import { EditDetailsModal } from "./Edit";
-import { useDeleteApplication } from "~/hooks/useQuery/useQueryaction";
-import { useState } from "react";
 import { useQueryApi } from "~/hooks/useQuery";
+
+import { useDeleteApplication } from "~/hooks/useQuery/useQueryaction";
+import { LaunchpadData } from "~/types";
 
 const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => void }) => {
   const [tabValue, setTabValue] = useState("Server Details");
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isServerOpen, setServerOpen] = useState(false);
   const { mutate, isPending } = useDeleteApplication();
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -44,10 +45,19 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
     setEditModalOpen(false);
   };
 
+  const GotoServerOpen = () => {
+    setServerOpen(true);
+  };
+
+  const GotoServerClose = () => {
+    setServerOpen(false);
+  };
+
   const handleModalClose = () => {
     setIsModalOpen(false);
     onClose();
   };
+
   if (isLoading || isFetching) {
     return (
       <Modal open={true} onClose={onClose}>
@@ -71,212 +81,225 @@ const LicenseModal = ({ app, onClose }: { app: LaunchpadData; onClose: () => voi
       </Modal>
     );
   }
+
   return (
-    <Modal open={isModalOpen} onClose={handleModalClose} aria-labelledby="modal-title">
-      <Box
-        sx={{
-          position: "absolute",
-          fontFamily: "sans-serif",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          bgcolor: "white",
-          borderRadius: "10px",
-          p: 2,
-          backgroundColor: "#e0e3fa",
-          height: 478,
-          width: 520,
-          boxShadow: 24
-        }}
-      >
-        <div className="flex items-center absolute top-0 w-[100%] left-0  m-auto  bg-transparent  px-4 h-[30px] gap-2  rounded-[8px]">
-          <IoMdCloseCircle
-            size={18}
-            className="cursor-pointer text-gray-500 hover:text-gray-700"
-            onClick={handleModalClose}
-          />
-          <p className="text-[13px] font-600 text-gray-500">{data?.applicationName}</p>
-        </div>
-        <Typography
-          variant="h4"
-          className="flex items-center gap-3 !mt-[50px]"
-          sx={{ fontWeight: "bold", textAlign: "center", mt: 1 }}
-        >
-          <img
-            className="w-[56px] h-[56px] rounded-4"
-            src={`${import.meta.env.VITE_BASE_URL}/icons/${data?.pathToIcon}`}
-            alt={data?.applicationName}
-            onError={(e) => {
-              e.currentTarget.src = "/icons/zoom1.png";
-            }}
-          />
-          <p className="text-[40px] font-500">{data?.applicationName}</p>
-        </Typography>
-        <Tabs
-          value={tabValue}
-          onChange={handleChange}
-          className="flex items-center justify-center m-auto"
+    <>
+      <Modal open={isModalOpen} onClose={handleModalClose} aria-labelledby="modal-title">
+        <Box
           sx={{
-            backgroundColor: "#e4ebfd",
-            borderRadius: "999px",
-            padding: "2px",
-            width: "100%",
-            marginBottom: "30px",
-            marginTop: "10px"
+            position: "absolute",
+            fontFamily: "sans-serif",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "white",
+            borderRadius: "10px",
+            p: 2,
+            backgroundColor: "#e0e3fa",
+            height: 478,
+            width: 520,
+            boxShadow: 24
           }}
-          TabIndicatorProps={{ style: { display: "none" } }}
         >
-          <Tab
-            label="Server Details"
-            value="Server Details"
-            sx={{
-              flex: 1,
-              borderRadius: "999px",
-              textTransform: "none",
-              height: "40px",
-              fontWeight: 200,
-              color: tabValue === "Server Details" ? "black" : "gray",
-              backgroundColor: tabValue === "Server Details" ? "white" : "transparent",
-              transition: "background-color 0.3s ease"
-            }}
-          />
-          <Tab
-            label="Agent Details"
-            value="Agent Details"
-            sx={{
-              flex: 1,
-              borderRadius: "999px",
-              textTransform: "none",
-              height: "40px",
-              fontWeight: 200,
-              color: tabValue === "Agent Details" ? "black" : "gray",
-              backgroundColor: tabValue === "Agent Details" ? "white" : "transparent",
-              transition: "background-color 0.3s ease"
-            }}
-          />
-        </Tabs>
-
-        {tabValue === "Server Details" ? (
-          <div className="mt-[30px] mb-[20px]">
-            <div className="w-[100%] p-6 gap-[30px] pt-4 justify-center h-[180px] grid grid-cols-2 rounded-[8px] bg-[#fdfcfe]">
-              <div className="flex flex-col items-start gap-3">
-                <div className="flex items-center gap-3">
-                  <img src="/icons/file_market.png" alt="count" />
-                  <p>License count</p>
-                </div>
-                <p className="text-[16px] font-500">
-                  {data?.serverDetails?.lisenceCount}
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-3">
-                <div className="flex items-center gap-3">
-                  <img src="/icons/Vector.png" alt="version" />
-                  <p>Agent version</p>
-                </div>
-                <p className="text-[16px] font-500">
-                  {data?.serverDetails?.serverVersion}
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-3">
-                <div className="flex items-center gap-3">
-                  <img src="/icons/computer.png" alt="address" />
-                  <p>IP address</p>
-                </div>
-                <p className="text-[16px] font-500">{data?.serverDetails?.ipAddress}</p>
-              </div>
-              <div className="flex flex-col items-start gap-3">
-                <div className="flex items-center gap-3">
-                  <BiMemoryCard />
-                  <p>File size</p>
-                </div>
-                <p className="text-[16px] font-500">
-                  {data?.serverDetails?.serverFileSize}GB
-                </p>
-              </div>
-            </div>
+          <div className="flex items-center absolute top-0 w-[100%] left-0 m-auto bg-transparent px-4 h-[30px] gap-2 rounded-[8px]">
+            <IoMdCloseCircle
+              size={18}
+              className="cursor-pointer text-gray-500 hover:text-gray-700"
+              onClick={handleModalClose}
+            />
+            <p className="text-[13px] font-600 text-gray-500">{data?.applicationName}</p>
           </div>
-        ) : (
-          <div className="mt-[30px] mb-[20px]">
-            <div className="w-[100%] p-6 gap-[30px] pt-4 justify-center h-[180px] grid grid-cols-2 rounded-[8px] bg-[#fdfcfe]">
-              <div className="flex flex-col items-start gap-3">
-                <div className="flex items-center gap-3">
-                  <CiClock2 />
-                  <p>First upload date</p>
-                </div>
-                <p className="text-[16px] font-500">
-                  {data?.agentDetails?.firstUploadDate}
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-3">
-                <div className="flex items-center gap-3">
-                  <CiClock2 />
-                  <p>Last upload date</p>
-                </div>
-                <p className="text-[16px] font-500">
-                  {data?.agentDetails?.lastUploadDate}
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-3">
-                <div className="flex items-center gap-3">
-                  <img src="/icons/Vector.png" alt="version" />
-                  <p>Agent version</p>
-                </div>
-                <p className="text-[16px] font-500">{data?.agentDetails?.agentVersion}</p>
-              </div>
-              <div className="flex flex-col items-start gap-3">
-                <div className="flex items-center gap-3">
-                  <BiMemoryCard />
-                  <p>File size</p>
-                </div>
-                <p className="text-[16px] font-500">
-                  {data?.agentDetails?.agentFileSize}GB
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex text-[18px] font-700 items-center justify-between">
-          <Button
-            onClick={() => UninstallApplication(data.id)}
-            sx={{
-              textTransform: "capitalize",
-              mr: 1,
-              fontFamily: "Inter, sans-serif"
-            }}
-            color="error"
+          <Typography
+            variant="h4"
+            className="flex items-center gap-3 !mt-[50px]"
+            sx={{ fontWeight: "bold", textAlign: "center", mt: 1 }}
           >
-            {isPending ? <CircularProgress size="30px" /> : "Uninstall"}
-          </Button>
-          <div className="flex items-center gap-1">
+            <img
+              className="w-[56px] h-[56px] rounded-4"
+              src={`${import.meta.env.VITE_BASE_URL}/icons/${data?.pathToIcon}`}
+              alt={data?.applicationName}
+              onError={(e) => {
+                e.currentTarget.src = "/icons/zoom1.png";
+              }}
+            />
+            <p className="text-[40px] font-500">{data?.applicationName}</p>
+          </Typography>
+          <Tabs
+            value={tabValue}
+            onChange={handleChange}
+            className="flex items-center justify-center m-auto"
+            sx={{
+              backgroundColor: "#e4ebfd",
+              borderRadius: "999px",
+              padding: "2px",
+              width: "100%",
+              marginBottom: "30px",
+              marginTop: "10px"
+            }}
+            TabIndicatorProps={{ style: { display: "none" } }}
+          >
+            <Tab
+              label="Server Details"
+              value="Server Details"
+              sx={{
+                flex: 1,
+                borderRadius: "999px",
+                textTransform: "none",
+                height: "40px",
+                fontWeight: 200,
+                color: tabValue === "Server Details" ? "black" : "gray",
+                backgroundColor: tabValue === "Server Details" ? "white" : "transparent",
+                transition: "background-color 0.3s ease"
+              }}
+            />
+            <Tab
+              label="Agent Details"
+              value="Agent Details"
+              sx={{
+                flex: 1,
+                borderRadius: "999px",
+                textTransform: "none",
+                height: "40px",
+                fontWeight: 200,
+                color: tabValue === "Agent Details" ? "black" : "gray",
+                backgroundColor: tabValue === "Agent Details" ? "white" : "transparent",
+                transition: "background-color 0.3s ease"
+              }}
+            />
+          </Tabs>
+
+          {tabValue === "Server Details" ? (
+            <div className="mt-[30px] mb-[20px]">
+              <div className="w-[100%] p-6 gap-[30px] pt-4 justify-center h-[180px] grid grid-cols-2 rounded-[8px] bg-[#fdfcfe]">
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <img src="/icons/file_market.png" alt="count" />
+                    <p>License count</p>
+                  </div>
+                  <p className="text-[16px] font-500">
+                    {data?.serverDetails?.lisenceCount}
+                  </p>
+                </div>
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <img src="/icons/Vector.png" alt="version" />
+                    <p>Agent version</p>
+                  </div>
+                  <p className="text-[16px] font-500">
+                    {data?.serverDetails?.serverVersion}
+                  </p>
+                </div>
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <img src="/icons/computer.png" alt="address" />
+                    <p>IP address</p>
+                  </div>
+                  <p className="text-[16px] font-500">{data?.serverDetails?.ipAddress}</p>
+                </div>
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <BiMemoryCard />
+                    <p>File size</p>
+                  </div>
+                  <p className="text-[16px] font-500">
+                    {data?.serverDetails?.serverFileSize}GB
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-[30px] mb-[20px]">
+              <div className="w-[100%] p-6 gap-[30px] pt-4 justify-center h-[180px] grid grid-cols-2 rounded-[8px] bg-[#fdfcfe]">
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <CiClock2 />
+                    <p>First upload date</p>
+                  </div>
+                  <p className="text-[16px] font-500">
+                    {format(new Date(data?.agentDetails?.firstUploadDate), "dd.MM.yyyy")}
+                  </p>
+                </div>
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <CiClock2 />
+                    <p>Last upload date</p>
+                  </div>
+                  <p className="text-[16px] font-500">
+                    {format(new Date(data?.agentDetails?.lastUploadDate), "dd.MM.yyyy")}
+                  </p>
+                </div>
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <img src="/icons/Vector.png" alt="version" />
+                    <p>Agent version</p>
+                  </div>
+                  <p className="text-[16px] font-500">
+                    {data?.agentDetails?.agentVersion}
+                  </p>
+                </div>
+                <div className="flex flex-col items-start gap-3">
+                  <div className="flex items-center gap-3">
+                    <BiMemoryCard />
+                    <p>File size</p>
+                  </div>
+                  <p className="text-[16px] font-500">
+                    {data?.agentDetails?.agentFileSize}GB
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex text-[18px] font-700 items-center justify-between">
             <Button
+              onClick={() => UninstallApplication(data.id)}
               sx={{
                 textTransform: "capitalize",
                 mr: 1,
                 fontFamily: "Inter, sans-serif"
               }}
-              color="primary"
+              color="error"
             >
-              Go to server
+              {isPending ? <CircularProgress size="30px" /> : "Uninstall"}
             </Button>
-            <Button
-              sx={{
-                textTransform: "capitalize",
-                mr: 1,
-                background: "white",
-                padding: "8px",
-                borderRadius: "8px",
-                fontFamily: "Inter, sans-serif"
-              }}
-              onClick={handleEditClick}
-            >
-              Edit details
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                onClick={GotoServerOpen}
+                sx={{
+                  textTransform: "capitalize",
+                  mr: 1,
+                  fontFamily: "Inter, sans-serif"
+                }}
+                color="primary"
+              >
+                Go to Server
+              </Button>
+              <Button
+                sx={{
+                  textTransform: "capitalize",
+                  mr: 1,
+                  background: "white",
+                  padding: "8px",
+                  borderRadius: "8px",
+                  fontFamily: "Inter, sans-serif"
+                }}
+                onClick={handleEditClick}
+              >
+                Edit details
+              </Button>
+            </div>
           </div>
-        </div>
-        {isEditModalOpen && <EditDetailsModal app={data} onClose={handleEditClose} />}
-      </Box>
-    </Modal>
+
+          {isEditModalOpen && <EditDetailsModal app={data} onClose={handleEditClose} />}
+        </Box>
+      </Modal>
+
+      <TerminalModalServer
+        isOpen={isServerOpen}
+        onClose={GotoServerClose}
+        appId={app?.id}
+      />
+    </>
   );
 };
 

@@ -29,6 +29,7 @@ declare global {
   const SuperAdmin_users: typeof import('./components/apps/SuperAdminUsers')['SuperAdmin_users']
   const SuperAdminusers: typeof import('./components/apps/SuperAdminUsers')['SuperAdminusers']
   const Terminal: typeof import('./components/apps/Terminal')['default']
+  const TerminalModalServer: typeof import('./components/apps/TerminalServer')['TerminalModalServer']
   const TopBar: typeof import('./components/menus/TopBar')['default']
   const Typora: (typeof import("./components/apps/Typora"))["default"]
   const Users: (typeof import("./components/apps/SuperAdminUsers"))["default"]

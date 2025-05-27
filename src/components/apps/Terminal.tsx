@@ -47,7 +47,7 @@ const TerminalComponent = () => {
       scrollToBottom();
       setTimeout(() => {
         if (!socketRef.current.connected) socketRef.current.connect();
-      }, 1000);
+      }, 500);
     });
 
     socketRef.current.on("data", ({ output }: any) => {
