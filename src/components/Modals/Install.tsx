@@ -49,7 +49,6 @@ const LicenseModalinstall = ({
     pathname: "Not_Installed_app",
     url: `/api/1/desktop/${app.id}`
   });
-  console.log(isLoading);
 
   const { data: markdown } = useQueryApi({
     url: `/api/1/desktop/download/script/${app.id}`,
@@ -239,7 +238,7 @@ const LicenseModalinstall = ({
     );
   }
 
-  console.log("persent:", percentage);
+  // console.log("persent:", percentage);
 
   return (
     <>

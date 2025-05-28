@@ -3,7 +3,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import { IoMdCloseCircle } from "react-icons/io";
-import { LinearProgress, Typography } from "@mui/material";
+import { CircularProgress, LinearProgress, Typography } from "@mui/material";
 import { computersbyIdType } from "~/types/configs";
 import { useQueryApi } from "~/hooks/useQuery";
 
@@ -13,18 +13,28 @@ const getSizeInGB = (size: string): number => {
 };
 
 const About_fc = ({ id, close }: { id: string; close: () => void }) => {
-  const { data }: { data?: computersbyIdType } = useQueryApi({
+  const {
+    data,
+    isLoading,
+    isFetching
+  }: { data?: computersbyIdType; isLoading: any; isFetching: any } = useQueryApi({
     url: `/api/1/device/${id}`,
     pathname: "Modal_info_application"
   });
-  console.log(data);
 
   const [tabValue, setTabValue] = useState("os");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    event.preventDefault();
     setTabValue(newValue);
   };
-
+  if (isLoading || isFetching) {
+    return (
+      <div className="inset-0  flex items-center mt-[30px] justify-center">
+        <CircularProgress size={45} color="primary" />
+      </div>
+    );
+  }
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-gradient-to-r from-blue-100 to-blue-100 rounded-lg shadow-lg p-3 flex flex-col overflow-auto w-[75vh] m-auto relative">

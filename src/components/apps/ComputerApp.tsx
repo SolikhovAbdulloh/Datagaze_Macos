@@ -15,7 +15,7 @@ interface ComputersAppProps {
   closeTable: () => void;
 }
 const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
-  const { data, isLoading, isError } = useQueryApi({
+  const { data, isLoading, isError, isFetching } = useQueryApi({
     url: `/api/1/device/${ID}/apps`,
     pathname: "apps"
   });
@@ -92,7 +92,7 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
           computerId: ID,
           appName: name
         });
-        toast.info("Delete");
+        toast.info("Delete", { closeButton: true });
         setLoadingItem(null);
       };
 
@@ -201,7 +201,7 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
             </thead>
 
             <tbody>
-              {isLoading || isError
+              {isLoading || isError || isFetching
                 ? Array.from({ length: 3 }).map((_, index) => (
                     <tr
                       key={index}
@@ -249,7 +249,11 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
                           {loading === item.name ? (
                             <CircularProgress size={20} />
                           ) : (
-                            <span className="cursor-pointer">Update</span>
+                            <span
+                              className={`cursor-pointer ${status == "inactive" && "text-[grey]"} `}
+                            >
+                              Update
+                            </span>
                           )}
                         </button>
                       </td>
@@ -261,7 +265,11 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
                           {loadingItem === item.name ? (
                             <CircularProgress size={20} />
                           ) : (
-                            "Delete"
+                            <span
+                              className={`cursor-pointer ${status == "inactive" && "text-[grey]"} `}
+                            >
+                              Delete
+                            </span>
                           )}
                         </button>
                       </td>

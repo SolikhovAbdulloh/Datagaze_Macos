@@ -33,7 +33,7 @@ const Computers = () => {
   const [argument, setArgutment] = useState("");
   const Status = params.get("status") || "all";
   const [isFormValid, setIsFormValid] = useState(false);
-  const { data, isLoading, isError } = useQueryApi({
+  const { data, isLoading, isError, isFetching } = useQueryApi({
     url: `/api/1/device/computers?page=${page + 1}&limit=${rowsPerPage}`,
     pathname: "computers"
   });
@@ -318,7 +318,7 @@ const Computers = () => {
               </div>
             )}
             <tbody>
-              {isLoading || isError
+              {isLoading || isError || isFetching
                 ? Array.from({ length: 5 }).map((_, index) => (
                     <tr
                       key={index}
@@ -385,11 +385,11 @@ const Computers = () => {
                       >
                         {item.ip_address}
                       </td>
-                      <td className=" flex justify-center mt-3 mr-7">
+                      <td className=" flex justify-center mt-3 m-auto">
                         <p
                           className={`${
                             item.status === "active"
-                              ? "bg-[#DCFCE7] flex text-green-600 w-[55px] h-[25px]  items-center justify-center p-2 rounded-[8px] text-[12px]"
+                              ? "bg-[#DCFCE7] flex text-green-600 w-[55px] h-[25px]  items-center justify-center rounded-[8px] text-[12px]"
                               : "text-[grey] bg-[#dfe8fb] flex w-[55px] h-[25px] text-[12px] items-center justify-center px-2 py-2 rounded-[8px]"
                           }`}
                         >
@@ -407,7 +407,7 @@ const Computers = () => {
                           onClick={() => DeleteAgent(item.id)}
                           className="text-[18px] text-[red]"
                         >
-                          <IoTrashBinOutline className="hover:text-[#a13738] " />
+                          <IoTrashBinOutline className="hover:text-[#a13738]"/>
                         </button>
                       </td>
                     </tr>

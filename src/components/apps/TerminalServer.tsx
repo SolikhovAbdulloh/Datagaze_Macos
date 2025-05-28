@@ -33,7 +33,7 @@ export const TerminalModalServer = ({
       disableStdin: false,
       scrollback: 1000,
       fontFamily: "monospace",
-      fontSize: 14,
+      fontSize: 16,
       theme: { background: "#1a1a1a", foreground: "#ffffff" }
     });
     const fitAddon = new FitAddon();
@@ -91,7 +91,7 @@ export const TerminalModalServer = ({
           left: "50%",
           transform: "translate(-50%, -50%)",
           bgcolor: "#1a1a1a",
-          width: 800,
+          width: 950,
           borderRadius: "10px",
           p: 2
         }}
@@ -101,7 +101,7 @@ export const TerminalModalServer = ({
             Terminal - {name || "Unknown"}
           </Typography>
           <IoMdCloseCircle
-            size={20}
+            size={25}
             className="cursor-pointer text-gray-400 hover:text-white"
             onClick={onClose}
           />
