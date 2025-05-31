@@ -283,7 +283,7 @@ const ModalLicense = () => {
           </div>
         </div>
         <div className="relative">
-          <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+          <div className="max-h-[510px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
             <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg">
               <thead className="sticky top-0 bg-[#d4e0f9]">
                 <tr className="border-b border-gray-300 text-gray-600 text-sm">

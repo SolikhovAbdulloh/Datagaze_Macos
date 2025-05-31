@@ -222,7 +222,7 @@ const Computers = () => {
             </FormControl>
           </div>
         </div>
-        <div className="max-h-[600px] overflow-y-auto">
+        <div className="max-h-[550px] overflow-y-auto">
           <table className="w-full text-left border-collapse bg-white shadow-md rounded-lg">
             <thead>
               <tr className="border-b border-gray-300 text-gray-600 text-sm bg-[#ccdaf8]">
@@ -407,7 +407,7 @@ const Computers = () => {
                           onClick={() => DeleteAgent(item.id)}
                           className="text-[18px] text-[red]"
                         >
-                          <IoTrashBinOutline className="hover:text-[#a13738]"/>
+                          <IoTrashBinOutline className="hover:text-[#a13738]" />
                         </button>
                       </td>
                     </tr>
