@@ -242,7 +242,9 @@ const Computers_app = ({ id: ID, closeTable, status }: ComputersAppProps) => {
                       <td className="p-3">{item.size} MB</td>
                       <td className="p-3">{item.type}</td>
                       <td className="p-3">
-                        {format(new Date(item.installed_date), "dd.MM.yyyy")}
+                        {item.installed_date
+                          ? format(new Date(item.installed_date), "dd.MM.yyyy")
+                          : ""}
                       </td>
                       <td className="p-3 text-[#1A79D8] ">
                         <button onClick={() => UpdateAppBySocket(item.name, item.id)}>
