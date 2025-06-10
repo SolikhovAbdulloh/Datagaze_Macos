@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+
 type NotificationType =
   | "superadmin"
   | "Not register"
@@ -10,7 +11,7 @@ type NotificationType =
   | "Upload"
   | "Update";
 export const notificationApi = () => {
-  const notify = (type: NotificationType, user?: string) => {
+  const notify = (type: NotificationType, user?: string, message?: string) => {
     switch (type) {
       case "superadmin":
         toast.success(`Welcome ${user} ✅`, { closeButton: true });
@@ -31,7 +32,7 @@ export const notificationApi = () => {
         toast.success(`Delete success !!!`, { closeButton: true });
         break;
       case "Xatolik":
-        toast.error(`Error !!!`, { closeButton: true });
+        toast.error(`Error ${message} !!!`, { closeButton: true });
         break;
       case "Update":
         toast.success(`Success Send update!`, { closeButton: true });

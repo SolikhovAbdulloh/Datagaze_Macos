@@ -78,7 +78,7 @@ const useRegister = () => {
       queryClient.invalidateQueries({ queryKey: ["superadmin_Users"] });
     },
     onError: (err) => {
-      console.log(err);
+      console.log("mesage", err.message);
       notify("Xatolik");
     }
   });
@@ -209,6 +209,7 @@ const useUpdateRegister = () => {
     },
     onError: (err) => {
       console.log(err);
+      notify("Xatolik");
     }
   });
 };
@@ -216,7 +217,10 @@ const useUpdateRegister = () => {
 const useCreateApplication = () => {
   const queryClient = useQueryClient();
   const axios = useAxios();
-  return useMutation({
+
+  const [progress, setProgress] = useState(0);
+
+  const mutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await axios({
         url: "/api/1/desktop/create",
@@ -225,21 +229,26 @@ const useCreateApplication = () => {
           accept: "application/json",
           "Content-Type": "multipart/form-data"
         },
-        body: data
+        body: data,
+        onUploadProgress: (event: any) => {
+          const percent = Math.round((event.loaded * 100) / event.total);
+          console.log("Upload progress:", percent);
+          setProgress(percent);
+        }
       });
-      return response.data;
+      return response;
     },
     onSuccess: (response) => {
-      toast.success("success create");
+      toast.success("success create", { closeButton: true });
       console.log("Muvaffaqiyatli yuborildi:", response);
-    },
-    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["application"] });
     },
     onError: (err) => {
       console.error("Xato yuz berdi:", err.message);
     }
   });
+
+  return { ...mutation, progress };
 };
 
 const useUploadApplication = () => {

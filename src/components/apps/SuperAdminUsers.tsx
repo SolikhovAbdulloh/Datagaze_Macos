@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
+import { z } from "zod";
 
 import {
   useDeleteRegister,
@@ -11,6 +12,8 @@ import {
 import { useQueryApi } from "~/hooks/useQuery";
 import { superadmin_users } from "~/types/configs/superadmin_users";
 import { Button, CircularProgress, Skeleton } from "@mui/material";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export const SuperAdminusers = () => {
   const [page, setPage] = useState(0);
@@ -30,13 +33,9 @@ export const SuperAdminusers = () => {
   const [open, setOpenModal] = useState(false);
   const [openUser, setOpenModalAdd] = useState(false);
   const [openDelete, setOpenModalDelete] = useState(false);
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
-  const [fullname, setFullname] = useState<string>("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const { mutate, isPending } = useRegister();
-  const { mutate: deleteRegisterMutate } = useDeleteRegister();
+  const { mutate: deleteRegisterMutate, isPending: deletePending } = useDeleteRegister();
   const { mutate: UpdateRegisterUser, isPending: updatepending } = useUpdateRegister();
 
   const searchFunctions = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +47,21 @@ export const SuperAdminusers = () => {
     setFilteredComputers(filtered);
     setPage(0);
   };
+  type RegisterForm = z.infer<typeof registerSchema>;
 
+  const registerSchema = z.object({
+    username: z.string().min(3, "Username Required").max(12),
+    fullname: z.string().min(3, "Fullname Required").max(12),
+    email: z.string().email("Email is not valid"),
+    password: z.string().min(4, "Password is not valid")
+  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema)
+  });
   const paginatedComputers = filteredComputers?.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -95,27 +108,24 @@ export const SuperAdminusers = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const OnSubmit = (formData: RegisterForm) => {
     const FormData = {
-      username: username,
-      fullName: fullname,
-      email: email,
-      password: password
+      username: formData.username,
+      fullName: formData.fullname,
+      email: formData.email,
+      password: formData.password
     };
     mutate({ data: FormData }, { onSuccess: () => CloseModal() });
   };
 
-  const hundleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const hundleUpdate = (formData: RegisterForm) => {
     const FormData = {
       userId: selectedUserId,
-      username: username,
-      fullName: fullname,
-      email: email,
-      password: password
+      username: formData.username,
+      fullName: formData.fullname,
+      email: formData.email,
+      password: formData.password
     };
-
     UpdateRegisterUser({ data: FormData }, { onSuccess: () => CloseModal() });
   };
 
@@ -161,50 +171,64 @@ export const SuperAdminusers = () => {
             </thead>
             {openUser && (
               <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[550px] h-[320px]">
+                <div className="bg-[#e7ecf8] rounded-2xl shadow-lg p-4 w-[550px] h-[340px]">
                   <h2 className="text-xl font-semibold mb-4">Add new user</h2>
 
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmit(OnSubmit)}>
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="mb-4">
                         <label className="block text-sm text-gray-700">Username</label>
                         <input
                           type="text"
                           placeholder="username"
-                          value={username}
                           className="w-full border rounded-lg p-2 mt-1"
-                          onChange={(e) => setUsername(e.target.value)}
+                          {...register("username")}
                         />
+                        {errors.username && (
+                          <p className="text-red-500 text-sm">
+                            {errors.username.message}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm text-gray-700">Full name</label>
                         <input
                           type="text"
-                          value={fullname}
-                          onChange={(e) => setFullname(e.target.value)}
+                          {...register("fullname")}
                           placeholder="fullname"
                           className="w-full border rounded-lg p-2 mt-1"
                         />
+                        {errors.fullname && (
+                          <p className="text-red-500 text-sm">
+                            {errors.fullname.message}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm text-gray-700">Email</label>
                         <input
                           type="email"
                           placeholder="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          {...register("email")}
                           className="w-full border rounded-lg p-2 mt-1"
                         />
+                        {errors.email && (
+                          <p className="text-red-500 text-sm">{errors.email?.message}</p>
+                        )}
                       </div>
                       <div className="mb-4">
                         <label className="block text-sm text-gray-700">Password</label>
                         <input
                           type="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
+                          {...register("password")}
                           placeholder="password"
                           className="w-full border rounded-lg p-2 mt-1"
                         />
+                        {errors.password && (
+                          <p className="text-red-500 text-sm">
+                            {errors.password?.message}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center  justify-end mt-4">
@@ -322,8 +346,8 @@ export const SuperAdminusers = () => {
       {open && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
           <form
-            onSubmit={hundleUpdate}
-            className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[550px] h-[320px]"
+            onSubmit={handleSubmit(hundleUpdate)}
+            className="bg-[#e7ecf8] rounded-2xl shadow-lg p-6 w-[550px] h-[340px]"
           >
             <h2 className="text-xl font-semibold mb-4">User settings</h2>
 
@@ -332,21 +356,25 @@ export const SuperAdminusers = () => {
                 <label className="block text-sm text-gray-700">Full name</label>
                 <input
                   type="text"
+                  {...register("fullname")}
                   placeholder="full name"
-                  value={fullname}
-                  onChange={(e) => setFullname(e.target.value)}
                   className="w-full border rounded-lg p-2 mt-1"
                 />
+                {errors.fullname && (
+                  <p className="text-red-500 text-sm">{errors.fullname?.message}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm text-gray-700">Email</label>
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email")}
                   placeholder="email"
                   className="w-full border rounded-lg p-2 mt-1"
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email?.message}</p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 mb-4">
@@ -354,37 +382,54 @@ export const SuperAdminusers = () => {
                 <label className="block text-sm text-gray-700">Password</label>
                 <input
                   type="password"
+                  {...register("password")}
                   placeholder="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full border rounded-lg p-2 mt-1"
                 />
+                {errors.password && (
+                  <p className="text-red-500 text-sm">{errors.password?.message}</p>
+                )}
               </div>
               <div className="mb-4">
                 <label className="block text-sm text-gray-700">Username</label>
                 <input
                   type="text"
                   placeholder="username"
-                  value={username}
+                  {...register("username")}
                   className="w-full border rounded-lg p-2 mt-1"
-                  onChange={(e) => setUsername(e.target.value)}
                 />
+                {errors.username && (
+                  <p className="text-red-500 text-sm">{errors.username?.message}</p>
+                )}
               </div>
             </div>
 
             <div className="flex justify-between items-center mt-4">
-              <button onClick={DeleteModal} className="text-red-500 text-sm font-medium">
+              <button
+                type="button"
+                onClick={DeleteModal}
+                className="text-red-500 text-sm font-medium"
+              >
                 Delete
               </button>
               <div className="flex gap-2">
-                <button onClick={CloseModal} className="border px-4 py-2 rounded-lg">
+                <button
+                  type="button"
+                  onClick={CloseModal}
+                  className="border px-4 py-2 rounded-lg"
+                >
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  disabled={updatepending}
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                 >
-                  Save
+                  {updatepending ? (
+                    <CircularProgress color="secondary" size={20} />
+                  ) : (
+                    "Save"
+                  )}
                 </button>
               </div>
             </div>
@@ -409,10 +454,10 @@ export const SuperAdminusers = () => {
               </button>
               <button
                 onClick={DeleteShure}
-                disabled={updatepending}
+                disabled={deletePending}
                 className="text-red-500 font-medium text-[14px] px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
-                {updatepending ? <CircularProgress size={20} /> : "Yes"}
+                {deletePending ? <CircularProgress size={20} /> : "Yes"}
               </button>
             </div>
           </div>

@@ -19,7 +19,7 @@ interface DesktopState {
   spotlight: boolean;
 }
 
-export default function Desktop(props: DesktopState | any) {
+export default function Desktop(props: DesktopState | any){
   const [state, setState] = useState({
     showApps: {},
     appsZ: {},

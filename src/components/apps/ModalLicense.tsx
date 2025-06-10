@@ -4,13 +4,16 @@ import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import AddIcon from "@mui/icons-material/Add";
 import { FiUploadCloud } from "react-icons/fi";
 import {
+  Box,
   Button,
   CircularProgress,
+  LinearProgress,
   Skeleton,
   Step,
   StepLabel,
   Stepper,
-  TextField
+  TextField,
+  Typography
 } from "@mui/material";
 import { useQueryApi } from "~/hooks/useQuery";
 import { useCreateApplication } from "~/hooks/useQuery/useQueryaction";
@@ -61,7 +64,7 @@ const ModalLicense = () => {
     agentFile: ""
   });
 
-  const { mutate, isPending: isMutating } = useCreateApplication();
+  const { mutate, isPending: isMutating, progress } = useCreateApplication();
 
   const handleTextChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -648,6 +651,7 @@ const ModalLicense = () => {
                   className="w-[137px] text-[black]"
                   variant="outlined"
                   color="info"
+                  disabled={isMutating}
                   sx={{ textTransform: "capitalize" }}
                 >
                   {activeStep > 0 ? "< Back" : "Cancel"}
@@ -661,7 +665,34 @@ const ModalLicense = () => {
                   disabled={isMutating}
                 >
                   {isMutating ? (
-                    <CircularProgress size={20} color="secondary" />
+                    <Box
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 1
+                      }}
+                    >
+                      <LinearProgress
+                        variant="determinate"
+                        sx={{ width: "80%" }}
+                        value={progress}
+                      />
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ display: "flex", gap: "30px" }}
+                      >
+                        {progress === 100 ? (
+                          <CircularProgress size={20} color="warning" />
+                        ) : (
+                          <p>{progress} %</p>
+                        )}
+                      </Typography>
+                    </Box>
                   ) : activeStep === 2 ? (
                     "Save"
                   ) : (

@@ -191,7 +191,7 @@ const Window = (props: WindowProps) => {
       id={`window-${props.id}`}
     >
       <div
-        className="window-bar relative h-6 text-center bg-c-200"
+        className="window-bar relative  h-6 text-center bg-c-200"
         onDoubleClick={() => !disableMax && props.setMax(props.id)}
       >
         <TrafficLights
@@ -204,7 +204,7 @@ const Window = (props: WindowProps) => {
         />
         <span className="font-semibold text-c-700">{props.title}</span>
       </div>
-      <div className="innner-window w-full overflow-y-hidden">{children}</div>
+      <div className="innner-window w-full  overflow-y-hidden">{children}</div>
     </Rnd>
   );
 };
