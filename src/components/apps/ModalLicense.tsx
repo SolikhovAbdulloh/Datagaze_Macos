@@ -658,7 +658,7 @@ const ModalLicense = () => {
                 </Button>
                 <Button
                   onClick={handleNext}
-                  className="w-[137px]"
+                  className={`${isMutating ? "w-[300px]" : "w-[137px]"}`}
                   variant="contained"
                   sx={{ textTransform: "capitalize" }}
                   color="primary"

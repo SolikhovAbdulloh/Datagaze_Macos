@@ -34,6 +34,9 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
+          p({ children }) {
+            return <div>{children}</div>; // yoki Typography, Box va hokazo
+          },
           code({ inline, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || "");
             const lang = match ? match[1] : "";
@@ -41,26 +44,23 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
             const code = String(children).trim();
 
             if (inline) {
-              if (lang && lang !== "text" && lang !== "") {
-                return (
-                  <Box
-                    component="code"
-                    sx={{
-                      display: "inline",
-                      bgcolor: "#eeeeee",
-                      px: 1,
-                      py: 0.3,
-                      borderRadius: 1,
-                      fontSize: "0.85rem",
-                      fontFamily: "monospace",
-                      whiteSpace: "pre-wrap"
-                    }}
-                  >
-                    {code}
-                  </Box>
-                );
-              }
-              return <span {...props}>{code}</span>;
+              return (
+                <Box
+                  component="code"
+                  sx={{
+                    display: "inline",
+                    bgcolor: "#eeeeee",
+                    px: 1,
+                    py: 0.3,
+                    borderRadius: 1,
+                    fontSize: "0.85rem",
+                    fontFamily: "monospace",
+                    whiteSpace: "pre-wrap"
+                  }}
+                >
+                  {code}
+                </Box>
+              );
             }
 
             if (isShell) {
@@ -70,13 +70,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                 .filter((cmd) => cmd.length > 0);
 
               return (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px"
-                  }}
-                >
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                   {commands.map((cmd, index) => (
                     <div
                       key={index}
@@ -145,14 +139,12 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                 {code}
               </SyntaxHighlighter>
             );
-          },
-          input({ children }) {
-            return <>{children}</>;
           }
         }}
       >
         {content}
       </ReactMarkdown>
+
       <>
         <Box position="relative" className="flex items-center justify-center">
           <CircularProgress variant="determinate" size={40} value={prosent} />
