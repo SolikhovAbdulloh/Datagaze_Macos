@@ -2,9 +2,8 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-
+import { atomDark, vs } from "react-syntax-highlighter/dist/esm/styles/prism";
 interface MarkdownViewerProps {
   content: string;
   prosent: number;
@@ -126,7 +125,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
             return (
               <SyntaxHighlighter
                 language={lang}
-                style={atomDark}
+                style={vs}
                 customStyle={{
                   padding: "16px",
                   borderRadius: "8px",

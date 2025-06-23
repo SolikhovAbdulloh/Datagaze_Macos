@@ -8,15 +8,15 @@ const apps: AppsData[] = [
     img: "/icons/icon-4.png"
   },
 
-  {
-    id: "support",
-    title: "Support",
-    desktop: false,
-    width: 600,
-    height: 580,
-    y: -20,
-    img: "/icons/support.png"
-  },
+  // {
+  //   id: "support",
+  //   title: "Support",
+  //   desktop: false,
+  //   width: 600,
+  //   height: 580,
+  //   y: -20,
+  //   img: "/icons/support.png"
+  // },
   {
     id: "Superadmin",
     title: "Superadmin",

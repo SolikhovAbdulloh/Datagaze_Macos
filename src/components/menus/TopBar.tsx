@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryApi } from "~/hooks/useQuery";
 import { remove, setUser, Usertype } from "~/utils";
+import { RiLogoutCircleRLine } from "react-icons/ri";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
@@ -106,9 +107,10 @@ const TopBar = () => {
             <button
               onClick={handleLogout}
               className="w-full  p-3   bg-grey text-white flex items-center cursor-pointer 
-                          hover:bg-white/20 transition-colors duration-200 rounded-md text-sm font-medium"
+                          hover:bg-white/20 transition-colors duration-200 flex items-center gap-5 rounded-md text-sm font-medium"
             >
               Log Out
+              <RiLogoutCircleRLine size={20} />
             </button>
           </div>
         )}

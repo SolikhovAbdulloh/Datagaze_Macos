@@ -17,7 +17,7 @@ export const notificationApi = () => {
         toast.success(`Welcome ${user} ✅`, { closeButton: true });
         break;
       case "Not register":
-        toast.error("Error registering ❌", { closeButton: true });
+        toast.error("Error register ❌", { closeButton: true });
         break;
       case "Install":
         toast.success("Success install !", { closeButton: true });
