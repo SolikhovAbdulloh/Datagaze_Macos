@@ -1,9 +1,9 @@
-import { Popover, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryApi } from "~/hooks/useQuery";
 import { remove, setUser, Usertype } from "~/utils";
 import { RiLogoutCircleRLine } from "react-icons/ri";
+import { LuShield } from "react-icons/lu";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
@@ -14,16 +14,6 @@ const TopBar = () => {
     navigate("/", { replace: true });
   };
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const handleClick = (event: any) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
 
   const { data } = useQueryApi({
     url: "/api/1/auth/user",
@@ -45,53 +35,22 @@ const TopBar = () => {
       <div className="flex items-center ">
         <div className="relative">
           <div ref={appleBtnRef} className="cursor-pointer">
-            <img src="/logo/logo_data.svg" alt="Datagaze" className="w-[15px] h-[23px]" />
+            <LuShield size={30} />
           </div>
         </div>
 
-        <p className="font-normal cursor-pointer ml-3">DataGaze LTD 2025</p>
+        <p className="font-normal cursor-pointer ml-3 font-bold">SecureApp</p>
       </div>
 
       <div className="flex items-center justify-end gap-4 ">
-        <button
+        {/* <button
           className="cursor-pointer flex items-center space-x-1"
           onClick={() => window.open("https://www.datagaze.uz/", "_blank")}
         >
           <span className="i-bx:bx-globe text-[17px]" />
           <span>Go to website</span>
-        </button>
-        {/* <div>
-          <button onClick={handleClick} className="px-4 py-2  text-white rounded">
-            Notifications
-          </button>
-          <Popover
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "center"
-            }}
-          >
-            <div className="w-[329px] h-[120px]">
-              <Typography
-                className="flex items-center space-x-3 bg-white/50 backdrop-blur-lg p-4 rounded-2xl shadow-xl"
-                sx={{ p: 2 }}
-              >
-                <div className="flex items-center justify-center bg-transparent rounded-lg">
-                  <span className="i-bx:bx-error text-blue-500 text-2xl" />
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">License Limit Reached</p>
-                  <p className="text-gray-700 text-sm">
-                    "You’ve reached the maximum number of licenses. Upgrade to continue
-                    using all features."
-                  </p>
-                </div>
-              </Typography>
-            </div>
-          </Popover>
-        </div> */}
+        </button> */}
+
         <div
           onClick={() => setShowAppleMenu(!showAppleMenu)}
           className="flex items-center gap-1 cursor-pointer"

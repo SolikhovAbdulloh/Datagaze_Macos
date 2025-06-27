@@ -22,7 +22,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setReady(true);
     });
 
-    // Bitta markazda response event handler qo'shamiz
     const handleResponse = (data: any) => {
       console.log("response from socket:", data);
       if (data.success === false) {

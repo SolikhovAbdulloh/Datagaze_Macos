@@ -14,9 +14,11 @@ import { superadmin_users } from "~/types/configs/superadmin_users";
 import { Button, CircularProgress, Skeleton } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "react-router-dom";
 
 export const SuperAdminusers = () => {
   const [page, setPage] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const { data, isError, isLoading } = useQueryApi({
@@ -84,20 +86,34 @@ export const SuperAdminusers = () => {
   const EditOpenModal = (id: string) => {
     setSelectedUserId(id);
     setOpenModal(true);
+    setSearchParams((prev) => {
+      prev.set("modal", "edit");
+      prev.set("id =", id);
+      return prev;
+    });
   };
 
   const AddModalOpen = () => {
     setOpenModalAdd(true);
+    setSearchParams((prev) => {
+      prev.set("modal", "add");
+      return prev;
+    });
   };
 
   const CloseModal = () => {
     setOpenModal(false);
     setOpenModalAdd(false);
     setOpenModalDelete(false);
+    setSearchParams({});
   };
 
   const DeleteModal = () => {
     setOpenModalDelete(true);
+    setSearchParams((prev) => {
+      prev.set("modal", "delete");
+      return prev;
+    });
   };
 
   const DeleteShure = () => {
@@ -128,7 +144,19 @@ export const SuperAdminusers = () => {
     };
     UpdateRegisterUser({ data: FormData }, { onSuccess: () => CloseModal() });
   };
+  useEffect(() => {
+    const modalType = searchParams.get("modal");
+    const id = searchParams.get("id");
 
+    if (modalType === "add") {
+      setOpenModalAdd(true);
+    } else if (modalType === "edit" && id) {
+      setSelectedUserId(id);
+      setOpenModal(true);
+    } else if (modalType === "delete") {
+      setOpenModalDelete(true);
+    }
+  }, []);
   return (
     <div className="p-4  bg-gray-100 min-h-screen">
       <div className="overflow-x-auto bg-white shadow-lg rounded-lg">
