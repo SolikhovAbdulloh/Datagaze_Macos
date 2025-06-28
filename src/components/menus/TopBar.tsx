@@ -1,14 +1,18 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryApi } from "~/hooks/useQuery";
 import { remove, setUser, Usertype } from "~/utils";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { LuShield } from "react-icons/lu";
+import { useClickOutside } from "~/hooks";
 
 const TopBar = () => {
   const appleBtnRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const [showAppleMenu, setShowAppleMenu] = useState(false);
   const navigate = useNavigate();
+
+  useClickOutside(menuRef, () => setShowAppleMenu(false), [appleBtnRef]);
   const handleLogout = () => {
     remove();
     navigate("/", { replace: true });
@@ -38,7 +42,7 @@ const TopBar = () => {
           </div>
         </div>
 
-        <p className="font-normal cursor-pointer ml-3 font-bold">CertiApp</p>
+        <p className="font-normal cursor-pointer ml-3 font-bold">SecureApp</p>
       </div>
 
       <div className="flex items-center justify-end gap-4 ">
@@ -53,7 +57,10 @@ const TopBar = () => {
           />
         </div>
         {showAppleMenu && (
-          <div className="absolute top-full mt-3 w-[150px] bg-[#4474f8] text-white rounded-lg shadow-lg z-11">
+          <div
+            ref={menuRef}
+            className="absolute top-full mt-3 w-[150px] bg-[#4474f8] text-white rounded-lg shadow-lg z-31"
+          >
             <button
               onClick={handleLogout}
               className="w-full  p-3   bg-grey text-white flex items-center cursor-pointer 
