@@ -12,10 +12,10 @@ import { toast } from "sonner";
 import { useUploadInstalldApplication } from "~/hooks/useQuery/useQueryaction";
 import { IoTrashBinOutline } from "react-icons/io5";
 import { useComputersSocket } from "~/routes/SocketProvider";
+import { ModalLicenseProps } from "./ModalLicense";
 
-const Computers = () => {
+const Computers = ({ width, setAppMax, appId }: ModalLicenseProps) => {
   const [params, setSearchparams] = useSearchParams();
-
   const [openModal, setOpenModal] = useState(false);
   const [openTable, setOpenTable] = useState(false);
   const [selectedId, setSelected] = useState<string | null>(null);
@@ -32,6 +32,8 @@ const Computers = () => {
   const [filename, setfileName] = useState<File | null>(null);
   const [argument, setArgutment] = useState("");
   const Status = params.get("status") || "all";
+  const [isOpen, setIsOpen] = useState(false);
+
   const [isFormValid, setIsFormValid] = useState(false);
   const { data, isLoading, isError, isFetching } = useQueryApi({
     url: `/api/1/device/computers?page=${page + 1}&limit=${rowsPerPage}`,
@@ -400,7 +402,18 @@ const Computers = () => {
                         className="hover:text-[blue]  text-[#1A79D8]"
                         onClick={() => showModal(item.id)}
                       >
-                        <span className="cursor-pointer"> About PC</span>
+                        <span
+                          onClick={() => {
+                            if (setAppMax && appId) {
+                              setAppMax(appId, true);
+                            }
+                            setIsOpen(true);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {" "}
+                          About PC
+                        </span>
                       </td>
                       <td className="p-1">
                         <button

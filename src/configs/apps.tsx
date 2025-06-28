@@ -21,8 +21,8 @@ const apps: AppsData[] = [
     id: "Superadmin",
     title: "Superadmin",
     desktop: true,
-    width: 1100,
-    height: 500,
+    width: 1200,
+    height: 600,
     content: <SuperAdminusers />,
     img: "/icons/users.png"
   },
@@ -40,8 +40,8 @@ const apps: AppsData[] = [
     id: "Add product",
     title: "Add product",
     desktop: true,
-    width: 1100,
-    height: 500,
+    width: 1200,
+    height: 600,
     img: "/icons/Liceses.png",
     content: <ModalLicense />
   },
@@ -49,8 +49,8 @@ const apps: AppsData[] = [
     id: "computers",
     title: "Computers",
     desktop: true,
-    width: 1100,
-    height: 500,
+    width: 1200,
+    height: 600,
     img: "/icons/camputers.png",
     content: <Computers />
   }

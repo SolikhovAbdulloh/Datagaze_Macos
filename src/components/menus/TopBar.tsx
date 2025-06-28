@@ -13,7 +13,6 @@ const TopBar = () => {
     remove();
     navigate("/", { replace: true });
   };
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const { data } = useQueryApi({
     url: "/api/1/auth/user",
@@ -39,18 +38,10 @@ const TopBar = () => {
           </div>
         </div>
 
-        <p className="font-normal cursor-pointer ml-3 font-bold">SecureApp</p>
+        <p className="font-normal cursor-pointer ml-3 font-bold">CertiApp</p>
       </div>
 
       <div className="flex items-center justify-end gap-4 ">
-        {/* <button
-          className="cursor-pointer flex items-center space-x-1"
-          onClick={() => window.open("https://www.datagaze.uz/", "_blank")}
-        >
-          <span className="i-bx:bx-globe text-[17px]" />
-          <span>Go to website</span>
-        </button> */}
-
         <div
           onClick={() => setShowAppleMenu(!showAppleMenu)}
           className="flex items-center gap-1 cursor-pointer"
@@ -62,7 +53,7 @@ const TopBar = () => {
           />
         </div>
         {showAppleMenu && (
-          <div className="absolute top-full mt-3 w-[150px] bg-[#4474f8] text-white rounded-lg shadow-lg z-30">
+          <div className="absolute top-full mt-3 w-[150px] bg-[#4474f8] text-white rounded-lg shadow-lg z-11">
             <button
               onClick={handleLogout}
               className="w-full  p-3   bg-grey text-white flex items-center cursor-pointer 

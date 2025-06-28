@@ -137,7 +137,9 @@ const Window = (props: WindowProps) => {
   const disableMax = props.aspectRatio !== undefined;
 
   const children = React.cloneElement(props.children as React.ReactElement, {
-    width: width
+    width: width,
+    setAppMax: props.setMax,
+    appId: props.id
   });
 
   return (

@@ -173,7 +173,7 @@ export const SuperAdminusers = () => {
             slotProps={{
               input: {
                 type: "search",
-                className: "w-[200px] h-[30px] bg-white flex items-center justify-center"
+                className: "w-[200px] h-[30px] bg-white flex items-center  justify-center"
               }
             }}
           />

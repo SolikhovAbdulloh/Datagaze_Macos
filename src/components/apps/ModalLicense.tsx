@@ -34,7 +34,13 @@ interface FormDataType {
   agentFile: File | string | any;
 }
 
-const ModalLicense = () => {
+export interface ModalLicenseProps {
+  width?: number;
+  setAppMax?: (id: string, target?: boolean) => void;
+  appId?: string;
+}
+
+const ModalLicense = ({ width, setAppMax, appId }: ModalLicenseProps) => {
   const { data, isLoading, isError } = useQueryApi({
     pathname: "application",
     url: "/api/1/desktop/web-applications"
@@ -246,6 +252,9 @@ const ModalLicense = () => {
         onSuccess: () => {
           setIsOpen(false);
           resetForm();
+          if (setAppMax && appId) {
+            setAppMax(appId, false);
+          }
         },
         onError: (error) => {
           console.error("Backend error:", error);
@@ -261,6 +270,9 @@ const ModalLicense = () => {
     } else {
       setIsOpen(false);
       resetForm();
+      if (setAppMax && appId) {
+        setAppMax(appId, true);
+      }
     }
   };
 
@@ -279,7 +291,12 @@ const ModalLicense = () => {
             />
           </div>
           <div
-            onClick={() => setIsOpen(true)}
+            onClick={() => {
+              if (setAppMax && appId) {
+                setAppMax(appId, true);
+              }
+              setIsOpen(true);
+            }}
             className="gap-2 bg-white w-[130px] text-[13px] cursor-pointer h-[32px] rounded-[8px] flex items-center justify-center px-2"
           >
             <AddIcon fontSize="small" /> <span className="text-[12px]">New Product</span>
